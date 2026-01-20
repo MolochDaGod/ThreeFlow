@@ -95,7 +95,7 @@ export const getSceneMaterialList = (scene: THREE.Scene): SceneModelItem[] => {
 
     model.traverse((child: THREE.Object3D) => {
       if (!(child instanceof THREE.Mesh)) return;
-      
+
       if (child.material instanceof THREE.Material) {
         materials.push({
           uuid: child.uuid,
@@ -105,35 +105,32 @@ export const getSceneMaterialList = (scene: THREE.Scene): SceneModelItem[] => {
         });
       } else if (Array.isArray(child.material)) {
         materials.push(
-          ...child.material
-            .filter(Boolean)
-            .map((mat: THREE.Material) => ({
-              uuid: mat.uuid,
-              name: mat.name || '未命名材质',
-              iconClass: 'icon-model',
-              type: mat.type,
-            }))
+          ...child.material.filter(Boolean).map((mat: THREE.Material) => ({
+            uuid: mat.uuid,
+            name: mat.name || '未命名材质',
+            iconClass: 'icon-model',
+            type: mat.type,
+          }))
         );
       }
     });
 
     return Array.from(
-      new Map(materials.map(mat => [mat.uuid, mat])).values()
+      new Map(materials.map((mat) => [mat.uuid, mat])).values()
     );
   };
 
   // 类型检查辅助函数
-  const isGeometry = (model: THREE.Object3D): boolean => 
-    model instanceof THREE.Mesh && model.geometry instanceof THREE.BufferGeometry;
-  
-  const isEffect = (model: THREE.Object3D): boolean => 
-    model instanceof THREE.Points;
-  
-  const isText = (model: THREE.Object3D): boolean => 
-    model.userData.type === DRAG_MODEL_TYPE.Text;
+  const isGeometry = (model: THREE.Object3D): boolean =>
+    model instanceof THREE.Mesh &&
+    model.geometry instanceof THREE.BufferGeometry;
 
-  const isLightIconType = (type: string): type is keyof typeof LIGHT_ICON_TYPE =>
-    type in LIGHT_ICON_TYPE;
+  const isEffect = (model: THREE.Object3D): boolean =>
+    model instanceof THREE.Points;
+
+  const isLightIconType = (
+    type: string
+  ): type is keyof typeof LIGHT_ICON_TYPE => type in LIGHT_ICON_TYPE;
 
   const getLightIconClass = (type: string) =>
     (isLightIconType(type) ? LIGHT_ICON_TYPE[type] : undefined) || 'icon-light';
@@ -144,7 +141,7 @@ export const getSceneMaterialList = (scene: THREE.Scene): SceneModelItem[] => {
       uuid: model.uuid,
       type: model.type,
       iconClass: 'icon-moxing',
-      name: model.name || '未命名模型'
+      name: model.name || '未命名模型',
     };
 
     // 根据模型类型自定义数据
@@ -154,26 +151,20 @@ export const getSceneMaterialList = (scene: THREE.Scene): SceneModelItem[] => {
       return {
         ...baseData,
         name: model.name || '未命名光源',
-        iconClass: getLightIconClass(model.type)
+        iconClass: getLightIconClass(model.type),
       };
     } else if (isEffect(model)) {
       return {
         ...baseData,
         name: model.name || '未命名特效',
-        iconClass: 'icon-lizifeisheng'
-      };
-    } else if (isText(model)) {
-      return {
-        ...baseData,
-        name: model.name || '未命名文本',
-        iconClass: 'icon-wenben'
+        iconClass: 'icon-lizifeisheng',
       };
     }
 
     // 对于带有材质的模型
     return {
       ...baseData,
-      children: getAllMeshMaterials(model)
+      children: getAllMeshMaterials(model),
     };
   };
 

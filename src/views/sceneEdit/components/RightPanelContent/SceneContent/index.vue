@@ -59,7 +59,7 @@
         <el-tab-pane
           label="材质"
           name="material"
-          v-if="meshMaterial?.isMaterial && !isEchartsOrText"
+          v-if="meshMaterial?.isMaterial"
         >
           <MaterialProperty
             ref="materialPropertyRef"
@@ -70,7 +70,7 @@
         <el-tab-pane
           label="几何体参数"
           name="geometry"
-          v-if="geometryParameters?.parameters && !isEchartsOrText"
+          v-if="geometryParameters?.parameters"
         >
           <GeometryProperty :geometryParameters="geometryParameters" />
         </el-tab-pane>
@@ -180,19 +180,12 @@ watch(transformMaterialRandomId, () => {
   updateCurrentMaterial(material);
 });
 
-// 是否是echarts或文本
-const isEchartsOrText = computed(() => {
-  const { type } = meshProperty.value?.userData || {};
-  return [DRAG_MODEL_TYPE.Echarts].includes(
-    type as DRAG_MODEL_TYPE
-  );
-});
 
 const availableTabs = computed(() => {
   const tabs = [];
   if (meshProperty.value) tabs.push("property");
-  if (meshMaterial?.value.isMaterial && !isEchartsOrText.value) tabs.push("material");
-  if (geometryParameters?.parameters && !isEchartsOrText.value) tabs.push("geometry");
+  if (meshMaterial?.value.isMaterial) tabs.push("material");
+  if (geometryParameters?.parameters) tabs.push("geometry");
   if (animationsList.value.length > 0) tabs.push("animation");
   return tabs;
 });

@@ -16,7 +16,7 @@ threejs-model-edit-pro
 tsconfig.app.tsbuildinfo
 threejs-model-edit-study
 out
-edit
+study
 
 .env.local
 .env.*.local
