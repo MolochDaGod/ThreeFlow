@@ -1,0 +1,112 @@
+.project-container {
+  font-size: 12px;
+  .project-content {
+    .project-content-title {
+      position: relative;
+      height: 28px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: bold;
+      line-height: 28px;
+      text-align: center;
+
+      // background-color: rgb(32 43 64);
+      background-color: rgb(64 78 105);
+    }
+    .project-content-item {
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      margin-bottom: 10px;
+      .item-label {
+        min-width: 60px;
+        margin-right: 10px;
+      }
+      .item-value {
+        display: flex;
+        flex: 1;
+        gap: 10px;
+        align-items: center;
+        .el-image {
+          width: 85px;
+          height: 45px;
+          cursor: pointer;
+          border-radius: 2px;
+        }
+        .disabled {
+          cursor: not-allowed;
+        }
+        .el-upload-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 85px;
+          height: 45px;
+          border: 1px dashed #dcdfe6;
+          border-radius: 2px;
+          &:hover {
+            color: #409eff;
+            border-color: #409eff;
+          }
+        }
+      }
+    }
+    :deep(.el-slider__runway) {
+      margin-right: 20px;
+    }
+    :deep(.el-slider) {
+      // width: 60px;
+      --el-slider-button-size: 16px;
+      --el-slider-height: 4px;
+      .el-slider__runway {
+        height: var(--el-slider-height);
+        margin-right: 20px !important;
+        background-color: rgb(255 255 255 / 10%);
+        &:hover {
+          .el-slider__bar {
+            background-color: rgb(124 77 255 / 90%);
+          }
+          .el-slider__button-wrapper {
+            .el-slider__button {
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+      .el-slider__bar {
+        height: var(--el-slider-height);
+        background: linear-gradient(90deg, #7c4dff, #448aff);
+      }
+      .el-slider__button-wrapper {
+        top: -8px !important;
+        width: var(--el-slider-button-size);
+        height: var(--el-slider-button-size);
+        .el-slider__button {
+          width: 100%;
+          height: 100%;
+          background-color: #ffffff;
+          border: 2px solid #7c4dff;
+          &:hover {
+            box-shadow: 0 0 8px rgb(124 77 255 / 40%);
+            transform: scale(1.1);
+          }
+        }
+      }
+      .el-slider__input {
+        width: 80px !important;
+        .el-input__wrapper {
+          padding: 0 8px !important;
+          background: rgb(255 255 255 / 5%);
+          box-shadow: none;
+          &:hover {
+            background: rgb(255 255 255 / 10%);
+          }
+          .el-input__inner {
+            font-size: 12px;
+            color: rgb(255 255 255 / 80%);
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+.render-container {
+  font-size: 12px;
+  .render-content {
+    position: relative;
+    display: flex;
+    width: 100vw;
+    height: calc(100vh - 32px);
+    .render-left-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    #scene-render {
+      position: relative;
+      width: calc(100% - 340px);
+      height: 100%;
+    }
+  }
+}

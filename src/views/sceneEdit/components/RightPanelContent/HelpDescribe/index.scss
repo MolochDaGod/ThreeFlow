@@ -1,0 +1,28 @@
+.help-describe {
+  box-sizing: border-box;
+  .help-describe-title {
+    padding: 4px 0;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    background-color: rgb(64 78 105);
+  }
+  .help-describe-content {
+    padding: 0 10px;
+    .help-content-item {
+      display: flex;
+      margin-bottom: 10px;
+      .help-content-label {
+        width: 100px;
+      }
+      .help-content-value {
+        display: flex;
+        align-items: center;
+        i {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}

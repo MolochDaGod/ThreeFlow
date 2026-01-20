@@ -1,0 +1,41 @@
+.property-content {
+  padding: 10px 8px;
+  .property-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 12px;
+    .property-item-label {
+      min-width: 70px;
+    }
+    .property-item-value {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: space-between;
+      .switch-label {
+        margin: 0 9px;
+      }
+      .input-content {
+        display: flex;
+        align-items: center;
+        span {
+          margin: 0 9px;
+        }
+      }
+      .el-upload-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 60px;
+        border: 1px dashed #dcdfe6;
+        border-radius: 6px;
+        &:hover {
+          color: #409eff;
+          border-color: #409eff;
+        }
+      }
+    }
+  }
+}

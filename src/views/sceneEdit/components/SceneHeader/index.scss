@@ -1,0 +1,23 @@
+.render-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  padding: 0 16px;
+  color: #ffffff;
+  background-color: #2a2342;
+  .render-header-right {
+    display: flex;
+    gap: 10px;
+  }
+  .header-right-item {
+    font-size: 12px;
+    cursor: pointer;
+    span {
+      font-size: 12px;
+    }
+  }
+}
+.iconfont {
+  font-size: 12px;
+}

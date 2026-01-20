@@ -1,0 +1,99 @@
+.right-panel-container {
+  position: relative;
+  box-sizing: border-box;
+  width: 340px;
+  color: #a9b1d6;
+  background-color: #252837;
+  transition: transform 0.3s ease;
+  :deep(.el-tabs) {
+    background-color: transparent;
+    border: none !important;
+
+    // tabs 头部样式
+    .el-tabs__header {
+      padding: 0;
+      margin: 0;
+      background-color: #29344c;
+      border: none;
+      .el-tabs__nav-wrap {
+        &::after {
+          display: none;
+        }
+      }
+      .el-tabs__nav {
+        border: none;
+      }
+      .el-tabs__item {
+        position: relative;
+        height: 30px;
+        padding: 12px 16px;
+        font-size: 13px;
+        line-height: 12px;
+        color: #a9b1d6;
+        border: none;
+        transition: all 0.3s ease;
+        &:hover {
+          color: #c5cceb;
+          background: rgb(99 116 171 / 10%);
+        }
+      }
+      .el-tabs__item.is-active {
+        font-weight: 500;
+        color: #c7cacf;
+        background-color: rgb(69 137 255);
+      }
+    }
+
+    // tabs 内容区域样式
+    .el-tabs__content {
+      padding: 0;
+      overflow: hidden;
+      .el-tab-pane {
+        height: 100%;
+        color: #c5cceb;
+      }
+    }
+  }
+  :deep(.el-input-number) {
+    width: auto;
+    .el-input-number__decrease {
+      border-radius: 0;
+    }
+    .el-input-number__increase {
+      border-radius: 0;
+    }
+    .el-input-number__decrease,
+    .el-input-number__increase {
+      width: 24px;
+      color: rgb(200 200 255 / 70%);
+      background: rgb(54 62 96 / 80%);
+      border: none;
+      transition: all 0.2s ease;
+      &:active {
+        color: rgb(200 200 255 / 100%);
+        background: rgb(82 90 136 / 95%);
+        transform: scale(0.95);
+      }
+    }
+  }
+  :deep(.el-input) {
+    .el-input__wrapper {
+      height: 24px;
+      padding: 0;
+      background: rgb(255 255 255 / 5%);
+      border-radius: 0;
+      box-shadow: 0 0 0 1px rgb(99 116 171 / 20%);
+      transition: all 0.3s ease;
+      &:hover {
+        background: rgb(42 45 68 / 70%);
+        box-shadow: 0 0 0 1px rgb(69 137 255 / 30%);
+      }
+    }
+    .el-input__inner {
+      color: #ffffff;
+      &::placeholder {
+        color: rgb(139 147 183 / 50%);
+      }
+    }
+  }
+}

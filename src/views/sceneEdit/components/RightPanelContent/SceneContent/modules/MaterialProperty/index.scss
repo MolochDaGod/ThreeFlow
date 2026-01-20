@@ -1,0 +1,34 @@
+.material-content {
+  padding: 10px 8px;
+  .material-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 12px;
+    .material-item-label {
+      width: 100px;
+    }
+    .el-image {
+      width: 65px;
+      height: 65px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .disabled {
+      cursor: not-allowed;
+    }
+    .el-upload-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 65px;
+      height: 65px;
+      border: 1px dashed #dcdfe6;
+      border-radius: 6px;
+      &:hover {
+        color: #409eff;
+        border-color: #409eff;
+      }
+    }
+  }
+}

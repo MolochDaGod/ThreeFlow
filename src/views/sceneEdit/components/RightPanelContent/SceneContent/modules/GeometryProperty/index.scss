@@ -1,0 +1,28 @@
+.property-content {
+  padding: 10px 5px;
+  .property-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 12px;
+    .property-item-label {
+      min-width: 70px;
+    }
+    .property-item-value {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      justify-content: space-between;
+      .switch-label {
+        margin: 0 9px;
+      }
+      .input-content {
+        display: flex;
+        align-items: center;
+        span {
+          margin: 0 9px;
+        }
+      }
+    }
+  }
+}
