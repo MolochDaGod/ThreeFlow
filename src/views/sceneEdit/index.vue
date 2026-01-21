@@ -21,7 +21,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, getCurrentInstance } from 'vue';
-import { LeftDragContent, RightPanelContent, SceneHeader } from './components';
+import { LeftDragContent, RightPanelContent, SceneHeader } from './layouts';
 import { Loading } from '@/components/index';
 import type {
   DragModelType,
