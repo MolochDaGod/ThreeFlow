@@ -9,7 +9,6 @@
         />
       </div>
       <div id="scene-render" @drop="dropModel" @dragover.prevent></div>
-
       <RightPanelContent :pageLoading="loadingInfo.pageLoading" />
     </div>
     <!-- 加载状态 -->
@@ -29,11 +28,14 @@ import type {
   ModelType,
 } from '@/types/renderModelTypes';
 import { useSceneStore } from '@/store/sceneEditStore';
+import { useIndexDbStore } from '@/store/indexDbStore';
 import renderScene from '@/utils/renderScene';
 import { ElMessageBox, type UploadFile } from 'element-plus';
 import { getFileType } from '@/utils/utils';
 import { DRAG_MODEL_TYPE, MITT_ON_KEY } from '@/enums/enum';
+
 const store = useSceneStore();
+const indexDbStore = useIndexDbStore();
 const { $eventBus } = getCurrentInstance()?.proxy || {};
 
 // 当前拖拽模型
@@ -51,6 +53,7 @@ const loadingInfo = reactive({
 });
 
 onMounted(async () => {
+  await indexDbStore.initIndexDb();
   const renderSceneApi = new renderScene('#scene-render');
   store.setSceneApi(renderSceneApi);
   // 初始化模型渲染器
@@ -78,8 +81,6 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  // 清理特效
-  // removeSmoke()
   store.sceneApi?.renderDestroy();
   $eventBus?.off(MITT_ON_KEY.PAGE_LOADING);
   store.setSceneApi(null);

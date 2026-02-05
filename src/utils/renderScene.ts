@@ -32,6 +32,8 @@ import type {
   ParametersType,
 } from '@/types/rightPanelTypes';
 import { useSceneStore } from '@/store/sceneEditStore';
+import { useIndexDbStore } from '@/store/indexDbStore';
+import { IndexDbStoreName, IndexDbStoreKeyPath } from '@/enums/indexDb';
 import { createMaterial, disposeMaterial, disposeScene } from './utils';
 import type { IndexDbSceneData } from '@/types/indexDbTypes';
 import type { ActionParams } from '@/types/rightPanelTypes';
@@ -137,9 +139,9 @@ class renderScene {
     };
     this.modelProgressCallback = null;
     this.onWindowResizesListener = null;
-    this.onKeyDownListener = () => {};
-    this.onKeyUpListener = () => {};
-    this.onPointerUnLockListener = () => {};
+    this.onKeyDownListener = () => { };
+    this.onKeyUpListener = () => { };
+    this.onPointerUnLockListener = () => { };
     this.renderAnimation = null;
     this.loadingStatus = true;
     this.boxHelper = null;
@@ -166,7 +168,23 @@ class renderScene {
       await this.initControls();
 
       this.transformControlsModules.init();
-      await this.initPlaneGround({} as IndexDbSceneData);
+
+      // 获取indexDb场景数据
+      const indexDbStore = useIndexDbStore();
+      let loadSceneData: IndexDbSceneData | null = null;
+      if (indexDbStore.indexDbUtil) {
+        loadSceneData = await indexDbStore.indexDbUtil.get<IndexDbSceneData>(
+          IndexDbStoreName.scene,
+          IndexDbStoreKeyPath.sceneBlobData
+        );
+      }
+
+      if (loadSceneData) {
+        await this.loadIndexDbSceneData(loadSceneData);
+      } else {
+        await this.initPlaneGround();
+      }
+
       this.sceneAnimation();
       this.addEvenListMouseListener();
       this.onWindowResizes();
@@ -235,7 +253,7 @@ class renderScene {
   /**
    * 初始化地面
    */
-  async initPlaneGround(loadSceneData: IndexDbSceneData) {
+  async initPlaneGround(loadSceneData?: IndexDbSceneData) {
     try {
       let planeGeometryType: string;
       // 获取地面类型
@@ -661,7 +679,7 @@ class renderScene {
       const { camera, scene, controls } = indexDbSceneData;
       // 2. 创建加载器（可以考虑缓存loader实例）
       const loader = new ObjectLoader();
-
+    
       // 3. 并行加载场景和相机数据
       const [parseScene, parseCamera] = await Promise.all([
         loader.parseAsync(scene),
@@ -699,7 +717,6 @@ class renderScene {
       // 7. 创建变换控制器
       this.transformControlsModules.createTransformControls();
 
-      // 10. 初始化天气效果
       this.onWindowResizes();
       // 11. 清理临时对象
       parseCamera?.clear();
