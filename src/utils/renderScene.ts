@@ -308,7 +308,6 @@ class renderScene {
     this.controls.enableZoom = true;
     this.controls.zoomSpeed = 1.0; // 增大缩放速度
     this.controls.panSpeed = 2.0; // 增大平移速度
-    // this.controls.dampingFactor = 0.05; // 增加阻尼系数使运动更平滑
     // 禁用右键拖动
     this.controls.mouseButtons = {
       LEFT: THREE.MOUSE.ROTATE,
@@ -317,7 +316,6 @@ class renderScene {
     };
     // 设置初始观察点
     this.controls.target.set(0, 0.5, 0);
-    // this.controls.maxPolarAngle = THREE.MathUtils.degToRad(90);
     this.controls.update();
 
     // 创建 ViewHelper

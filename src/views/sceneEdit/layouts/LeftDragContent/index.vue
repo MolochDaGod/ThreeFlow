@@ -17,7 +17,7 @@
         <div class="drag-tab-content">
           <!-- 模型 -->
           <el-scrollbar
-            max-height="calc(100vh - 200px)"
+            max-height="calc(100vh - 215px)"
             v-if="activeTabKey === DRAG_MODEL_TYPE.Model"
           >
             <div class="drag-list">
@@ -39,7 +39,7 @@
         <div class="drag-tab-content min-height">
           <!-- 几何体 -->
           <el-scrollbar
-            max-height="calc(100vh - 200px)"
+            max-height="calc(100vh - 215px)"
             v-if="activeTabKey === DRAG_MODEL_TYPE.Geometry"
           >
             <div class="drag-list">
@@ -59,7 +59,7 @@
 
           <!-- 灯光 -->
           <el-scrollbar
-            max-height="calc(100vh - 200px)"
+            max-height="calc(100vh - 215px)"
             v-if="activeTabKey === DRAG_MODEL_TYPE.Light"
           >
             <div class="drag-list">
@@ -96,9 +96,16 @@
             type="hidden"
             :on-change="chooseOutsideFile"
           ></el-upload>
+          <div></div>
         </div>
       </div>
+      <!-- 底部占位，防止被商用版文案遮挡 -->
+      <div class="bottom-spacer"></div>
     </el-scrollbar>
+    <div class="commercial-version">
+        <span class="iconfont icon-hot"></span>
+        <span @click="openCommercialVersion">商用版：ThreeFlowX</span>
+    </div>
     <!-- 开关 -->
     <div class="collapse-button" @click="toggleCollapse">
       <el-icon :size="20">
@@ -145,6 +152,10 @@ const chooseOutsideFile = async (file: UploadFile) => {
 const changeFile = () => {
   const input = uploadRef?.value?.$el.querySelector('input');
   if (input instanceof HTMLInputElement) input.click();
+};
+// 打开商用版
+const openCommercialVersion = () => {
+  window.open('http://threeflowx.cn/edit/', '_blank');
 };
 </script>
 <style lang="scss" scoped src="./index.scss"></style>

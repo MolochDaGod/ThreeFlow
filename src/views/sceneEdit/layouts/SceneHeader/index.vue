@@ -1,7 +1,9 @@
 <template>
   <div class="render-header">
     <div class="render-header-left">
-      <div class="render-header-left-title">ThreeFlow(开源版)</div>
+      <div class="render-header-left-title">ThreeFlow 作者:answer</div>
+
+    
     </div>
     <div class="render-header-right">
       <div class="header-right-item">
