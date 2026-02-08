@@ -37,7 +37,7 @@ import { IndexDbStoreName, IndexDbStoreKeyPath } from '@/enums/indexDb';
 import { createMaterial, disposeMaterial, disposeScene } from './utils';
 import type { IndexDbSceneData } from '@/types/indexDbTypes';
 import type { ActionParams } from '@/types/rightPanelTypes';
-import { FOG_COLOR_VALUE, planeGroundMapImg } from '@/config/propertyConfig';
+import { FOG_COLOR_VALUE,  } from '@/config/propertyConfig';
 import {
   createModelFromResult,
   getMousePosition,
@@ -262,7 +262,7 @@ class renderScene {
       if (!this.scene) return;
 
       const map = await new THREE.TextureLoader().loadAsync(
-        planeGroundMapImg[planeGeometryType].mapPath
+        new URL(`../assets/textures/textures-5.png`, import.meta.url).href
       );
 
       map.repeat.set(1000, 1000);
@@ -272,7 +272,7 @@ class renderScene {
       map.colorSpace = THREE.SRGBColorSpace;
       // 可选：加载法线贴图
       const normalMap = await new THREE.TextureLoader().loadAsync(
-        planeGroundMapImg[planeGeometryType].normalMapPath
+        new URL(`../assets/textures/textures-normal-5.png`, import.meta.url).href
       );
       const gg = new THREE.PlaneGeometry(2000, 2000);
       const gm = new THREE.MeshPhysicalMaterial({

@@ -200,74 +200,6 @@ export const environmentOptions = [
   },
 ];
 
-// 地面
-export const planeGeometryOptions = [
-  {
-    label: '无',
-    key: 'none',
-    modelType: 'planeGeometry',
-  },
-  {
-    label: '石灰板',
-    key: 'grass',
-    modelType: 'planeGeometry',
-    mapPath: new URL(`../assets/textures/textures-1.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-2.png`,
-      import.meta.url
-    ).href,
-  },
-  {
-    label: '地板',
-    key: 'floor',
-    modelType: 'planeGeometry',
-    mapPath: new URL(`../assets/textures/textures-2.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-2.png`,
-      import.meta.url
-    ).href,
-  },
-  {
-    label: '岩石',
-    key: 'rock',
-    modelType: 'planeGeometry',
-    mapPath: new URL(`../assets/textures/textures-3.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-3.png`,
-      import.meta.url
-    ).href,
-  },
-  {
-    label: '木板',
-    key: 'wood',
-    modelType: 'planeGeometry',
-    mapPath: new URL(`../assets/textures/textures-4.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-4.png`,
-      import.meta.url
-    ).href,
-  },
-  {
-    label: '板砖',
-    key: 'brick',
-    modelType: 'planeGeometry',
-    mapPath: new URL(`../assets/textures/textures-5.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-5.png`,
-      import.meta.url
-    ).href,
-  },
-  {
-    label: '砂石',
-    key: 'brick-old',
-    modelType: 'planeGeometry',
-    mapPath: new URL(`../assets/textures/textures-6.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-6.png`,
-      import.meta.url
-    ).href,
-  },
-];
 
 export const fogOptions = [
   {
@@ -284,58 +216,6 @@ export const fogOptions = [
   },
 ];
 
-// 地面贴图
-export const planeGroundMapImg: Record<
-  string,
-  { mapPath: string; normalMapPath: string }
-> = {
-  none: {
-    mapPath: '',
-    normalMapPath: '',
-  },
-  brick: {
-    mapPath: new URL(`../assets/textures/textures-5.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-5.png`,
-      import.meta.url
-    ).href,
-  },
-  'brick-old': {
-    mapPath: new URL(`../assets/textures/textures-6.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-6.png`,
-      import.meta.url
-    ).href,
-  },
-  wood: {
-    mapPath: new URL(`../assets/textures/textures-4.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-4.png`,
-      import.meta.url
-    ).href,
-  },
-  rock: {
-    mapPath: new URL(`../assets/textures/textures-3.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-3.png`,
-      import.meta.url
-    ).href,
-  },
-  floor: {
-    mapPath: new URL(`../assets/textures/textures-2.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-2.png`,
-      import.meta.url
-    ).href,
-  },
-  grass: {
-    mapPath: new URL(`../assets/textures/textures-1.png`, import.meta.url).href,
-    normalMapPath: new URL(
-      `../assets/textures/textures-normal-1.png`,
-      import.meta.url
-    ).href,
-  },
-};
 
 export const FOG_NEAR_VALUE = 1;
 export const FOG_FAR_VALUE = 200;
