@@ -84,6 +84,40 @@ interface SceneModelItem extends SceneMaterialItem {
 }
 
 /**
+ * 检查模型是否为几何体
+ * @param model 模型
+ * @returns 是否为几何体
+ */
+const isGeometry = (model: THREE.Object3D): boolean =>
+  model instanceof THREE.Mesh &&
+  model.geometry instanceof THREE.BufferGeometry;
+
+/**
+ * 检查模型是否为特效
+ * @param model 模型
+ * @returns 是否为特效
+ */
+const isEffect = (model: THREE.Object3D): boolean =>
+  model instanceof THREE.Points;
+
+/**
+ * 检查类型是否为光源类型
+ * @param type 类型
+ * @returns 是否为光源类型
+ */
+const isLightIconType = (
+  type: string
+): type is keyof typeof LIGHT_ICON_TYPE => type in LIGHT_ICON_TYPE;
+
+/**
+ * 获取光源图标类名
+ * @param type 类型
+ * @returns 光源图标类名
+ */
+const getLightIconClass = (type: string) =>
+  (isLightIconType(type) ? LIGHT_ICON_TYPE[type] : undefined) || 'icon-light';
+
+/**
  * 获取场景材质列表
  * @param scene 场景
  * @returns 场景材质列表
@@ -120,20 +154,7 @@ export const getSceneMaterialList = (scene: THREE.Scene): SceneModelItem[] => {
     );
   };
 
-  // 类型检查辅助函数
-  const isGeometry = (model: THREE.Object3D): boolean =>
-    model instanceof THREE.Mesh &&
-    model.geometry instanceof THREE.BufferGeometry;
 
-  const isEffect = (model: THREE.Object3D): boolean =>
-    model instanceof THREE.Points;
-
-  const isLightIconType = (
-    type: string
-  ): type is keyof typeof LIGHT_ICON_TYPE => type in LIGHT_ICON_TYPE;
-
-  const getLightIconClass = (type: string) =>
-    (isLightIconType(type) ? LIGHT_ICON_TYPE[type] : undefined) || 'icon-light';
 
   // 根据类型创建模型数据
   const createModelData = (model: THREE.Object3D): SceneModelItem => {

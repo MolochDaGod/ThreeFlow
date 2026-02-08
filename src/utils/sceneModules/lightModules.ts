@@ -147,23 +147,6 @@ class LightModules {
     );
 
     if (!light || !helper) return;
-    // 场景中心点
-    // const center = new THREE.Vector3(0, 0, 0);
-
-    // if (
-    //   light instanceof THREE.DirectionalLight ||
-    //   light instanceof THREE.SpotLight
-    // ) {
-    //   // 更新目标位置
-    //   light.target.position.copy(center);
-    //   light.target.updateMatrixWorld();
-    // }
-
-    // if (light instanceof THREE.HemisphereLight) {
-    //   // 更新半球光朝向
-    //   light.lookAt(center);
-    // }
-
     // 更新辅助线
     if (
       helper instanceof THREE.DirectionalLightHelper ||

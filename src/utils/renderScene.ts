@@ -779,7 +779,6 @@ class renderScene {
     this.transformControlsModules?.transformControls?.attach(material);
     store.setCurrentTransformMaterialUuid(material.uuid);
     this.setObjectHighlight(material);
-    disposeMaterial(material as THREE.Mesh);
   }
   /**
    * 删除材质
@@ -980,7 +979,6 @@ class renderScene {
     });
     object.material = material;
     disposeMaterial(oldMaterial);
-    disposeMaterial(material);
     return object;
   }
   /**

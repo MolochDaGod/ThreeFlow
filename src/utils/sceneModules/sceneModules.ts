@@ -44,7 +44,6 @@ export const getSceneConfig = () => {
   const planeGeometry = scene?.getObjectByName('customPlane') as THREE.Mesh;
   const planeGeometryKey = planeGeometry?.userData.planeGeometry as string;
 
-  disposeMaterial(planeGeometry);
 
   const sceneFog = scene?.fog;
   let fog = FOG_TYPE.None;
@@ -119,9 +118,8 @@ export const updatePlaneGeometry = async (plane: PlaneGeometry) => {
     (newMaterial as THREE.MeshPhysicalMaterial)['normalMap'] = normalMap;
 
     planeGeometry.material = newMaterial;
-    
+
     disposeMaterial(oldMaterial);
-    disposeMaterial(planeGeometry);
     map.dispose();
     normalMap.dispose();
   } finally {
@@ -266,7 +264,18 @@ export const createModelFromResult = (
 };
 
 /**
+ * 获取文件名
+ * @param ext - 文件扩展名
+ * @returns 文件名
+ */
+export const getFilename = (ext: string): string =>
+  `${new Date().toLocaleString()}.${ext}`.replace(/[:]/g, '-');
+
+
+/**
  * 设置模型位置和大小
+ * @param model - 模型
+ * @param mousePosition - 鼠标位置
  */
 export const setModelPositionSize = (
   model: THREE.Object3D,
@@ -348,8 +357,7 @@ export const exportSceneModel = async (
         }
       });
     }
-    const getFilename = (ext: string) =>
-      `${new Date().toLocaleString()}.${ext}`.replace(/[:]/g, '-');
+
 
     const saveFile = (data: BlobPart, ext: string, mime: string) => {
       const blob = new Blob([data], { type: mime });
@@ -393,7 +401,7 @@ export const exportSceneModel = async (
 
       case MODEL_TYPE.STL:
         saveFile(
-          new STLExporter().parse(modelGroup, { binary: true }),
+          new STLExporter().parse(modelGroup, { binary: true }) as unknown as BlobPart,
           'stl',
           'application/octet-stream'
         );
@@ -402,7 +410,7 @@ export const exportSceneModel = async (
       case MODEL_TYPE.USDZ:
         new USDZExporter().parse(
           modelGroup,
-          (usdz) => saveFile(usdz, 'usdz', 'model/vnd.usdz+zip'),
+          (usdz) => saveFile(usdz as unknown as BlobPart, 'usdz', 'model/vnd.usdz+zip'),
           (err) => ElMessage.error(err as string)
         );
         break;

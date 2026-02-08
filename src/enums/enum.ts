@@ -292,3 +292,10 @@ export enum TEXT_MATERIAL_TYPE {
   Sprite = 'Sprite',
   Mesh = 'Mesh',
 }
+
+export enum TAB_TYPE {
+  Property = 'property',
+  Material = 'material',
+  Geometry = 'geometry',
+  Animation = 'animation',
+}

@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import * as TWEEN from '@tweenjs/tween.js';
 import type { PerspectiveCamera } from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
-import { useSceneStore } from '@/store/sceneEditStore';
 import { toRaw } from 'vue';
+import { useSceneStore } from '@/store/sceneEditStore';
 import { TransformCommand } from '../historyModules/transformCommand';
 import router from '@/router'; // 导入你的路由实例
 import { PREVIEW_URL } from '@/config/constant';
@@ -77,7 +77,10 @@ class TransformControlsModules {
       this.init();
     }
   }
-
+/**
+ * 鼠标按下事件
+ * @param event - 鼠标事件
+ */
   onMouseDown(event: MouseEvent) {
     if (!store.sceneApi?.container) return;
     const rect = store.sceneApi?.container.getBoundingClientRect();
@@ -213,7 +216,11 @@ class TransformControlsModules {
       TWEEN.removeAll();
     }
   }
-  // 获取有效的选中对象
+  /**
+   * 获取有效的选中对象
+   * @param intersects - 交集
+   * @returns 有效的选中对象
+   */
   getValidSelectedObject(
     intersects: THREE.Intersection[]
   ): THREE.Object3D | null {

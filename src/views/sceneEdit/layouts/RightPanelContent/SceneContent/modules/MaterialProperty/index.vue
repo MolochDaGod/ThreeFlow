@@ -249,7 +249,6 @@ const handleChangeMaterialType = (type: string) => {
   const mesh = store.sceneApi?.updateMaterialType(type);
   if (mesh) {
     emit('updateMeshMaterial', mesh);
-    disposeMaterial(mesh);
     editablePropertiesList.value = generateEditablePropertiesList(
       mesh.material as unknown as MaterialData
     );
@@ -275,8 +274,6 @@ const updateMeshMaterialProperty = <T,>(key: string, value: T) => {
     } else {
       (mesh.material as unknown as Record<string, T>)[key] = value;
     }
-    // 释放材质资源
-    disposeMaterial(mesh);
   }
 };
 
@@ -363,7 +360,6 @@ const getNewMaterialPropertyList = () => {
   editablePropertiesList.value = generateEditablePropertiesList(
     mesh.material as unknown as MaterialData
   );
-  disposeMaterial(mesh);
 };
 defineExpose({
   getNewMaterialPropertyList,
