@@ -36,6 +36,7 @@ export default class IndexDBUtil {
         // 创建对象仓库
         stores.forEach((store) => {
           if (!db.objectStoreNames.contains(store.name)) {
+             console.log('创建对象仓库', store.name, store.keyPath);
             db.createObjectStore(store.name, { keyPath: store.keyPath });
           }
         });

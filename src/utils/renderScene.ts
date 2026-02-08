@@ -664,20 +664,19 @@ class renderScene {
    * @param indexDbSceneData - 场景数据
    * @returns Promise<void>
    */
-
   async loadIndexDbSceneData(
     indexDbSceneData: IndexDbSceneData
   ): Promise<boolean> {
     try {
+      const { camera, scene, controls } = indexDbSceneData;
       // 1. 清理旧场景资源
       if (this.scene) {
         disposeScene(this.scene);
         this.scene.clear();
       }
-      const { camera, scene, controls } = indexDbSceneData;
       // 2. 创建加载器（可以考虑缓存loader实例）
       const loader = new ObjectLoader();
-    
+
       // 3. 并行加载场景和相机数据
       const [parseScene, parseCamera] = await Promise.all([
         loader.parseAsync(scene),

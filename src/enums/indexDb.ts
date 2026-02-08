@@ -1,11 +1,11 @@
 export enum IndexDbStoreName {
-  scene = 'scene',
+  scene = 'scene-flow',
 }
 
 export enum IndexDbStoreKeyPath {
-  sceneBlobData = 'sceneBlobData',
+  sceneBlobData = 'sceneBlobDataFlow',
 }
 
 export enum IndexDbDataName {
-  sceneEditor = 'scene-editor',
+  sceneEditor = 'scene-editor-flow',
 }

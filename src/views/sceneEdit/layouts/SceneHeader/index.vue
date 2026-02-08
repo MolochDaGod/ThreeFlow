@@ -2,10 +2,36 @@
   <div class="render-header">
     <div class="render-header-left">
       <div class="render-header-left-title">ThreeFlow 作者:answer</div>
-
-    
     </div>
     <div class="render-header-right">
+      <div class="header-right-item">
+        <el-button type="primary" @click="debounceSaveScene">
+          <span class="iconfont icon-baocun">&nbsp;保存场景</span>
+        </el-button>
+      </div>
+      <div class="header-right-item">
+        <el-dropdown trigger="click">
+          <el-button type="primary">
+            <span class="iconfont icon-changjing2">&nbsp;场景</span>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="addScene">
+                <span class="iconfont icon-changjing1">&nbsp;新增场景</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="saveSceneSnapshot">
+                <span class="iconfont icon-zhaoxiangji"> &nbsp;场景快照(.png) </span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="debounceExportScene">
+                <span class="iconfont icon-daochu">&nbsp;导出场景(.json)</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="importScene">
+                <span class="iconfont icon-daoru">&nbsp;导入场景(.json)</span>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
       <div class="header-right-item">
         <el-dropdown trigger="click">
           <el-button type="primary">
@@ -29,34 +55,6 @@
               </el-dropdown-item>
               <el-dropdown-item @click="debounceExportModel(EXPORT_TYPE.OBJ)">
                 <span class="iconfont icon-obj">&nbsp;导出模型(.obj)</span>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-      <div class="header-right-item">
-        <el-dropdown trigger="click">
-          <el-button type="primary">
-            <span class="iconfont icon-changjing2">&nbsp;场景</span>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="addScene">
-                <span class="iconfont icon-changjing1">&nbsp;新增场景</span>
-              </el-dropdown-item>
-              <el-dropdown-item @click="debounceSaveScene">
-                <span class="iconfont icon-baocun">&nbsp;保存场景</span>
-              </el-dropdown-item>
-              <el-dropdown-item @click="saveSceneSnapshot">
-                <span class="iconfont icon-zhaoxiangji">
-                  &nbsp;场景快照(.png)
-                </span>
-              </el-dropdown-item>
-              <el-dropdown-item @click="debounceExportScene">
-                <span class="iconfont icon-daochu">&nbsp;导出场景(.json)</span>
-              </el-dropdown-item>
-              <el-dropdown-item @click="importScene">
-                <span class="iconfont icon-daoru">&nbsp;导入场景(.json)</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -106,8 +104,6 @@ const addScene = () => {
     .catch(() => {});
 };
 
-
-
 // 保存场景
 const debounceSaveScene = debounce(async () => {
   loadingText.value = "保存场景中,页面可能会有卡顿请耐心等待...";
@@ -152,7 +148,7 @@ const saveSceneIndexDb = async () => {
     };
 
     let sceneInfo = {
-      sceneBlobData: IndexDbStoreKeyPath.sceneBlobData,
+      sceneBlobDataFlow: IndexDbStoreKeyPath.sceneBlobData,
       ...jsonData,
     };
 
