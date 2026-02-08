@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import type { ActionParams } from '@/types/rightPanelTypes';
 import { toRaw } from 'vue';
+import type { ActionParams } from '@/types/rightPanelTypes';
 import { useSceneStore } from '@/store/sceneEditStore';
+
 const store = useSceneStore();
 class animationModules {
   // 动画混合器

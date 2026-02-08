@@ -248,8 +248,6 @@ const currentLight = computed(() => {
     meshProperty.groundColor
   ).getStyle();
 
-  disposeMaterial(light as THREE.Mesh);
-  disposeMaterial(helper as THREE.Mesh);
   return { light, helper };
 });
 
@@ -336,8 +334,6 @@ const updateMaterialProperty = (
     (material as unknown as Record<string, string | boolean | number>)[
       propertyKey
     ] = value;
-    // 释放材质资源
-    disposeMaterial(material as THREE.Mesh);
   }
 };
 
@@ -369,9 +365,6 @@ const updateLightProperty = (propertyKey: string, value: string | boolean) => {
       helper.update();
     }
   }
-  // 释放材质资源
-  disposeMaterial(light as THREE.Mesh);
-  disposeMaterial(helper as THREE.Mesh);
 };
 
 // 更新灯光辅助线

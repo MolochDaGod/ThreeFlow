@@ -53,12 +53,12 @@
     <!-- 场景内容属性-->
     <div class="scene-content-property" v-if="currentTransformMaterialUuid">
       <el-tabs type="border-card" v-model="currentTab">
-        <el-tab-pane label="属性" name="property" v-if="meshProperty">
+        <el-tab-pane label="属性" :name="TAB_TYPE.Property" v-if="meshProperty">
           <MeshProperty :meshProperty="meshProperty" />
         </el-tab-pane>
         <el-tab-pane
           label="材质"
-          name="material"
+          :name="TAB_TYPE.Material"
           v-if="meshMaterial?.isMaterial"
         >
           <MaterialProperty
@@ -69,12 +69,12 @@
         </el-tab-pane>
         <el-tab-pane
           label="几何体参数"
-          name="geometry"
+          :name="TAB_TYPE.Geometry"
           v-if="geometryParameters?.parameters"
         >
           <GeometryProperty :geometryParameters="geometryParameters" />
         </el-tab-pane>
-        <el-tab-pane label="动画" name="animation" v-if="animationsList.length">
+        <el-tab-pane label="动画" :name="TAB_TYPE.Animation" v-if="animationsList.length">
           <AnimationsProperty :animationsList="animationsList" />
         </el-tab-pane>
           
@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import { useSceneStore } from "@/store/sceneEditStore";
-import { disposeMaterial, getSceneMaterialList, scrollToTreeNode } from "@/utils/utils";
+import { getSceneMaterialList, scrollToTreeNode } from "@/utils/utils";
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import type { GeometryParameters, MaterialNode } from "@/types/rightPanelTypes";
 import { ElMessage } from "element-plus";
@@ -97,7 +97,7 @@ import MeshProperty from "./modules/MeshProperty/index.vue";
 import GeometryProperty from "./modules/GeometryProperty/index.vue";
 import AnimationsProperty from "./modules/AnimationsProperty/index.vue";
 import type { MaterialData } from "@/types/rightPanelTypes";
-import { DRAG_MODEL_TYPE, SCENE_OBJECT_NAME } from "@/enums/enum";
+import { SCENE_OBJECT_NAME, TAB_TYPE } from "@/enums/enum";
 const store = useSceneStore();
 
 const formattedSceneData = computed(() => {
@@ -134,7 +134,7 @@ const materialPropertyRef = ref<typeof MaterialProperty | null>(null);
 // 是否点击选择
 const isClickChoose = ref(false);
 // 当前选中的标签
-const currentTab = ref("material");
+const currentTab = ref(TAB_TYPE.Material);
 // 几何体参数
 const geometryParameters = reactive<GeometryParameters>({
   type: "",
@@ -167,8 +167,6 @@ watch(currentTransformMaterialUuid, async () => {
     );
   }
   isClickChoose.value = false;
-  // 释放材质资源
-  disposeMaterial(material as THREE.Mesh);
 });
 // 监听变化控制器操作
 watch(transformMaterialRandomId, () => {
@@ -183,10 +181,10 @@ watch(transformMaterialRandomId, () => {
 
 const availableTabs = computed(() => {
   const tabs = [];
-  if (meshProperty.value) tabs.push("property");
-  if (meshMaterial?.value.isMaterial) tabs.push("material");
-  if (geometryParameters?.parameters) tabs.push("geometry");
-  if (animationsList.value.length > 0) tabs.push("animation");
+  if (meshProperty.value) tabs.push(TAB_TYPE.Property);
+  if (meshMaterial?.value.isMaterial) tabs.push(TAB_TYPE.Material);
+  if (geometryParameters?.parameters) tabs.push(TAB_TYPE.Geometry);
+  if (animationsList.value.length > 0) tabs.push(TAB_TYPE.Animation);
   return tabs;
 });
 
@@ -243,8 +241,6 @@ const updateCurrentMaterial = async (mesh: THREE.Mesh) => {
   await materialPropertyRef.value?.getNewMaterialPropertyList();
   //动画
   animationsList.value = mesh?.animations || [];
-  // 放材质资源
-  disposeMaterial(mesh);
 };
 // 更新材质
 const updateMeshMaterial = (mesh: THREE.Mesh) => {
@@ -294,8 +290,6 @@ const handleNodeDblClick = (data: MaterialNode) => {
   if (material) {
     store.sceneApi?.transformControlsModules?.focusOnObject(material);
   }
-  // 释放材质资源
-  disposeMaterial(material as THREE.Mesh);
 };
 // 展开节点
 const handleNodeExpand = (node: MaterialNode) => {
