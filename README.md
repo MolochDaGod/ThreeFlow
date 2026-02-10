@@ -28,11 +28,10 @@ ThreeFlow:一个基于Three.js+Vue3实现的3D场景编辑器
 
 | 名称                     | 版本    | 名称         | 版本  |
 | ------------------------ | ------- | ------------ | ----- |
-| Vue                      | 3.5.13  | Mitt         | 3.0.1 |
+| Vue                      | 3.5.13  | Typescript   | 5.7.x |
 | Vite                     | 6.1.x   | Element-plus | 2.9.4 |
 | Three                    | 182     | Pinia        | 2.3.x |
 | 详见 `package.json`      | 😁      | 🥰           | 🤗    |
-
 
 ### 🌺 开发环境
 
@@ -40,7 +39,7 @@ ThreeFlow:一个基于Three.js+Vue3实现的3D场景编辑器
 | ---- | ------- | ------- | ------ |
 | node | 21.3.0  | npm     | 10.2.4 |
 | yarn | 1.22.21 | windows | 10     |
-| pnpm | 9.15.1  | mac | M1-M4    |
+| pnpm | 9.15.1  | mac     | M1-M4  |
 
 ### ⚖️ 许可协议
 
@@ -52,11 +51,10 @@ ThreeFlow:一个基于Three.js+Vue3实现的3D场景编辑器
 
 ### 📚 商用版（ThreeFlowX）
 
-如果你有商用目的需求，那么非常推荐购买**ThreeFlowX(商用版)**
+如果你有商用目的需求，那么非常推荐
 
-在保留了 *ThreeFlow* 所有功能的基础上提供更加丰富多态的3D场景元素内容和更加丰富的功能
+**ThreeFlowX(商用版)：** 在保留了 *ThreeFlow* 所有功能的基础上，提供更加丰富多态的3D场景元素内容和更加强大的低代码自定义能力。同时提供了多模型、大场景资源的加载/渲染/存储的解决方案
 
-**ThreeFlowX(商用版)**:一个提供了非常强大且灵活的3D低代码编辑能力和多场景、大模型加载、存储、渲染的3D低代码编辑器。
 
 <!-- Start of Selection -->
 **[在线文档](http://threeflowx.cn/docs/)**:http://threeflowx.cn/docs/
@@ -66,3 +64,31 @@ ThreeFlow:一个基于Three.js+Vue3实现的3D场景编辑器
 
 ### 👷 项目目录结构介绍
 
+### 1. 入口文件
+
+- App.vue : 应用程序的根组件，包含路由视图
+- main.js : 应用程序入口文件，负责初始化 Vue 应用、注册全局组件、全局状态、指令和插件
+
+ ### 2. /assets 目录
+
+存放静态资源文件：
+
+- iconFont/ : 阿里巴巴矢量图标库（地址: https://www.iconfont.cn/）
+- image/ : 图片资源
+- previewIcon/ : 模型预览图片
+- textures/ : 资源贴图文件
+
+### 3. /components 目录
+
+全局组件文件：
+
+- Loading/ : 自定义封装的页面加载loading
+- index.ts : 组件导出文件
+
+### 4. /config 目录
+
+常量配置和静态数据配置文件：
+
+- constant.ts :  常量定义
+- defaultDragList.ts : 左侧模型拖拽资源内容数据
+- propertyConfig.ts : 3D资源属性项目静态配置
