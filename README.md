@@ -1,17 +1,94 @@
 ### 项目名称：ThreeFlow
 
+### 项目描述
+
+ThreeFlow:一个基于Three.js+Vue3实现的3D场景编辑器
+
+### 开源背景
+
+
+
+
 ### 🌐 安装/启动/打包(详见 package.json)
 
 ```
-pnpm install / pnpm serve / pnpm build(pnpm build:pro)
+ pnpm install
+
+ pnpm serve 
+ 
+ pnpm build/pnpm build:pro
+
 ```
 
-### 🎨 打包部署线上注意事项
+### 💚  支持项目 ⭐
 
-打包时需要将 `vite.config.ts` 中的 `base` 设置为 `'/'或者(自身服务器对于域名地址)`
-或者修改 `.env.production` 文件中的 `VITE_APP_BASE_URL` 为 `'/'或者(自身服务器对于域名地址)`
+如果你觉得该项目对你有帮助那就留个star吧，这是对作者每次熬夜牺牲休息时间去更新开源项目最大的动力支持
 
-### node.js 版本要求
+### 🎵 主要技术栈
 
-- 项目使用 node.js 版本为 v21.3.0
-- 项目使用 pnpm 版本为 9.15.1
+| 名称                     | 版本    | 名称         | 版本  |
+| ------------------------ | ------- | ------------ | ----- |
+| Vue                      | 3.5.13  | Typescript   | 5.7.x |
+| Vite                     | 6.1.x   | Element-plus | 2.9.4 |
+| Three                    | 182     | Pinia        | 2.3.x |
+| 详见 `package.json`      | 😁      | 🥰           | 🤗    |
+
+### 🌺 开发环境
+
+| 名称 | 版本    | 名称    | 版本   |
+| ---- | ------- | ------- | ------ |
+| node | 21.3.0  | npm     | 10.2.4 |
+| yarn | 1.22.21 | windows | 10     |
+| pnpm | 9.15.1  | mac     | M1-M4  |
+
+### ⚖️ 许可协议
+
+本项目采用 AGPL-3.0 开源协议，使用时请遵守协议条款及以下补充条款
+
+✅本项目仅供学习、研究、非商业用途使用。
+
+任何商业使用需获得作者书面授权。
+
+### 📚 商用版（ThreeFlowX）
+
+如果你有商用目的需求，那么非常推荐
+
+**ThreeFlowX(商用版)：** 在保留了 *ThreeFlow* 所有功能的基础上，提供更加丰富多态的3D场景元素内容和更加强大的低代码自定义能力。同时提供了多模型、大场景资源的加载/渲染/存储的解决方案
+
+
+<!-- Start of Selection -->
+**[在线文档](http://threeflowx.cn/docs/)**:http://threeflowx.cn/docs/
+
+**[在线地址](http://threeflowx.cn/edit/)**:http://threeflowx.cn/edit/
+<!-- End of Selection -->
+
+### 👷 项目目录结构介绍
+
+### 1. 入口文件
+
+- App.vue : 应用程序的根组件，包含路由视图
+- main.js : 应用程序入口文件，负责初始化 Vue 应用、注册全局组件、全局状态、指令和插件
+
+ ### 2. /assets 目录
+
+存放静态资源文件：
+
+- iconFont/ : 阿里巴巴矢量图标库（地址: https://www.iconfont.cn/）
+- image/ : 图片资源
+- previewIcon/ : 模型预览图片
+- textures/ : 资源贴图文件
+
+### 3. /components 目录
+
+全局组件文件：
+
+- Loading/ : 自定义封装的页面加载loading
+- index.ts : 组件导出文件
+
+### 4. /config 目录
+
+常量配置和静态数据配置文件：
+
+- constant.ts :  常量定义
+- defaultDragList.ts : 左侧模型拖拽资源内容数据
+- propertyConfig.ts : 3D资源属性项目静态配置

@@ -1,7 +1,11 @@
 <template>
   <div class="render-header">
     <div class="render-header-left">
-      <div class="render-header-left-title">ThreeFlow 作者:answer</div>
+      <img src="/icon.png" class="header-logo" alt="logo" />
+      <div class="left-title">
+        ThreeFlow
+        <span class="author">作者:answer</span>
+      </div>
     </div>
     <div class="render-header-right">
       <div class="header-right-item">

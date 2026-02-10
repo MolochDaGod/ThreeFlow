@@ -6,18 +6,55 @@
   padding: 0 16px;
   color: #ffffff;
   background-color: #2a2342;
+
+  .render-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .header-logo {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .left-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #c0caf5;
+      display: flex;
+      align-items: center;
+      letter-spacing: 0.5px;
+      background: linear-gradient(to right, #ffffff, #c0caf5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      .author {
+        font-size: 12px;
+        font-weight: normal;
+        color: #565f89;
+        margin-left: 8px;
+        -webkit-text-fill-color: #565f89;
+        opacity: 0.8;
+      }
+    }
+  }
+
   .render-header-right {
     display: flex;
     gap: 10px;
   }
+
   .header-right-item {
     font-size: 12px;
     cursor: pointer;
+
     span {
       font-size: 12px;
     }
   }
 }
+
 .iconfont {
   font-size: 12px;
 }
