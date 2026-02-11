@@ -2,12 +2,11 @@
 
 ### 项目描述
 
-ThreeFlow:一个基于Three.js+Vue3实现的3D场景编辑器
+ThreeFlow:一个基于Three.js+Vue3+Vite+Typescript实现的3D场景编辑器。
 
-### 开源背景
+项目采用企业级项目标准的开发规范：Eslint+Stylelint+Prettier+Husky+JSDoc实现项目代码工程规范。
 
-
-
+对Three.js核心操作模块的功能进行单独模块化抽离封装，减少Three.j在现代框架中使用的成本
 
 ### 🌐 安装/启动/打包(详见 package.json)
 
@@ -44,14 +43,16 @@ ThreeFlow:一个基于Three.js+Vue3实现的3D场景编辑器
 ### ⚖️ 许可协议
 
 本项目采用 AGPL-3.0 开源协议，使用时请遵守协议条款:
+✅ 允许 个人学习、研究、修改使用
 
 ✅ 允许 商业使用
+
 ✅ 允许收费、SaaS、企业内部使用
 
-❗ 但 要求：
+❗ 但要求：
 修改过的代码必须开源
-通过网络向用户提供服务时，也必须提供源码
 
+通过网络向用户提供服务时，也必须提供源码
 
 ### 📚 商用版（ThreeFlowX）
 
@@ -59,11 +60,10 @@ ThreeFlow:一个基于Three.js+Vue3实现的3D场景编辑器
 
 **ThreeFlowX(商用版)：** 在保留了 *ThreeFlow* 所有功能的基础上，提供更加丰富多态的3D场景元素内容和更加强大的低代码自定义能力。同时提供了多模型、大场景资源的加载/渲染/存储的解决方案。
 
-
 <!-- Start of Selection -->
-**[在线文档](http://threeflowx.cn/docs/)**:http://threeflowx.cn/docs/
+**[在线文档](http://threeflowx.cn/docs/)**:<http://threeflowx.cn/docs/>
 
-**[在线地址](http://threeflowx.cn/edit/)**:http://threeflowx.cn/edit/
+**[在线地址](http://threeflowx.cn/edit/)**:<http://threeflowx.cn/edit/>
 <!-- End of Selection -->
 
 ### 👷 项目目录结构介绍
@@ -73,11 +73,11 @@ ThreeFlow:一个基于Three.js+Vue3实现的3D场景编辑器
 - App.vue : 应用程序的根组件，包含路由视图
 - main.js : 应用程序入口文件，负责初始化 Vue 应用、注册全局组件、全局状态、指令和插件
 
- ### 2. /assets 目录
+### 2. /assets 目录
 
 存放静态资源文件：
 
-- iconFont/ : 阿里巴巴矢量图标库（地址: https://www.iconfont.cn/）
+- iconFont/ : 阿里巴巴矢量图标库（地址: <https://www.iconfont.cn/）>
 - image/ : 图片资源
 - previewIcon/ : 模型预览图片
 - textures/ : 资源贴图文件
