@@ -77,10 +77,10 @@ class TransformControlsModules {
       this.init();
     }
   }
-/**
- * 鼠标按下事件
- * @param event - 鼠标事件
- */
+  /**
+   * 鼠标按下事件
+   * @param event - 鼠标事件
+   */
   onMouseDown(event: MouseEvent) {
     if (!store.sceneApi?.container) return;
     const rect = store.sceneApi?.container.getBoundingClientRect();
@@ -403,7 +403,7 @@ class TransformControlsModules {
     this.transformControls = null;
     this.transformControlsHelper = null;
     this.draggingChangedHandler = null;
-    this.transformChangeHandler = () => {};
+    this.transformChangeHandler = () => { };
     this.onMouseClickListener = null;
     this.onMouseDblClickListener = null;
     this.clearCurrentSelection();

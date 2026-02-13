@@ -104,7 +104,6 @@ class renderScene {
     createTransformControls: () => void;
     clearCurrentSelection: () => void;
   };
-
   // 历史记录模块实例
   historyModules: {
     undo: () => void;
@@ -112,7 +111,6 @@ class renderScene {
     clear: () => void;
     execute: (command: Command) => void;
   };
-
   // 视图辅助器实例
   viewHelper: ViewportGizmo | null;
   constructor(selector: string) {
@@ -151,7 +149,6 @@ class renderScene {
     this.historyModules = new HistoryModules();
     this.viewHelper = null;
   }
-
   /**
    * 初始化场景
    * @returns Promise<boolean>
@@ -166,9 +163,7 @@ class renderScene {
       this.initRender();
       await this.initScene();
       await this.initControls();
-
       this.transformControlsModules.init();
-
       // 获取indexDb场景数据
       const indexDbStore = useIndexDbStore();
       let loadSceneData: IndexDbSceneData | null = null;
@@ -184,15 +179,12 @@ class renderScene {
       } else {
         await this.initPlaneGround();
       }
-
       this.sceneAnimation();
       this.addEvenListMouseListener();
       this.onWindowResizes();
-
       resolve(true);
     });
   }
-
   /**
    * 初始化渲染器
    */
@@ -214,7 +206,6 @@ class renderScene {
     this.renderer.autoClear = false;
     this.container.appendChild(this.renderer.domElement);
   }
-
   /**
    * 初始化相机
    */
@@ -229,7 +220,6 @@ class renderScene {
     this.camera.name = 'Camera';
     this.camera.updateProjectionMatrix();
   }
-
   /**
    * 初始化场景
    */
@@ -249,7 +239,6 @@ class renderScene {
 
     return Promise.resolve();
   }
-
   /**
    * 初始化地面
    */
@@ -301,7 +290,6 @@ class renderScene {
   async initControls(): Promise<void> {
     if (!this.camera || !this.renderer || !this.scene) return;
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-
     // 启用平移
     this.controls.screenSpacePanning = false;
     // 启用平滑缩放
@@ -332,7 +320,6 @@ class renderScene {
 
     return Promise.resolve();
   }
-
   /**
    * 初始化第一人称控制器
    */

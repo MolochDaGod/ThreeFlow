@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import type { MODEL_TYPE } from '@/enums/enum';
 import { LIGHT_ICON_TYPE } from '@/enums/enum';
 import { ElNotification } from 'element-plus';
+
 /**
  * 获取文件扩展名
  * @param fileName 文件名
@@ -153,8 +154,6 @@ export const getSceneMaterialList = (scene: THREE.Scene): SceneModelItem[] => {
       new Map(materials.map((mat) => [mat.uuid, mat])).values()
     );
   };
-
-
 
   // 根据类型创建模型数据
   const createModelData = (model: THREE.Object3D): SceneModelItem => {
