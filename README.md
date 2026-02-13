@@ -6,7 +6,7 @@ ThreeFlow:一个基于 `Three.js+Vue3+Vite+Typescript `实现的3D场景编辑�
 
 项目采用企业级开发标准，集成 `ESLint` + `Stylelint` + `Prettier` + `Husky` + `CommitLint` 构建全链路代码质量保障体系。
 
-对Three.js核心操作模块的功能进行单独模块化抽离封装，减低Three.js在前端现代框架中开发的成本
+对Three.js核心操作模块的功能进行单独模块化抽离封装，减低Three.js在前端现代框架中开发的成本。
 
 ### 🌐 安装/启动/打包(详见 package.json)
 
@@ -57,7 +57,7 @@ ThreeFlow:一个基于 `Three.js+Vue3+Vite+Typescript `实现的3D场景编辑�
 
 ### 📚 商用Pro版（ThreeFlowX）
 
-如果你有商用目的需求，那么非常推荐👇🏻
+**如果您无法遵守上述开源要求（例如需要闭源发布）又或者你有商用目的需求，那么非常推荐👇🏻**
 
 **ThreeFlowX：** 在保留了 *ThreeFlow* 所有功能的基础上，提供更加丰富多态的3D场景元素内容和更加强大的低代码自定义能力。同时提供了多模型、大场景资源的加载/渲染/存储的解决方案。
 
