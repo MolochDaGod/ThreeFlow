@@ -44,7 +44,6 @@ export const getSceneConfig = () => {
   const planeGeometry = scene?.getObjectByName('customPlane') as THREE.Mesh;
   const planeGeometryKey = planeGeometry?.userData.planeGeometry as string;
 
-
   const sceneFog = scene?.fog;
   let fog = FOG_TYPE.None;
   let fogColor = FOG_COLOR_VALUE;
@@ -357,8 +356,6 @@ export const exportSceneModel = async (
         }
       });
     }
-
-
     const saveFile = (data: BlobPart, ext: string, mime: string) => {
       const blob = new Blob([data], { type: mime });
       const url = URL.createObjectURL(blob);

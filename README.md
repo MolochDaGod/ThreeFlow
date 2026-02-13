@@ -1,12 +1,12 @@
-### 项目名称：ThreeFlow
+### 项目名称：ThreeFlow(3D场景编辑器)
 
 ### 项目描述
 
-ThreeFlow:一个基于Three.js+Vue3+Vite+Typescript实现的3D场景编辑器。
+ThreeFlow:一个基于 `Three.js+Vue3+Vite+Typescript `实现的3D场景编辑器。
 
-项目采用企业级项目标准的开发规范：Eslint+Stylelint+Prettier+Husky+JSDoc实现项目代码工程规范。
+项目采用企业级开发标准，集成 `ESLint` + `Stylelint` + `Prettier` + `Husky` + `CommitLint` 构建全链路代码质量保障体系。
 
-对Three.js核心操作模块的功能进行单独模块化抽离封装，减低Three.js在前端现代框架中开发的成本
+对Three.js核心操作模块的功能进行单独模块化抽离封装，减低Three.js在前端现代框架中开发的成本。
 
 ### 🌐 安装/启动/打包(详见 package.json)
 
@@ -54,13 +54,13 @@ ThreeFlow:一个基于Three.js+Vue3+Vite+Typescript实现的3D场景编辑器。
 - ❗ **传染性**：基于本项目修改或衍生的代码，必须继续采用 **AGPL-3.0** 协议开源。
 - ❗ **保留声明**：必须保留原作者的版权声明和协议说明。
 
-**如果您无法遵守上述开源要求（例如需要闭源发布），请考虑使用下方的商业版（ThreeFlowX）。**
+**⚠️若有因您本人不遵守协议导致造成的一切损失，将由您本人承担**
 
-### 📚 商用版（ThreeFlowX）
+### 📚 商用Pro版（ThreeFlowX）
 
-如果你有商用目的需求，那么非常推荐👇🏻
+**如果您无法遵守上述开源要求（例如需要闭源发布）又或者你有商用目的需求，那么非常推荐👇🏻**
 
-**ThreeFlowX(商用版)：** 在保留了 *ThreeFlow* 所有功能的基础上，提供更加丰富多态的3D场景元素内容和更加强大的低代码自定义能力。同时提供了多模型、大场景资源的加载/渲染/存储的解决方案。
+**ThreeFlowX（3D低代码场景编辑器）：** 在保留了 *ThreeFlow* 所有功能的基础上，提供更加丰富多态的3D场景元素内容和更加强大的低代码自定义能力，以及优秀的性能处理和更加灵活便捷的操作。同时也提供了多模型、大场景资源的加载/渲染/存储的解决方案。
 
 <!-- Start of Selection -->
 **[在线文档](http://threeflowx.cn/docs/)**:<http://threeflowx.cn/docs/>
