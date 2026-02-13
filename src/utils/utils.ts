@@ -7,7 +7,7 @@ import type {
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import * as THREE from 'three';
 import type { MODEL_TYPE } from '@/enums/enum';
-import { DRAG_MODEL_TYPE, LIGHT_ICON_TYPE } from '@/enums/enum';
+import { LIGHT_ICON_TYPE } from '@/enums/enum';
 import { ElNotification } from 'element-plus';
 /**
  * 获取文件扩展名

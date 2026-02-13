@@ -3,19 +3,13 @@
     <SceneHeader />
     <div class="render-content">
       <div class="render-left-box">
-        <LeftDragContent
-          @drag-model-start="updateCurrentDragModel"
-          @choose-outside-file="chooseOutsideFile"
-        />
+        <LeftDragContent @drag-model-start="updateCurrentDragModel" @choose-outside-file="chooseOutsideFile" />
       </div>
       <div id="scene-render" @drop="dropModel" @dragover.prevent></div>
       <RightPanelContent :pageLoading="loadingInfo.pageLoading" />
     </div>
     <!-- 加载状态 -->
-    <Loading
-      :percentage="loadingInfo.percentage"
-      :loading="loadingInfo.loading"
-    />
+    <Loading :percentage="loadingInfo.percentage" :loading="loadingInfo.loading" />
   </div>
 </template>
 <script setup lang="ts">
