@@ -6,7 +6,7 @@ ThreeFlow:一个基于Three.js+Vue3+Vite+Typescript实现的3D场景编辑器。
 
 项目采用企业级项目标准的开发规范：Eslint+Stylelint+Prettier+Husky+JSDoc实现项目代码工程规范。
 
-对Three.js核心操作模块的功能进行单独模块化抽离封装，减少Three.j在现代框架中使用的成本
+对Three.js核心操作模块的功能进行单独模块化抽离封装，减低Three.js在前端现代框架中开发的成本
 
 ### 🌐 安装/启动/打包(详见 package.json)
 
@@ -30,7 +30,7 @@ ThreeFlow:一个基于Three.js+Vue3+Vite+Typescript实现的3D场景编辑器。
 | Vue                      | 3.5.13  | Typescript   | 5.7.x |
 | Vite                     | 6.1.x   | Element-plus | 2.9.4 |
 | Three                    | 182     | Pinia        | 2.3.x |
-| 详见 `package.json`      | 😁      | 🥰           | 🤗    |
+| TWEEN                   | 18.5.0  | 详见 `package.json` | 🤗    |
 
 ### 🌺 开发环境
 
@@ -42,17 +42,19 @@ ThreeFlow:一个基于Three.js+Vue3+Vite+Typescript实现的3D场景编辑器。
 
 ### ⚖️ 许可协议
 
-本项目采用 AGPL-3.0 开源协议，使用时请遵守协议条款:
-✅ 允许 个人学习、研究、修改使用
+本项目基于 **AGPL-3.0** 开源协议发布。
 
-✅ 允许 商业使用
+**您可以：**
+- ✅ **自由使用**：用于个人学习、研究或商业项目。
+- ✅ **二次开发**：根据需求自由修改源代码。
+- ✅ **提供服务**：将本软件作为服务提供给他人使用（SaaS）。
 
-✅ 允许收费、SaaS、企业内部使用
+**但您必须遵守以下义务：**
+- ❗ **开源义务**：如果您修改了代码并通过网络提供服务（如 SaaS 网站、Web 应用），**必须向该服务的所有用户公开完整的源代码**。
+- ❗ **传染性**：基于本项目修改或衍生的代码，必须继续采用 **AGPL-3.0** 协议开源。
+- ❗ **保留声明**：必须保留原作者的版权声明和协议说明。
 
-❗ 但要求：
-修改过的代码必须开源
-
-通过网络向用户提供服务时，也必须提供源码
+**如果您无法遵守上述开源要求（例如需要闭源发布），请考虑使用下方的商业版（ThreeFlowX）。**
 
 ### 📚 商用版（ThreeFlowX）
 
@@ -77,7 +79,7 @@ ThreeFlow:一个基于Three.js+Vue3+Vite+Typescript实现的3D场景编辑器。
 
 存放静态资源文件：
 
-- iconFont/ : 阿里巴巴矢量图标库（地址: <https://www.iconfont.cn/）>
+- iconFont/ : 阿里巴巴矢量图标库文件（地址: <https://www.iconfont.cn/）>
 - image/ : 图片资源
 - previewIcon/ : 模型预览图片
 - textures/ : 资源贴图文件
@@ -95,4 +97,72 @@ ThreeFlow:一个基于Three.js+Vue3+Vite+Typescript实现的3D场景编辑器。
 
 - constant.ts :  常量定义
 - defaultDragList.ts : 左侧模型拖拽资源内容数据
-- propertyConfig.ts : 3D资源属性项目静态配置
+- propertyConfig.ts : 静态属性配置项
+
+### 5. /enums 目录
+
+全局枚举文件：
+
+- enum.ts : 场景、变换控制器、材质等相关枚举定义
+- indexDb.ts : IndexedDB 数据库相关枚举
+
+### 6. /layouts 目录
+
+布局组件文件：
+
+- RenderView.vue : 渲染视图布局组件，作为应用的主要承载容器
+
+### 7. /router 目录
+
+路由配置文件：
+
+- index.ts : Vue Router 路由配置入口，定义应用页面导航规则
+
+### 8. /store 目录
+
+Pinia 状态管理文件：
+
+- indexDbStore.ts : IndexedDB 数据操作状态管理
+- pinia.ts : Pinia 实例初始化配置
+- sceneEditStore.ts : 场景编辑器核心状态管理（包括场景对象、选中状态等）
+
+### 9. /style 目录
+
+样式资源文件：
+
+- iconFont.scss : 字体图标样式定义
+- index.scss : 全局通用样式入口
+- reset.scss : 浏览器默认样式重置
+
+### 10. /types 目录
+
+TypeScript 类型定义文件：
+
+- global.d.ts : 全局通用类型声明
+- indexDbTypes.ts : IndexedDB 数据结构类型定义
+- renderModelTypes.ts : 渲染模型相关接口定义
+- rightPanelTypes.ts : 右侧属性面板配置类型定义
+- three-css3d.d.ts : CSS3D 渲染器类型声明
+- three-utils.d.ts : Three.js 工具函数类型声明
+
+### 11. /utils 目录
+
+核心工具函数与逻辑封装：
+
+- directive.ts : Vue 自定义指令注册
+- globalComponent.ts : 全局组件自动注册逻辑
+- globalProperties.ts : Vue 全局属性挂载
+- historyModules/ : 操作历史记录（撤销/重做）模块封装
+- indexedDB.ts : IndexedDB 数据库操作封装类
+- renderScene.ts : **核心文件**，Three.js 场景渲染逻辑封装（初始化、渲染循环、事件监听等）
+- sceneModules/ : 场景功能模块（灯光、动画、变换控制等）
+- utils.ts : 通用辅助函数
+
+### 12. /views 目录
+
+页面视图文件：
+
+- sceneEdit/ : 3D 场景编辑器主视图
+  - index.vue : 编辑器入口组件
+  - layouts/ : 编辑器内部布局组件（左侧拖拽栏、右侧属性面板、顶部工具栏等）
+
