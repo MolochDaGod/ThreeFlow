@@ -108,7 +108,7 @@
           <div class="property-item-value">
             <el-color-picker
               v-model="lightColor.color"
-              :predefine="colorPickerOptions"
+              :predefine="PREDEFINE_COLORS"
               @change="updateLightProperty('color', $event)"
             />
           </div>
@@ -118,7 +118,7 @@
           <div class="property-item-value">
             <el-color-picker
               v-model="lightColor.groundColor"
-              :predefine="colorPickerOptions"
+              :predefine="PREDEFINE_COLORS"
               @change="updateLightProperty('groundColor', $event)"
             />
           </div>
@@ -199,7 +199,6 @@
     </div>
   </el-scrollbar>
 </template>
-
 <script setup lang="ts">
 import { computed, onUnmounted, ref, type PropType } from 'vue';
 import * as THREE from 'three';
@@ -227,11 +226,9 @@ const { meshProperty } = defineProps({
   },
 });
 
-const colorPickerOptions = PREDEFINE_COLORS;
+
 // 当前选中的材质
-const currentTransformMaterialUuid = computed(() => {
-  return store.currentTransformMaterialUuid;
-});
+const currentTransformMaterialUuid = computed(() =>store.currentTransformMaterialUuid);
 
 // 当前灯光
 const currentLight = computed(() => {
@@ -307,7 +304,6 @@ const updateTransformProperties = (
       (helper as THREE.DirectionalLightHelper).update();
     }
   }
-
   disposeMaterial(material as THREE.Mesh);
 };
 

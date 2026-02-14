@@ -100,6 +100,7 @@ import type { MaterialData } from "@/types/rightPanelTypes";
 import { SCENE_OBJECT_NAME, TAB_TYPE } from "@/enums/enum";
 const store = useSceneStore();
 
+// 格式化场景数据
 const formattedSceneData = computed(() => {
   if (store.sceneApi?.scene) {
     const camera = store.sceneApi?.camera;
