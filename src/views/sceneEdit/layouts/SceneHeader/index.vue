@@ -287,9 +287,7 @@ const chooseSceneJson = async (file: File) => {
 
 // 导出模型
 const debounceExportModel = debounce(async (type: ExportType) => {
-  if (checkPageUsageTime(3)) {
-    return false;
-  }
+
   loading.value = true;
   loadingText.value = "导出模型中,页面可能会有卡顿请耐心等待...";
   loadingTimeout.value = setTimeout(() => {

@@ -79,7 +79,7 @@
           <template v-else-if="verifyValueColor(item.key)">
             <el-space :size="15">
               <el-color-picker
-                :predefine="colorPickerOptions"
+                :predefine="PREDEFINE_COLORS"
                 v-model="item.value"
                 @change="updateMeshMaterialProperty(item.key, $event)"
               />
@@ -194,8 +194,7 @@ onMounted(() => {
 
 // 可编辑的属性列表
 const editablePropertiesList = ref<EditableProperty[]>([]);
-// 颜色选择器配置
-const colorPickerOptions = PREDEFINE_COLORS;
+
 // 生成可编辑的属性列表
 const generateEditablePropertiesList = (material: MaterialData) => {
   if (!material) return [];

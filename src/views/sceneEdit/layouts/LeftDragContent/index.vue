@@ -102,10 +102,10 @@
       <!-- 底部占位，防止被商用版文案遮挡 -->
       <div class="bottom-spacer"></div>
     </el-scrollbar>
-    <div class="commercial-version">
+    <!-- <div class="commercial-version" @click="openCommercialVersion">
         <span class="iconfont icon-hot"></span>
-        <span @click="openCommercialVersion">商用版：ThreeFlowX</span>
-    </div>
+        <span>商用版：ThreeFlowX</span>
+    </div> -->
     <!-- 开关 -->
     <div class="collapse-button" @click="toggleCollapse">
       <el-icon :size="20">
