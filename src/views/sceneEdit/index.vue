@@ -19,7 +19,7 @@ import { Loading } from '@/components/index';
 import type {
   DragModelType,
   CurrentDragModelData,
-  ModelType,
+  ModelType
 } from '@/types/renderModelTypes';
 import { useSceneStore } from '@/store/sceneEditStore';
 import { useIndexDbStore } from '@/store/indexDbStore';
@@ -100,8 +100,10 @@ const dropModel = async (e: DragEvent) => {
   } else {
     const { filePath, fileType, name } = currentDrag.modelData as ModelType;
     try {
-      loadingInfo.loading = true;
-      loadingInfo.percentage = 0;
+      Object.assign(loadingInfo, {
+        loading: true,
+        percentage: 0,
+      });
       await store.sceneApi?.loadModel(
         filePath,
         fileType,

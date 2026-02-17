@@ -4,6 +4,10 @@ import type { ActionParams } from '@/types/rightPanelTypes';
 import { useSceneStore } from '@/store/sceneEditStore';
 
 const store = useSceneStore();
+
+/**
+ * @description 动画模块
+ */
 class animationModules {
   // 动画混合器
   animationMixers: Map<string, THREE.AnimationMixer>;
@@ -157,7 +161,6 @@ class animationModules {
         }
       }
     }
-
     this.currentActions.set(mapId, newActionList);
   }
   /**
@@ -181,7 +184,6 @@ class animationModules {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
     }
-
     this.animationClock.stop();
   }
 }
