@@ -10,6 +10,7 @@ import { PREVIEW_URL } from '@/config/constant';
 import type { SelectLightType } from '@/types/renderModelTypes';
 
 const store = useSceneStore();
+
 class TransformControlsModules {
   transformControls: TransformControls | null = null;
   transformControlsHelper: THREE.Object3D | null = null;
@@ -22,7 +23,6 @@ class TransformControlsModules {
   currentSelectedObject: THREE.Object3D | null = null;
   mouseDownPosition = new THREE.Vector2();
   isMouseDown = false;
-
   constructor() {
     this.transformControls = null;
     this.transformControlsHelper = null;
@@ -35,7 +35,9 @@ class TransformControlsModules {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
   }
-
+  /**
+   * 初始化变幻控制器
+   */
   init() {
     const { camera, renderer, scene, container } = store.sceneApi || {};
     this.transformControls = new TransformControls(
@@ -68,7 +70,9 @@ class TransformControlsModules {
     container?.addEventListener('mousedown', this.onMouseDown.bind(this));
     container?.addEventListener('mouseup', this.onMouseUp.bind(this));
   }
-
+  /**
+   * 创建变换控制器
+   */
   createTransformControls() {
     this.destroy();
     // 获取当前路由路径
@@ -91,11 +95,17 @@ class TransformControlsModules {
     this.isMouseDown = true;
   }
 
+  /**
+   * 鼠标松开事件
+   */
   onMouseUp() {
     this.isMouseDown = false;
   }
 
-  // 鼠标单击事件
+  /**
+   * 鼠标单击事件
+   * @returns 鼠标单击事件
+   */
   onMouseClick() {
     return (event: MouseEvent) => {
       const { camera, container, scene, boxHelper } = store.sceneApi || {};
@@ -144,7 +154,10 @@ class TransformControlsModules {
     };
   }
 
-  // 拖拽状态改变事件
+  /**
+   * 拖拽状态改变事件
+   * @returns 拖拽状态改变事件
+   */
   onDraggingChanged() {
     return (event: { value: unknown }) => {
       const object = this.transformControls?.object;
@@ -171,13 +184,19 @@ class TransformControlsModules {
       }
     };
   }
-  // 变换改变事件
+  /**
+   * 变换改变事件
+   * @returns 变换改变事件
+   */
   onTransformChange() {
     return () => {
       store.sceneApi?.lightModules.updateHelper();
     };
   }
-  // 鼠标双击事件
+  /**
+   * 鼠标双击事件
+   * @returns 鼠标双击事件
+   */
   onMouseDblClick() {
     return (event: MouseEvent) => {
       const { camera, renderer, controls, scene, container } =
@@ -207,6 +226,9 @@ class TransformControlsModules {
       }
     };
   }
+  /**
+   * 清除当前选中对象
+   */
   clearCurrentSelection() {
     if (this.transformControls?.object) {
       this.transformControls.detach();
@@ -366,7 +388,9 @@ class TransformControlsModules {
       .start();
   }
 
-  // 销毁
+  /**
+   * 销毁
+   */
   destroy() {
     this.clearCurrentSelection();
     const { container } = store.sceneApi || {};

@@ -194,6 +194,11 @@ export const getSceneMaterialList = (scene: THREE.Scene): SceneModelItem[] => {
     .map(createModelData);
 };
 
+/**
+ * 获取网格类型
+ * @param mesh - 网格
+ * @returns 网格类型
+ */
 export const getMeshType = (mesh: THREE.Mesh) => {
   if (mesh instanceof THREE.Mesh) {
     return mesh.geometry.type;

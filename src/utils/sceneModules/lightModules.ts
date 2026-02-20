@@ -4,11 +4,17 @@ import { LIGHT_TYPE } from '@/enums/enum';
 
 const store = useSceneStore();
 
+/**
+ * @description 光源模块
+ */
 class LightModules {
   lightMap: Map<string, THREE.Light>;
   constructor() {
     this.lightMap = new Map();
   }
+  /**
+   * 初始化光源
+   */
   initLight() {
     if (!store.sceneApi?.scene) return;
     store.sceneApi.scene.traverse((child) => {
@@ -132,7 +138,6 @@ class LightModules {
 
     return light;
   }
-
   /**
    * 更新辅助线
    * @param uuid - 光源UUID
@@ -145,7 +150,6 @@ class LightModules {
       'uuid',
       light?.userData.helperUuid
     );
-
     if (!light || !helper) return;
     // 更新辅助线
     if (
