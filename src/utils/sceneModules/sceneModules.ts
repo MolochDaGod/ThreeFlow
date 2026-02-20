@@ -270,7 +270,6 @@ export const createModelFromResult = (
 export const getFilename = (ext: string): string =>
   `${new Date().toLocaleString()}.${ext}`.replace(/[:]/g, '-');
 
-
 /**
  * 设置模型位置和大小
  * @param model - 模型
