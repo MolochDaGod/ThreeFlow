@@ -37,7 +37,7 @@ import { IndexDbStoreName, IndexDbStoreKeyPath } from '@/enums/indexDb';
 import { createMaterial, disposeMaterial, disposeScene } from './utils';
 import type { IndexDbSceneData } from '@/types/indexDbTypes';
 import type { ActionParams } from '@/types/rightPanelTypes';
-import { FOG_COLOR_VALUE,  } from '@/config/propertyConfig';
+import { FOG_COLOR_VALUE, } from '@/config/propertyConfig';
 import {
   createModelFromResult,
   getMousePosition,
@@ -693,11 +693,11 @@ class renderScene {
       this.initPlaneGround(indexDbSceneData);
       // 7. 创建变换控制器
       this.transformControlsModules.createTransformControls();
-
+      // 8. 更新窗口大小
       this.onWindowResizes();
-      // 11. 清理临时对象
+      // 9. 清理临时对象
       parseCamera?.clear();
-      // 12. 初始化动画
+      // 10. 初始化动画
       this.animationModules.initializeAnimations();
       return Promise.resolve(true);
     } catch (error) {

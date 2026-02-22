@@ -70,6 +70,7 @@ onMounted(async () => {
   $eventBus?.on(MITT_ON_KEY.PAGE_LOADING, (value) => {
     loadingInfo.loading = value;
     loadingInfo.percentage = 0;
+    
   });
   $eventBus?.emit(MITT_ON_KEY.SCENE_LOADING, true);
 });
