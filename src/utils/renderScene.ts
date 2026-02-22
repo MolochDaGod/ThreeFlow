@@ -37,7 +37,7 @@ import { IndexDbStoreName, IndexDbStoreKeyPath } from '@/enums/indexDb';
 import { createMaterial, disposeMaterial, disposeScene } from './utils';
 import type { IndexDbSceneData } from '@/types/indexDbTypes';
 import type { ActionParams } from '@/types/rightPanelTypes';
-import { FOG_COLOR_VALUE,  } from '@/config/propertyConfig';
+import { FOG_COLOR_VALUE, } from '@/config/propertyConfig';
 import {
   createModelFromResult,
   getMousePosition,
@@ -419,7 +419,6 @@ class renderScene {
    */
   calculateMoveSpeed(): number {
     if (!this.camera) return 1;
-
     // 获取相机的缩放值
     const zoom = this.camera.zoom;
 
@@ -430,12 +429,10 @@ class renderScene {
 
     // 基础速度
     const baseSpeed = 0.1;
-
     // 根据缩放值和距离计算速度
     // 当缩放值越大（拉近）时，移动速度应该越小
     // 当距离越远时，移动速度应该越大
     const speed = baseSpeed * (distance / zoom);
-
     // 限制速度在合理范围内
     return Math.max(0.05, Math.min(speed, 2));
   }
@@ -445,10 +442,8 @@ class renderScene {
    */
   updatePointerLockControls() {
     if (!this.pointerLockControls) return;
-
     // 计算当前合适的移动速度
     this.moveSpeed = this.calculateMoveSpeed();
-
     // 根据按键状态移动相机
     if (this.keys.w) this.pointerLockControls.moveForward(this.moveSpeed);
     if (this.keys.s) this.pointerLockControls.moveForward(-this.moveSpeed);
@@ -461,10 +456,8 @@ class renderScene {
    */
   sceneAnimation(): void {
     if (!this.controls || !this.renderer || !this.scene || !this.camera) return;
-
     // 确保动画循环持续进行
     this.renderAnimation = requestAnimationFrame(() => this.sceneAnimation());
-
     if (this.loadingStatus || this.controls.enabled) {
       // 更新 TWEEN
       TWEEN.update();
@@ -700,11 +693,11 @@ class renderScene {
       this.initPlaneGround(indexDbSceneData);
       // 7. 创建变换控制器
       this.transformControlsModules.createTransformControls();
-
+      // 8. 更新窗口大小
       this.onWindowResizes();
-      // 11. 清理临时对象
+      // 9. 清理临时对象
       parseCamera?.clear();
-      // 12. 初始化动画
+      // 10. 初始化动画
       this.animationModules.initializeAnimations();
       return Promise.resolve(true);
     } catch (error) {

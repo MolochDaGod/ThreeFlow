@@ -28,7 +28,6 @@ const directiveLoading = (Vue: App) => {
       el.appendChild(loadingInstance.$el);
       el._loading_instance = loadingInstance;
     },
-
     updated(el: HTMLElement, binding: DirectiveBinding) {
       const loadingEl = el.querySelector(
         '#directive-loading-mark'
@@ -39,7 +38,6 @@ const directiveLoading = (Vue: App) => {
       el.style.position = binding.value ? 'relative' : '';
       loadingEl.style.display = binding.value ? 'block' : 'none';
     },
-
     unmounted(el: HTMLElement) {
       if (el._loading_instance) {(
           el._loading_instance as ComponentPublicInstance & {
