@@ -226,9 +226,10 @@ const { meshProperty } = defineProps({
   },
 });
 
-
 // 当前选中的材质
-const currentTransformMaterialUuid = computed(() =>store.currentTransformMaterialUuid);
+const currentTransformMaterialUuid = computed(
+  () => store.currentTransformMaterialUuid
+);
 
 // 当前灯光
 const currentLight = computed(() => {

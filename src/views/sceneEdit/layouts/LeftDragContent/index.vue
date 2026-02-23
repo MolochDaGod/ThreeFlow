@@ -56,7 +56,6 @@
               </div>
             </div>
           </el-scrollbar>
-
           <!-- 灯光 -->
           <el-scrollbar
             max-height="calc(100vh - 215px)"

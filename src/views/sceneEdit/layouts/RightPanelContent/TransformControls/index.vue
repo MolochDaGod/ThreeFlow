@@ -31,6 +31,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useSceneStore } from '@/store/sceneEditStore';
 import { TRANSFORM_CONTROLS_TYPE } from '@/enums/enum';
+
 const transformTypeList = [
   {
     type: TRANSFORM_CONTROLS_TYPE.Translate,
@@ -48,6 +49,7 @@ const transformTypeList = [
     tooltip: '缩放（快捷键：R）',
   },
 ];
+
 const transformKeyMap = {
   w: TRANSFORM_CONTROLS_TYPE.Translate,
   e: TRANSFORM_CONTROLS_TYPE.Rotate,

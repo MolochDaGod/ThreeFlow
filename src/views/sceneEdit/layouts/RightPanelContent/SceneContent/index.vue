@@ -98,6 +98,7 @@ import GeometryProperty from "./modules/GeometryProperty/index.vue";
 import AnimationsProperty from "./modules/AnimationsProperty/index.vue";
 import type { MaterialData } from "@/types/rightPanelTypes";
 import { SCENE_OBJECT_NAME, TAB_TYPE } from "@/enums/enum";
+
 const store = useSceneStore();
 
 // 格式化场景数据
@@ -117,13 +118,10 @@ const formattedSceneData = computed(() => {
   }
   return [];
 });
-const transformMaterialRandomId = computed(() => {
-  return store.transformMaterialRandomId;
-});
-const currentTransformMaterialUuid = computed(() => {
-  return store.currentTransformMaterialUuid;
-});
-
+// 变换材质随机id
+const transformMaterialRandomId = computed(() => store.transformMaterialRandomId);
+// 当前变换材质uuid
+const currentTransformMaterialUuid = computed(() => store.currentTransformMaterialUuid);
 // 材质属性
 const meshProperty = ref<TransformMaterial | null>(null);
 // 滚动条
@@ -179,7 +177,7 @@ watch(transformMaterialRandomId, () => {
   updateCurrentMaterial(material);
 });
 
-
+// 动态设置当前tab
 const availableTabs = computed(() => {
   const tabs = [];
   if (meshProperty.value) tabs.push(TAB_TYPE.Property);

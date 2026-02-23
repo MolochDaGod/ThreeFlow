@@ -54,6 +54,7 @@ const store = useSceneStore();
 const { geometryParameters } = defineProps<{
   geometryParameters: GeometryParameters;
 }>();
+
 // 几何体参数列表
 const geometryParametersList = computed(() => {
   const params = geometryParameters.parameters;
@@ -74,6 +75,7 @@ const geometryParametersList = computed(() => {
       };
     });
 });
+
 // 更新几何体参数
 const updateGeometryParameter = (
   item: { labelKey: string },
@@ -85,6 +87,7 @@ const updateGeometryParameter = (
     geometryParameters.uuid
   );
 };
+
 </script>
 
 <style lang="scss" scoped src="./index.scss"></style>
