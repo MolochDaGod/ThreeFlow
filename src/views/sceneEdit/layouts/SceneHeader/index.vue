@@ -73,7 +73,7 @@ import { useSceneStore } from "@/store/sceneEditStore";
 import { useIndexDbStore } from "@/store/indexDbStore";
 import { IndexDbStoreName, IndexDbStoreKeyPath } from "@/enums/indexDb";
 import { debounce, cloneDeep } from "lodash-es";
-import { checkPageUsageTime, disposeScene } from "@/utils/utils";
+import { disposeScene } from "@/utils/utils";
 import { ref, onUnmounted, toRaw } from "vue";
 import Loading from "@/components/Loading/index.vue";
 import { ElMessage, ElMessageBox } from "element-plus";

@@ -68,6 +68,7 @@ defineProps<{
 
 const store = useSceneStore();
 
+// 动画参数
 const actionParams = reactive<ActionParams>({
   loop: THREE.LoopRepeat,
   paused: false,
@@ -121,7 +122,7 @@ const chooseAnimation = async (item: THREE.AnimationClip) => {
     store.sceneApi?.animationModules?.playAnimation(item, currentModel.value);
   }
 };
-
+// 更新动画参数
 const updateActionParams = () => {
   store.sceneApi?.animationModules?.updateAnimationParams(
     actionParams,

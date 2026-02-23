@@ -19,7 +19,11 @@
         </div>
       </div>
       <!-- 添加材质属性循环 -->
-      <div v-for="item in editablePropertiesList" :key="item.key" class="material-item">
+      <div
+        v-for="item in editablePropertiesList"
+        :key="item.key"
+        class="material-item"
+      >
         <div class="material-item-label">{{ item.label }}</div>
         <div class="material-item-value">
           <template v-if="item.valueType === 'boolean'">
@@ -41,7 +45,9 @@
               </template>
             </el-space>
           </template>
-          <template v-else-if="['blending', 'combine', 'side'].includes(item.key)">
+          <template
+            v-else-if="['blending', 'combine', 'side'].includes(item.key)"
+          >
             <el-select
               v-if="item.key === 'side'"
               v-model="item.value"
@@ -61,8 +67,14 @@
             >
               <el-option label="NoBlending" :value="THREE.NoBlending" />
               <el-option label="NormalBlending" :value="THREE.NormalBlending" />
-              <el-option label="AdditiveBlending" :value="THREE.AdditiveBlending" />
-              <el-option label="MultiplyBlending" :value="THREE.MultiplyBlending" />
+              <el-option
+                label="AdditiveBlending"
+                :value="THREE.AdditiveBlending"
+              />
+              <el-option
+                label="MultiplyBlending"
+                :value="THREE.MultiplyBlending"
+              />
               <el-option label="CustomBlending" :value="THREE.CustomBlending" />
             </el-select>
             <el-select
@@ -71,7 +83,10 @@
               style="width: 180px"
               @change="updateMeshMaterialProperty(item.key, $event)"
             >
-              <el-option label="MultiplyOperation" :value="THREE.MultiplyOperation" />
+              <el-option
+                label="MultiplyOperation"
+                :value="THREE.MultiplyOperation"
+              />
               <el-option label="MixOperation" :value="THREE.MixOperation" />
               <el-option label="AddOperation" :value="THREE.AddOperation" />
             </el-select>
@@ -91,7 +106,9 @@
                 v-if="item.key === 'emissive'"
                 style="width: 100px"
                 v-model="meshMaterial.emissiveIntensity"
-                @change="updateMeshMaterialProperty('emissiveIntensity', $event)"
+                @change="
+                  updateMeshMaterialProperty('emissiveIntensity', $event)
+                "
               />
             </el-space>
           </template>
@@ -127,7 +144,9 @@
                   style="width: 100px"
                   :min="0"
                   v-model="meshMaterial.lightMapIntensity"
-                  @change="updateMeshMaterialProperty('lightMapIntensity', $event)"
+                  @change="
+                    updateMeshMaterialProperty('lightMapIntensity', $event)
+                  "
                 />
               </template>
             </el-space>
@@ -258,10 +277,7 @@ const handleChangeMaterialType = (type: string) => {
 const updateMeshMaterialProperty = <T,>(key: string, value: T) => {
   const { sceneApi } = store;
   const uuid = store.currentTransformMaterialUuid;
-  const mesh = sceneApi?.scene?.getObjectByProperty(
-    'uuid',
-    uuid
-  ) as THREE.Mesh;
+  const mesh = sceneApi?.scene?.getObjectByProperty('uuid', uuid) as THREE.Mesh;
 
   if (mesh && mesh.material) {
     if (verifyValueColor(key)) {
@@ -280,23 +296,17 @@ const updateMeshMaterialProperty = <T,>(key: string, value: T) => {
 const updateMeshMaterialMap = (key: string, value: EditableProperty) => {
   const { sceneApi } = store;
   const uuid = store.currentTransformMaterialUuid;
-  const mesh = sceneApi?.scene?.getObjectByProperty(
-    'uuid',
-    uuid
-  ) as THREE.Mesh;
+  const mesh = sceneApi?.scene?.getObjectByProperty('uuid', uuid) as THREE.Mesh;
   if (mesh && mesh.material) {
     const { visible, texture } = value.customMapData;
     const oldMaterial = mesh.material;
-    const newMaterial = (oldMaterial as unknown as THREE.Material).clone();
+    const newMaterial = (oldMaterial as THREE.Material).clone();
 
     (newMaterial as unknown as Record<string, THREE.Texture | null>)[key] =
       visible ? texture : null;
     mesh.material = newMaterial;
     // 标记材质需要更新
     (mesh.material as THREE.Material).needsUpdate = true;
-
-    // 释放材质资源
-    disposeMaterial(mesh);
   }
 };
 
@@ -335,7 +345,7 @@ const uploadMaterialMapFile = async (
       }
       // 如果存在旧的贴图，释放它
       if (item.customMapData.texture) {
-        (item.customMapData.texture as THREE.Texture).dispose();
+        item.customMapData.texture.dispose();
       }
       // 更新贴图数据
       item.customMapData.image = generateMaterialMaps(textures);
@@ -355,6 +365,7 @@ const getNewMaterialPropertyList = () => {
     'uuid',
     store.currentTransformMaterialUuid
   ) as THREE.Mesh;
+
   if (!mesh) return;
   editablePropertiesList.value = generateEditablePropertiesList(
     mesh.material as unknown as MaterialData
