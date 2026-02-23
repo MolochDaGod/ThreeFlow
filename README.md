@@ -65,6 +65,11 @@ ThreeFlow:一个基于 `Three.js+Vue3+Vite+Typescript `实现的3D场景编辑�
 **[在线地址](http://threeflowx.cn/edit/)**:<http://threeflowx.cn/edit/>
 <!-- End of Selection -->
 
+###  项目界面
+
+![输入图片说明](public/image/demo-1.png)
+![输入图片说明](public/image/demo-2.png)
+
 ### 👷 项目目录结构介绍
 
 ### 1. 入口文件
@@ -154,6 +159,8 @@ TypeScript 类型定义文件：
 - renderScene.ts : **核心文件**，Three.js 场景渲染逻辑封装（初始化、渲染循环、事件监听等）
 - sceneModules/ : 场景功能模块（灯光、动画、变换控制等）
 - utils.ts : 通用辅助函数
+
+
 
 ### 12. /views 目录
 
