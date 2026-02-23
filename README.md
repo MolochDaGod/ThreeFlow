@@ -155,6 +155,11 @@ TypeScript 类型定义文件：
 - sceneModules/ : 场景功能模块（灯光、动画、变换控制等）
 - utils.ts : 通用辅助函数
 
+###  项目界面
+
+![输入图片说明](public/image/demo-1.png)
+![输入图片说明](public/image/demo-2.png)
+
 ### 12. /views 目录
 
 页面视图文件：
