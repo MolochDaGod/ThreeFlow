@@ -74,7 +74,7 @@ import { useIndexDbStore } from "@/store/indexDbStore";
 import { IndexDbStoreName, IndexDbStoreKeyPath } from "@/enums/indexDb";
 import { debounce, cloneDeep } from "lodash-es";
 import { disposeScene } from "@/utils/utils";
-import { ref, onUnmounted, toRaw } from "vue";
+import { ref, onUnmounted, toRaw ,toValue} from "vue";
 import Loading from "@/components/Loading/index.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import * as THREE from "three";
@@ -90,7 +90,7 @@ const loadingText = ref("保存场景中...");
 const loadingTimeout = ref<NodeJS.Timeout>();
 
 onUnmounted(() => {
-  clearTimeout(loadingTimeout.value);
+  clearTimeout(toValue(loadingTimeout));
 });
 
 // 新增场景
@@ -114,13 +114,13 @@ const debounceSaveScene = debounce(async () => {
   loading.value = true;
   loadingTimeout.value = setTimeout(async () => {
     try {
-      clearTimeout(loadingTimeout.value);
+      clearTimeout(toValue(loadingTimeout));
       await saveSceneIndexDb();
       loading.value = false;
       ElMessage.success("保存场景成功");
     } catch {
       loading.value = false;
-      clearTimeout(loadingTimeout.value);
+      clearTimeout(toValue(loadingTimeout));
       ElMessage.error("保存场景失败");
     }
   }, 1000);
@@ -226,12 +226,12 @@ const debounceExportScene = debounce(async () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       loading.value = false;
-      clearTimeout(loadingTimeout.value);
+      clearTimeout(toValue(loadingTimeout));
       ElMessage.success("导出场景成功");
     } catch {
       ElMessage.error("导出场景失败");
       loading.value = false;
-      clearTimeout(loadingTimeout.value);
+      clearTimeout(toValue(loadingTimeout));
     }
   }, 1000);
 }, 1000);
@@ -295,12 +295,12 @@ const debounceExportModel = debounce(async (type: ExportType) => {
       if (!store.sceneApi?.scene) return;
       exportSceneModel(type, store.sceneApi?.scene);
       loading.value = false;
-      clearTimeout(loadingTimeout.value);
+      clearTimeout(toValue(loadingTimeout));
       ElMessage.success("导出模型成功");
     } catch (error) {
       ElMessage.error("导出模型失败");
       loading.value = false;
-      clearTimeout(loadingTimeout.value);
+      clearTimeout(toValue(loadingTimeout));
     }
   }, 1000);
 }, 1000);

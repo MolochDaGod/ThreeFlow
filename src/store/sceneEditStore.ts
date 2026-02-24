@@ -13,6 +13,7 @@ type ModelStoreType = {
 };
 
 export const useSceneStore = defineStore('modelStore', (): ModelStoreType => {
+  
   const sceneApi = ref<renderModel | null>(null) as Ref<renderModel | null>;
 
   const currentTransformMaterialUuid = ref<string | null>(null);

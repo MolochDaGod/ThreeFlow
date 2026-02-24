@@ -57,7 +57,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, reactive } from 'vue';
+import { computed, onMounted, shallowReactive } from 'vue';
 import * as THREE from 'three';
 import { useSceneStore } from '@/store/sceneEditStore';
 import type { ActionParams } from '@/types/rightPanelTypes';
@@ -69,7 +69,7 @@ defineProps<{
 const store = useSceneStore();
 
 // 动画参数
-const actionParams = reactive<ActionParams>({
+const actionParams = shallowReactive<ActionParams>({
   loop: THREE.LoopRepeat,
   paused: false,
   weight: 1,

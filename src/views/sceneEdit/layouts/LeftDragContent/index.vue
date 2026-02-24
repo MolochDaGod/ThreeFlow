@@ -128,12 +128,10 @@ import { DRAG_MODEL_TYPE } from '@/enums/enum';
 
 const emit = defineEmits(['drag-model-start', 'choose-outside-file']);
 
-const uploadRef = ref<InstanceType<typeof ElUpload>>();
-const isCollapsed = ref<boolean>(false);
-
 const activeTabKey = ref<DRAG_MODEL_TYPE>(DRAG_MODEL_TYPE.Model);
 
 // 折叠
+const isCollapsed = ref<boolean>(false);
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
 };
@@ -147,7 +145,9 @@ const onDragModelStart = (model: DragModelType) => {
 const chooseOutsideFile = async (file: UploadFile) => {
   emit('choose-outside-file', file);
 };
+
 // 选择外部模型
+const uploadRef = ref<InstanceType<typeof ElUpload>>();
 const changeFile = () => {
   const input = uploadRef?.value?.$el.querySelector('input');
   if (input instanceof HTMLInputElement) input.click();

@@ -200,7 +200,7 @@
   </el-scrollbar>
 </template>
 <script setup lang="ts">
-import { computed, onUnmounted, ref, type PropType } from 'vue';
+import { computed, onUnmounted, shallowRef, type PropType } from 'vue';
 import * as THREE from 'three';
 import {
   baseProperties,
@@ -249,7 +249,7 @@ const currentLight = computed(() => {
   return { light, helper };
 });
 
-const lightColor = ref({
+const lightColor = shallowRef({
   color: new THREE.Color(meshProperty.color).getStyle(),
   groundColor: new THREE.Color(meshProperty.groundColor).getStyle(),
 });
