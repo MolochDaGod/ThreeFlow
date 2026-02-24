@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, type Ref } from 'vue';
+import { ref, shallowRef, type Ref } from 'vue';
 import type renderModel from '@/utils/renderScene';
 import { generateUniqueId } from '@/utils/utils';
 
@@ -13,7 +13,8 @@ type ModelStoreType = {
 };
 
 export const useSceneStore = defineStore('modelStore', (): ModelStoreType => {
-  const sceneApi = ref<renderModel | null>(null) as Ref<renderModel | null>;
+  
+  const sceneApi = shallowRef<renderModel | null>(null) as Ref<renderModel | null>;
 
   const currentTransformMaterialUuid = ref<string | null>(null);
   /**

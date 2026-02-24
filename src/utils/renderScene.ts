@@ -37,7 +37,7 @@ import { IndexDbStoreName, IndexDbStoreKeyPath } from '@/enums/indexDb';
 import { createMaterial, disposeMaterial, disposeScene } from './utils';
 import type { IndexDbSceneData } from '@/types/indexDbTypes';
 import type { ActionParams } from '@/types/rightPanelTypes';
-import { FOG_COLOR_VALUE, } from '@/config/propertyConfig';
+import { FOG_COLOR_VALUE } from '@/config/propertyConfig';
 import {
   createModelFromResult,
   getMousePosition,
@@ -137,9 +137,9 @@ class renderScene {
     };
     this.modelProgressCallback = null;
     this.onWindowResizesListener = null;
-    this.onKeyDownListener = () => { };
-    this.onKeyUpListener = () => { };
-    this.onPointerUnLockListener = () => { };
+    this.onKeyDownListener = () => {};
+    this.onKeyUpListener = () => {};
+    this.onPointerUnLockListener = () => {};
     this.renderAnimation = null;
     this.loadingStatus = true;
     this.boxHelper = null;
@@ -261,7 +261,8 @@ class renderScene {
       map.colorSpace = THREE.SRGBColorSpace;
       // 可选：加载法线贴图
       const normalMap = await new THREE.TextureLoader().loadAsync(
-        new URL(`../assets/textures/textures-normal-5.png`, import.meta.url).href
+        new URL(`../assets/textures/textures-normal-5.png`, import.meta.url)
+          .href
       );
       const gg = new THREE.PlaneGeometry(2000, 2000);
       const gm = new THREE.MeshPhysicalMaterial({

@@ -13,7 +13,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, onUnmounted, reactive, getCurrentInstance } from 'vue';
+import { onMounted, onUnmounted, shallowReactive, getCurrentInstance } from 'vue';
 import { LeftDragContent, RightPanelContent, SceneHeader } from './layouts';
 import { Loading } from '@/components/index';
 import type {
@@ -33,14 +33,14 @@ const indexDbStore = useIndexDbStore();
 const { $eventBus } = getCurrentInstance()?.proxy || {};
 
 // 当前拖拽模型
-const currentDrag = reactive<CurrentDragModelData>({
+const currentDrag = shallowReactive<CurrentDragModelData>({
   clientX: 0,
   clientY: 0,
   modelData: null,
   modelType: '',
 });
 
-const loadingInfo = reactive({
+const loadingInfo = shallowReactive({
   percentage: 0,
   loading: false,
   pageLoading: false,

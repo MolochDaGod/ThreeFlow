@@ -58,6 +58,7 @@ const transformKeyMap = {
   E: TRANSFORM_CONTROLS_TYPE.Rotate,
   R: TRANSFORM_CONTROLS_TYPE.Scale,
 };
+
 const store = useSceneStore();
 
 // 当前视角

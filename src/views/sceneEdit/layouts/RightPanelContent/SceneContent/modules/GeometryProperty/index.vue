@@ -49,6 +49,7 @@ import { GEOMETRY_PARAMETERS } from '@/enums/enum';
 import { GEOMETRY_PARAMETER_LIMITS } from '@/config/propertyConfig';
 import { useSceneStore } from '@/store/sceneEditStore';
 import { computed } from 'vue';
+
 const store = useSceneStore();
 
 const { geometryParameters } = defineProps<{
