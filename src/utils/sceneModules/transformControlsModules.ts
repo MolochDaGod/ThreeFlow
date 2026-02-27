@@ -12,16 +12,26 @@ import type { SelectLightType } from '@/types/renderModelTypes';
 const store = useSceneStore();
 
 class TransformControlsModules {
+  // 变换控制器
   transformControls: TransformControls | null = null;
+  // 变换控制器辅助对象
   transformControlsHelper: THREE.Object3D | null = null;
+  // 拖拽状态改变事件
   draggingChangedHandler: ((event: { value: unknown }) => void) | null = null;
+  // 变换改变事件
   transformChangeHandler: () => void;
+  // 鼠标单击事件
   onMouseClickListener: ((event: MouseEvent) => void) | null = null;
+  // 鼠标双击事件
   onMouseDblClickListener: ((event: MouseEvent) => void) | null = null;
+  // 射线投射器
   raycaster = new THREE.Raycaster();
+  // 鼠标位置
   mouse = new THREE.Vector2();
   currentSelectedObject: THREE.Object3D | null = null;
+  // 鼠标按下位置
   mouseDownPosition = new THREE.Vector2();
+  // 是否鼠标按下
   isMouseDown = false;
   constructor() {
     this.transformControls = null;
