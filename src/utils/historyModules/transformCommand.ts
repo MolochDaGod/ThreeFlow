@@ -22,7 +22,6 @@ export class TransformCommand extends Command {
   ) {
     super('Transform Object');
     this.updatable = true;
-
     this.object = object;
     this.oldPosition = object.position.clone();
     this.oldRotation = object.rotation.clone();
@@ -41,7 +40,9 @@ export class TransformCommand extends Command {
       this.originalTargetPosition = null;
     }
   }
-
+/**
+ * 执行变换操作
+ */
   execute() {
     this.object.position.copy(this.newPosition);
     this.object.rotation.copy(this.newRotation);
@@ -60,6 +61,9 @@ export class TransformCommand extends Command {
     }
   }
 
+  /**
+   * 撤销变换操作
+   */
   undo() {
     this.object.position.copy(this.oldPosition);
     this.object.rotation.copy(this.oldRotation);
@@ -77,6 +81,7 @@ export class TransformCommand extends Command {
       store.sceneApi?.lightModules.updateHelper(this.object.uuid);
     }
   }
+
 
   update(command: TransformCommand) {
     this.newPosition.copy(command.newPosition);

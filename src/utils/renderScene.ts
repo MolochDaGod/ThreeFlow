@@ -37,13 +37,13 @@ import { IndexDbStoreName, IndexDbStoreKeyPath } from '@/enums/indexDb';
 import { createMaterial, disposeMaterial, disposeScene } from './utils';
 import type { IndexDbSceneData } from '@/types/indexDbTypes';
 import type { ActionParams } from '@/types/rightPanelTypes';
-import { FOG_COLOR_VALUE } from '@/config/propertyConfig';
+import { FOG_COLOR_VALUE } from '@/config/constant';
+import type { LIGHT_TYPE, MODEL_TYPE } from '@/enums/enum';
 import {
   createModelFromResult,
   getMousePosition,
   setModelPositionSize,
-} from './sceneModules/sceneModules';
-import type { LIGHT_TYPE, MODEL_TYPE } from '@/enums/enum';
+} from './sceneModules';
 
 const store = useSceneStore();
 

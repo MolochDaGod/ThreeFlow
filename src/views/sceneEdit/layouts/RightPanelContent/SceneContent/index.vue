@@ -77,7 +77,6 @@
         <el-tab-pane label="动画" :name="TAB_TYPE.Animation" v-if="animationsList.length">
           <AnimationsProperty :animationsList="animationsList" />
         </el-tab-pane>
-          
       </el-tabs>
     </div>
   </div>
@@ -87,16 +86,14 @@
 import { useSceneStore } from "@/store/sceneEditStore";
 import { getSceneMaterialList, scrollToTreeNode } from "@/utils/utils";
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import type { GeometryParameters, MaterialNode } from "@/types/rightPanelTypes";
+import type { GeometryParameters, MaterialNode, MaterialData ,TransformMaterial} from "@/types/rightPanelTypes";
 import { ElMessage } from "element-plus";
 import type { ElScrollbar, ElTree } from "element-plus";
 import * as THREE from "three";
-import type { TransformMaterial } from "@/types/rightPanelTypes";
 import MaterialProperty from "./modules/MaterialProperty/index.vue";
 import MeshProperty from "./modules/MeshProperty/index.vue";
 import GeometryProperty from "./modules/GeometryProperty/index.vue";
 import AnimationsProperty from "./modules/AnimationsProperty/index.vue";
-import type { MaterialData } from "@/types/rightPanelTypes";
 import { SCENE_OBJECT_NAME, TAB_TYPE } from "@/enums/enum";
 
 const store = useSceneStore();
@@ -221,7 +218,7 @@ const updateCurrentMaterial = async (mesh: THREE.Mesh) => {
     geometryParameters.parameters = null;
     animationsList.value = [];
     // 材质
-    meshMaterial.value = { ...((mesh.material as unknown) as MaterialData) };
+    meshMaterial.value = { ...(mesh.material as MaterialData) };
     await materialPropertyRef.value?.getNewMaterialPropertyList();
     return;
   }

@@ -15,7 +15,7 @@ import {
   FOG_DENSITY_VALUE,
   FOG_FAR_VALUE,
   FOG_NEAR_VALUE,
-} from '@/config/propertyConfig';
+} from '@/config/constant';
 import { cloneDeep } from 'lodash-es';
 
 const store = useSceneStore();
@@ -397,7 +397,9 @@ export const exportSceneModel = async (
 
       case MODEL_TYPE.STL:
         saveFile(
-          new STLExporter().parse(modelGroup, { binary: true }) as unknown as BlobPart,
+          new STLExporter().parse(modelGroup, {
+            binary: true,
+          }) as unknown as BlobPart,
           'stl',
           'application/octet-stream'
         );
@@ -406,7 +408,8 @@ export const exportSceneModel = async (
       case MODEL_TYPE.USDZ:
         new USDZExporter().parse(
           modelGroup,
-          (usdz) => saveFile(usdz as unknown as BlobPart, 'usdz', 'model/vnd.usdz+zip'),
+          (usdz) =>
+            saveFile(usdz as unknown as BlobPart, 'usdz', 'model/vnd.usdz+zip'),
           (err) => ElMessage.error(err as string)
         );
         break;

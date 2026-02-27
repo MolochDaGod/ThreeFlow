@@ -56,7 +56,6 @@ export default class IndexDBUtil {
         reject(new Error('数据库未初始化'));
         return;
       }
-
       const transaction = this.db.transaction([storeName], 'readwrite');
       const store = transaction.objectStore(storeName);
       const request = store.add(data);

@@ -79,7 +79,7 @@ import Loading from "@/components/Loading/index.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import * as THREE from "three";
 import type { ExportType } from "@/types/rightPanelTypes";
-import { exportSceneModel } from "@/utils/sceneModules/sceneModules";
+import { exportSceneModel } from "@/utils/sceneModules";
 import { EXPORT_TYPE } from "@/enums/enum";
 
 const store = useSceneStore();
