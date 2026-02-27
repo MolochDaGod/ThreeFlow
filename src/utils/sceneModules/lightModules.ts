@@ -8,6 +8,7 @@ const store = useSceneStore();
  * @description 光源模块
  */
 class LightModules {
+  // 光源映射
   lightMap: Map<string, THREE.Light>;
   constructor() {
     this.lightMap = new Map();
