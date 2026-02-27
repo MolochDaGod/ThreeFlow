@@ -185,7 +185,7 @@
 import { onMounted, ref } from 'vue';
 import { materialTypeList, PREDEFINE_COLORS } from '@/config/propertyConfig';
 import { MATERIAL_DATA_ENUM } from '@/enums/enum';
-import type { EditableProperty, MaterialData } from '@/types/rightPanelTypes';
+import type { EditableProperty, MaterialData, EditableValue } from '@/types/rightPanelTypes';
 import { useSceneStore } from '@/store/sceneEditStore';
 import * as THREE from 'three';
 import {
@@ -217,27 +217,33 @@ const editablePropertiesList = ref<EditableProperty[]>([]);
 // 生成可编辑的属性列表
 const generateEditablePropertiesList = (material: MaterialData) => {
   if (!material) return [];
-  const newMaterial = (material as unknown as THREE.Material).clone();
-  const propertyKey = Object.entries(newMaterial);
-  const hidePropertyKey = ['clearcoat', 'iridescence', 'sheen'];
+  const propertyKey = Object.entries(material);
+  const hidePropertyKey: (keyof MaterialData)[] = ['clearcoat', 'iridescence', 'sheen'];
 
   const result = propertyKey
     .filter(([key]) => key in MATERIAL_DATA_ENUM)
     .map(([key, value]) => {
-      let generateValue = value;
+      let generateValue: EditableValue = value;
       // 颜色和发光颜色需要转换为十六进制
       if (verifyValueColor(key)) {
-        generateValue = new THREE.Color(value as unknown as number).getStyle();
+        if (value instanceof THREE.Color) {
+           generateValue = value.getStyle();
+        } else if (typeof value === 'number') {
+           generateValue = new THREE.Color(value).getStyle();
+        } else if (typeof value === 'string') {
+           generateValue = value;
+        }
       }
       let customMapData = {};
       // 如果是贴图数据
       if (verifyValueMap(key)) {
+        const texture = generateValue as THREE.Texture | null;
         customMapData = {
-          visible: generateValue ? true : false,
-          texture: generateValue,
-          image: cloneDeep(
-            generateMaterialMaps(generateValue as unknown as THREE.Texture)
-          ),
+          visible: !!texture,
+          texture: texture,
+          image: texture ? cloneDeep(
+            generateMaterialMaps(texture)
+          ) : null,
         };
       }
       return {
@@ -253,7 +259,7 @@ const generateEditablePropertiesList = (material: MaterialData) => {
     return {
       label: MATERIAL_DATA_ENUM[key as keyof typeof MATERIAL_DATA_ENUM],
       key: `_${key}`, // 添加下划线前缀以区分
-      value: (newMaterial as unknown as Record<string, number>)[key] || 0,
+      value: (material[key] as number) || 0,
       valueType: 'number',
       customMapData: {},
     };
@@ -268,7 +274,7 @@ const handleChangeMaterialType = (type: string) => {
   if (mesh) {
     emit('updateMeshMaterial', mesh);
     editablePropertiesList.value = generateEditablePropertiesList(
-      mesh.material as unknown as MaterialData
+      mesh.material as MaterialData
     );
   }
 };
@@ -303,7 +309,7 @@ const updateMeshMaterialMap = (key: string, value: EditableProperty) => {
     const newMaterial = (oldMaterial as THREE.Material).clone();
 
     (newMaterial as unknown as Record<string, THREE.Texture | null>)[key] =
-      visible ? texture : null;
+      visible ? (texture ?? null) : null;
     mesh.material = newMaterial;
     // 标记材质需要更新
     (mesh.material as THREE.Material).needsUpdate = true;

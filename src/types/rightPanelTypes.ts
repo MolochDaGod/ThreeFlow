@@ -8,11 +8,11 @@ export interface MaterialNode {
 export type ParametersType = Record<string, number | string | boolean> | null;
 
 export interface TransformMaterial {
-  // Mesh properties
+  // Mesh 属性
   geometry?: THREE.BufferGeometry;
   material?: THREE.Material | THREE.Material[];
 
-  // Light properties
+  // Light 属性
   color?: THREE.Color;
   intensity?: number;
   distance?: number;
@@ -20,7 +20,7 @@ export interface TransformMaterial {
   penumbra?: number;
   decay?: number;
   power?: number;
-  // Common properties
+  // Common 属性
   type: string;
   name: string;
   visible: boolean;
@@ -31,20 +31,20 @@ export interface TransformMaterial {
   receiveShadow: boolean;
   frustumCulled: boolean;
 
-  // Group properties
+  // Group 子对象
   children?: THREE.Object3D[];
 
-  // Light specific properties
+  // Light 特定属性
   shadow?: THREE.LightShadow & THREE.SpotLightShadow;
   target?: THREE.Object3D;
 
-  // SkinnedMesh properties
+  // SkinnedMesh 属性
   skeleton?: THREE.Skeleton;
   bindMode?: string;
   bindMatrix?: THREE.Matrix4;
   bindMatrixInverse?: THREE.Matrix4;
 
-  // Camera properties
+  // Camera 属性
   fov?: number;
   aspect?: number;
   near?: number;
@@ -52,17 +52,17 @@ export interface TransformMaterial {
   zoom?: number;
 
   isLight?: boolean;
-  // SpotLight specific
+  // SpotLight 特定属性
   isSpotLight?: boolean;
   map?: THREE.Texture;
 
-  // DirectionalLight specific
+  // DirectionalLight 特定属性
   isDirectionalLight?: boolean;
 
-  // PointLight specific
+  // PointLight 特定属性
   isPointLight?: boolean;
 
-  // HemisphereLight specific
+  // HemisphereLight 特定属性
   isHemisphereLight?: boolean;
   groundColor?: THREE.Color;
   userData?: {
@@ -70,7 +70,7 @@ export interface TransformMaterial {
   };
   isPoints?: boolean;
   isSprite?: boolean;
-  // Methods
+  // 方法
   updateMatrix?: () => void;
   updateMatrixWorld?: (force?: boolean) => void;
   lookAt?: (vector: THREE.Vector3 | number, y?: number, z?: number) => void;
@@ -176,13 +176,119 @@ export type MaterialPropertyType =
   | 'vertexColors'
   | 'fog'
   | 'normalMap';
-export interface MaterialData {
-  type: string;
-  [key: string]: boolean | number | string;
-}
 
 import type { EFFECT_METHOD, FOG_TYPE ,TEXT_MATERIAL_TYPE} from '@/enums/enum';
 import * as THREE from 'three';
+
+/**
+ * 材质数据接口
+ * 包含所有支持的材质属性，提供强类型支持
+ */
+export interface MaterialData {
+  // 基础属性
+  type: string;
+  uuid?: string;
+  name?: string;
+  color?: THREE.Color | string | number;
+  transparent?: boolean;
+  opacity?: number;
+  visible?: boolean;
+  side?: THREE.Side;
+  alphaTest?: number;
+  
+  // 贴图相关
+  map?: THREE.Texture | null;
+  normalMap?: THREE.Texture | null;
+  bumpMap?: THREE.Texture | null;
+  displacementMap?: THREE.Texture | null;
+  roughnessMap?: THREE.Texture | null;
+  metalnessMap?: THREE.Texture | null;
+  alphaMap?: THREE.Texture | null;
+  aoMap?: THREE.Texture | null;
+  emissiveMap?: THREE.Texture | null;
+  iridescenceMap?: THREE.Texture | null;
+  lightMap?: THREE.Texture | null;
+  envMap?: THREE.Texture | null;
+  gradientMap?: THREE.Texture | null;
+  clearcoatMap?: THREE.Texture | null;
+  clearcoatRoughnessMap?: THREE.Texture | null;
+  sheenMap?: THREE.Texture | null;
+  transmissionMap?: THREE.Texture | null;
+  matcap?: THREE.Texture | null;
+
+  // 物理/标准材质属性
+  metalness?: number;
+  roughness?: number;
+  emissive?: THREE.Color | string | number;
+  emissiveIntensity?: number;
+  aoMapIntensity?: number;
+  envMapIntensity?: number;
+  lightMapIntensity?: number;
+  bumpScale?: number;
+  normalScale?: THREE.Vector2;
+  displacementScale?: number;
+  displacementBias?: number;
+
+  // PBR 高级属性
+  clearcoat?: number;
+  clearcoatRoughness?: number;
+  transmission?: number;
+  transmissionRoughness?: number;
+  ior?: number;
+  reflectivity?: number;
+  sheen?: number;
+  sheenRoughness?: number;
+  sheenColor?: THREE.Color | string | number;
+  iridescence?: number;
+  iridescenceIOR?: number;
+  thickness?: number;
+  attenuationDistance?: number;
+  attenuationColor?: THREE.Color | string | number;
+
+  // Phong/Lambert 材质属性
+  specular?: THREE.Color | string | number;
+  shininess?: number;
+  combine?: THREE.Combine;
+
+  // 线条/点材质属性
+  linewidth?: number;
+  dashSize?: number;
+  gapSize?: number;
+  scale?: number; // LineDashedMaterial
+  size?: number;
+  sizeAttenuation?: boolean;
+
+  // Sprite 材质属性
+  rotation?: number;
+
+  // 通用渲染属性
+  wireframe?: boolean;
+  wireframeLinewidth?: number;
+  flatShading?: boolean;
+  depthTest?: boolean;
+  depthWrite?: boolean;
+  depthPacking?: number; // MeshDepthMaterial
+  blending?: THREE.Blending;
+  
+  // 动画/变形
+  morphTargets?: boolean;
+  morphNormals?: boolean;
+  
+  // 其他
+  vertexColors?: boolean;
+  fog?: boolean;
+  shadowSide?: THREE.Side;
+  
+  // ShaderMaterial
+  uniforms?: { [key: string]: THREE.Uniform };
+  vertexShader?: string;
+  fragmentShader?: string;
+
+  // 内部使用的隐式属性 (对应 MaterialProperty/index.vue 中的 hidePropertyKey)
+  _clearcoat?: number;
+  _iridescence?: number;
+  _sheen?: number;
+}
 
 export type MaterialConfig = {
   // 通用参数
@@ -236,12 +342,25 @@ export type MaterialConfig = {
     | null;
 };
 
+export type EditableValue =
+  | string
+  | number
+  | boolean
+  | THREE.Color
+  | THREE.Texture
+  | null
+  | undefined;
+
 export interface EditableProperty {
   label: string;
   key: string;
-  value: string | number | boolean;
+  value: EditableValue;
   valueType: string;
-  customMapData: Record<string, any>;
+  customMapData: {
+    visible?: boolean;
+    texture?: THREE.Texture | null;
+    image?: string | null;
+  };
 }
 
 export interface UniformValue {
