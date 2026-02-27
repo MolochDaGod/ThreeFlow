@@ -195,6 +195,7 @@ export interface MaterialData {
   visible?: boolean;
   side?: THREE.Side;
   alphaTest?: number;
+  isMaterial?: boolean;
   
   // 贴图相关
   map?: THREE.Texture | null;

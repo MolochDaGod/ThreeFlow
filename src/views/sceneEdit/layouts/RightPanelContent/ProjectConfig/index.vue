@@ -259,12 +259,8 @@ import {
   shadowTypeOptions,
   backgroundOptions,
   environmentOptions,
-  FOG_NEAR_VALUE,
-  FOG_FAR_VALUE,
-  FOG_DENSITY_VALUE,
-  FOG_COLOR_VALUE,
 } from "@/config/propertyConfig";
-
+import { FOG_NEAR_VALUE, FOG_FAR_VALUE, FOG_DENSITY_VALUE, FOG_COLOR_VALUE } from "@/config/constant";
 import { onMounted, onUnmounted, reactive, getCurrentInstance } from "vue";
 import * as THREE from "three";
 import type { UploadFile } from "element-plus";
@@ -273,13 +269,12 @@ import {
   ENVIRONMENT_TYPE,
   FOG_TYPE,
   MITT_ON_KEY,
-  WEATHER_TYPE,
 } from "@/enums/enum";
 import { PREDEFINE_COLORS, fogOptions } from "@/config/propertyConfig";
 import type { ProjectConfigData } from "@/types/rightPanelTypes";
 import { useSceneStore } from "@/store/sceneEditStore";
 import { generateMaterialMaps, getFileType, updateMaterialMap } from "@/utils/utils";
-import { getSceneConfig, updateSceneFog } from "@/utils/sceneModules/sceneModules";
+import { getSceneConfig, updateSceneFog } from "@/utils/sceneModules";
 import type { WeatherOptions } from "@/types/renderModelTypes";
 const colorPickerOptions = PREDEFINE_COLORS;
 
@@ -327,7 +322,7 @@ const initConfigData = () => {
     shadowType: sceneConfig?.shadowType,
     background: sceneConfig?.background,
     backgroundColor: new THREE.Color(
-      (sceneConfig?.backgroundColor as unknown) as string
+      sceneConfig?.backgroundColor as string
     ).getStyle(),
     backgroundMap: generateMaterialMaps(
       (sceneConfig?.backgroundMap as unknown) as THREE.Texture

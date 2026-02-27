@@ -25,11 +25,7 @@
           show-input
           :show-input-controls="false"
           :step="item.labelKey === 'detail' ? 1 : 0.5"
-          v-model="
-            (geometryParameters.parameters as Record<string, number>)[
-              item.labelKey
-            ]
-          "
+          v-model="geometryParameters.parameters[item.labelKey]"
           @change="updateGeometryParameter(item, $event)"
         />
       </div>
@@ -88,7 +84,6 @@ const updateGeometryParameter = (
     geometryParameters.uuid
   );
 };
-
 </script>
 
 <style lang="scss" scoped src="./index.scss"></style>

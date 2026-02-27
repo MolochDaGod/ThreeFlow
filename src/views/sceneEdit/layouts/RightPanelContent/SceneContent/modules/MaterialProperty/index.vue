@@ -356,8 +356,6 @@ const uploadMaterialMapFile = async (
       // 更新贴图数据
       item.customMapData.image = generateMaterialMaps(textures);
       item.customMapData.texture = textures;
-      // 释放材质资源
-      disposeMaterial(mesh);
     }
   } finally {
     // 确保在任何情况下都释放 URL 对象
