@@ -1,7 +1,7 @@
 ### 项目名称：ThreeFlow(3D场景编辑器) [English](README.en.md)
 
 <a href='https://gitee.com/ZHANG_6666/three-flow/stargazers'><img src='https://gitee.com/ZHANG_6666/three-flow/badge/star.svg?theme=dark' alt='star'></img></a> 
-<a href='https://gitee.com/ZHANG_6666/three-flow/members'><img src='https://gitee.com/ZHANG_6666/three-flowD/badge/fork.svg?theme=dark' alt='fork'></img></a>
+<a href='https://gitee.com/ZHANG_6666/three-flow/members'><img src='https://gitee.com/ZHANG_6666/three-flow/badge/fork.svg?theme=dark' alt='fork'></img></a>
 <a target="_black" href="https://github.com/zhangbo126/ThreeFlow">
 <img alt="github-starts" src="https://img.shields.io/github/stars/zhangbo126/ThreeFlow?style=social">
 </a><a target="_black" href="https://github.com/zhangbo126/ThreeFlow">
