@@ -410,7 +410,7 @@ const updateSceneFogInfo = () => {
     fogFar: configData.fogFar,
     fogDensity: configData.fogDensity,
   };
-  updateSceneFog(fogInfo as Record<string, boolean | number | string>);
+  updateSceneFog(fogInfo as Record<string, number | string>);
 };
 </script>
 <style lang="scss" scoped src="./index.scss"></style>

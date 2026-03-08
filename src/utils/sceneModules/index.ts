@@ -21,7 +21,7 @@ import { cloneDeep } from 'lodash-es';
 const store = useSceneStore();
 
 /**
- * 获取场景配置
+ * @description 获取场景配置数据
  * @returns 场景配置
  */
 export const getSceneConfig = () => {
@@ -84,6 +84,7 @@ export const getSceneConfig = () => {
 
 /**
  * 更新地面
+ * @description 更新地面
  * @param planeGeometry - 地面几何体
  */
 export const updatePlaneGeometry = async (plane: PlaneGeometry) => {
@@ -128,10 +129,11 @@ export const updatePlaneGeometry = async (plane: PlaneGeometry) => {
 
 /**
  * 更新场景雾
+ * @description 更新场景雾
  * @param fogInfo - 雾信息
  */
 export const updateSceneFog = (
-  fogInfo: Record<string, boolean | number | string>
+  fogInfo: Record<string, number | string>
 ) => {
   const { fog, fogColor, fogNear, fogFar, fogDensity } = fogInfo;
   if (fog === FOG_TYPE.None) {
@@ -152,6 +154,7 @@ export const updateSceneFog = (
 
 /**
  * 获取鼠标在3D场景中的位置
+ * @description 获取鼠标在3D场景中的位置
  * @param clientX - 鼠标X坐标
  * @param clientY - 鼠标Y坐标
  * @returns THREE.Vector3 | null - 返回3D坐标位置，如果未找到则返回null
@@ -235,6 +238,7 @@ export const getMousePosition = (
 
 /**
  * 根据文件类型创建模型
+ * @description 根据文件类型创建模型
  * @param result - 加载结果
  * @param fileType - 文件类型
  * @returns THREE.Object3D | null
@@ -264,6 +268,7 @@ export const createModelFromResult = (
 
 /**
  * 获取文件名
+ * @description 获取文件名
  * @param ext - 文件扩展名
  * @returns 文件名
  */
@@ -272,6 +277,7 @@ export const getFilename = (ext: string): string =>
 
 /**
  * 设置模型位置和大小
+ * @description 设置模型位置和大小
  * @param model - 模型
  * @param mousePosition - 鼠标位置
  */
@@ -309,6 +315,7 @@ export const setModelPositionSize = (
 
 /**
  * 导出模型
+ * @description 导出模型
  * @param type - 导出类型
  * @param scene - 场景
  * @param options - 导出选项

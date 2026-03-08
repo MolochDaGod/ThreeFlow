@@ -11,6 +11,9 @@ import type { SelectLightType } from '@/types/renderModelTypes';
 
 const store = useSceneStore();
 
+/**
+ * @description 变换控制器模块
+ */
 class TransformControlsModules {
   // 变换控制器
   transformControls: TransformControls | null = null;
@@ -46,7 +49,7 @@ class TransformControlsModules {
     this.mouse = new THREE.Vector2();
   }
   /**
-   * 初始化变幻控制器
+   * @description 初始化变幻控制器
    */
   init() {
     const { camera, renderer, scene, container } = store.sceneApi || {};
@@ -81,7 +84,7 @@ class TransformControlsModules {
     container?.addEventListener('mouseup', this.onMouseUp.bind(this));
   }
   /**
-   * 创建变换控制器
+   * @description 创建变换控制器
    */
   createTransformControls() {
     this.destroy();
@@ -92,7 +95,7 @@ class TransformControlsModules {
     }
   }
   /**
-   * 鼠标按下事件
+   * @description 鼠标按下事件
    * @param event - 鼠标事件
    */
   onMouseDown(event: MouseEvent) {
@@ -106,14 +109,14 @@ class TransformControlsModules {
   }
 
   /**
-   * 鼠标松开事件
+   * @description 鼠标松开事件
    */
   onMouseUp() {
     this.isMouseDown = false;
   }
 
   /**
-   * 鼠标单击事件
+   * @description 鼠标单击事件
    * @returns 鼠标单击事件
    */
   onMouseClick() {
@@ -165,7 +168,7 @@ class TransformControlsModules {
   }
 
   /**
-   * 拖拽状态改变事件
+   * @description 拖拽状态改变事件
    * @returns 拖拽状态改变事件
    */
   onDraggingChanged() {
@@ -195,7 +198,7 @@ class TransformControlsModules {
     };
   }
   /**
-   * 变换改变事件
+   * @description 变换改变事件
    * @returns 变换改变事件
    */
   onTransformChange() {
@@ -204,7 +207,7 @@ class TransformControlsModules {
     };
   }
   /**
-   * 鼠标双击事件
+   * @description 鼠标双击事件
    * @returns 鼠标双击事件
    */
   onMouseDblClick() {
@@ -237,7 +240,7 @@ class TransformControlsModules {
     };
   }
   /**
-   * 清除当前选中对象
+   * @description 清除当前选中对象
    */
   clearCurrentSelection() {
     if (this.transformControls?.object) {
@@ -249,7 +252,7 @@ class TransformControlsModules {
     }
   }
   /**
-   * 获取有效的选中对象
+   * @description 获取有效的选中对象
    * @param intersects - 交集
    * @returns 有效的选中对象
    */
@@ -296,7 +299,7 @@ class TransformControlsModules {
     return selectedObject;
   }
   /**
-   * 聚焦对象
+   * @description 聚焦对象
    * @param object - 对象
    */
   focusOnObject(object: THREE.Object3D) {
