@@ -181,3 +181,14 @@ TypeScript 类型定义文件：
   - index.vue : 编辑器入口组件
   - layouts/ : 编辑器内部布局组件（左侧拖拽栏、右侧属性面板、顶部工具栏等）
 
+### 🍻 相关链接
+
+###### Three.js:[https://threejs.org/](https://threejs.org/)
+
+###### 模型下载网站 [https://sketchfab.com/feed](https://sketchfab.com/feed)
+
+###### 贴图素材网站 [https://polyhaven.com/](https://polyhaven.com/)
+
+###### 图片格式转换网站 [https://onlineconvertfree.com/zh/convert/hdr/](https://onlineconvertfree.com/zh/convert/hdr/)
+
+

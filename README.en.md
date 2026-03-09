@@ -188,3 +188,12 @@ Page views:
   - `index.vue`: Entry component of the editor
   - `layouts/`: Internal layout components of the editor (left drag panel, right property panel, top toolbar, etc.)
 
+### 🍻 Related links
+
+###### Three.js: [https://threejs.org/](https://threejs.org/)
+
+###### 3D Models Download Website: [https://sketchfab.com/feed](https://sketchfab.com/feed)
+
+###### Texture Assets Website: [https://polyhaven.com/](https://polyhaven.com/)
+
+###### Image Format Conversion Website: [https://onlineconvertfree.com/zh/convert/hdr/](https://onlineconvertfree.com/zh/convert/hdr/)
