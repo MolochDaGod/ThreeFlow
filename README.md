@@ -1,7 +1,7 @@
 ### 项目名称：ThreeFlow(3D场景编辑器) [English](README.en.md)
 
 <a href='https://gitee.com/ZHANG_6666/three-flow/stargazers'><img src='https://gitee.com/ZHANG_6666/three-flow/badge/star.svg?theme=dark' alt='star'></img></a> 
-<a href='https://gitee.com/ZHANG_6666/three-flow/members'><img src='https://gitee.com/ZHANG_6666/three-flowD/badge/fork.svg?theme=dark' alt='fork'></img></a>
+<a href='https://gitee.com/ZHANG_6666/three-flow/members'><img src='https://gitee.com/ZHANG_6666/three-flow/badge/fork.svg?theme=dark' alt='fork'></img></a>
 <a target="_black" href="https://github.com/zhangbo126/ThreeFlow">
 <img alt="github-starts" src="https://img.shields.io/github/stars/zhangbo126/ThreeFlow?style=social">
 </a><a target="_black" href="https://github.com/zhangbo126/ThreeFlow">
@@ -180,4 +180,15 @@ TypeScript 类型定义文件：
 - sceneEdit/ : 3D 场景编辑器主视图
   - index.vue : 编辑器入口组件
   - layouts/ : 编辑器内部布局组件（左侧拖拽栏、右侧属性面板、顶部工具栏等）
+
+### 🍻 相关链接
+
+###### Three.js:[https://threejs.org/](https://threejs.org/)
+
+###### 模型下载网站 [https://sketchfab.com/feed](https://sketchfab.com/feed)
+
+###### 贴图素材网站 [https://polyhaven.com/](https://polyhaven.com/)
+
+###### 图片格式转换网站 [https://onlineconvertfree.com/zh/convert/hdr/](https://onlineconvertfree.com/zh/convert/hdr/)
+
 

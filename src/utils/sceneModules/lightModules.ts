@@ -14,7 +14,7 @@ class LightModules {
     this.lightMap = new Map();
   }
   /**
-   * 初始化光源
+   * @description 初始化光源
    */
   initLight() {
     if (!store.sceneApi?.scene) return;
@@ -49,7 +49,7 @@ class LightModules {
     });
   }
   /**
-   * 创建光源
+   * @description 创建光源
    * @param type - 光源类型
    * @param position - 光源位置
    */
@@ -140,7 +140,7 @@ class LightModules {
     return light;
   }
   /**
-   * 更新辅助线
+   * @description 更新辅助线
    * @param uuid - 光源UUID
    */
   updateHelper(uuid?: string) {
