@@ -16,6 +16,7 @@ import {
   FOG_FAR_VALUE,
   FOG_NEAR_VALUE,
 } from '@/config/constant';
+import { normalizeShadowType } from '@/config/propertyConfig';
 import { cloneDeep } from 'lodash-es';
 
 const store = useSceneStore();
@@ -72,7 +73,7 @@ export const getSceneConfig = () => {
     environmentTexture: scene?.environment,
     toneMapping: renderer?.toneMapping,
     toneMappingExposure: renderer?.toneMappingExposure,
-    shadowType: renderer?.shadowMap.type,
+    shadowType: normalizeShadowType(renderer?.shadowMap.type),
     planeGeometry: planeGeometryKey,
     fog,
     fogColor,

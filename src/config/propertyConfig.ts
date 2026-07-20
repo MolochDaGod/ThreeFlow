@@ -160,18 +160,26 @@ export const shadowTypeOptions = [
     value: THREE.BasicShadowMap,
   },
   {
-    label: 'PCF阴影(PCFShadowMap)',
+    // r182+：PCFShadowMap 已自带软阴影，PCFSoftShadowMap 已弃用
+    label: 'PCF软阴影(PCFShadowMap)',
     value: THREE.PCFShadowMap,
-  },
-  {
-    label: 'PCF软阴影(PCFSoftShadowMap)',
-    value: THREE.PCFSoftShadowMap,
   },
   {
     label: 'VSM阴影(VSMShadowMap)',
     value: THREE.VSMShadowMap,
   },
 ];
+
+/** 将旧版 PCFSoftShadowMap 归一为 PCFShadowMap，避免升级后选项无法匹配 */
+export const normalizeShadowType = (
+  type?: THREE.ShadowMapType | null
+): THREE.ShadowMapType => {
+  // PCFSoftShadowMap 历史枚举值为 2
+  if (type === 2) {
+    return THREE.PCFShadowMap;
+  }
+  return type ?? THREE.BasicShadowMap;
+};
 // 场景背景
 export const backgroundOptions = [
   {

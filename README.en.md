@@ -41,7 +41,7 @@ Your support is the greatest motivation for the author to keep spending late-nig
 | ------------ | ------- | ------------ | ------- |
 | Vue          | 3.5.13  | TypeScript   | 5.7.x   |
 | Vite         | 6.1.x   | Element Plus | 2.9.4   |
-| Three        | 182     | Pinia        | 2.3.x   |
+| Three        | 185    | Pinia        | 2.3.x   |
 | TWEEN        | 18.5.0  | More in `package.json` | 🤗 |
 
 ### 🌺 Development Environment

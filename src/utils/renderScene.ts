@@ -4,12 +4,12 @@ import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-import { USDZLoader } from 'three/addons/loaders/USDZLoader.js';
+import { USDLoader } from 'three/addons/loaders/USDLoader.js';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 import { ObjectLoader } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { ElMessage, ElNotification } from 'element-plus';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { ViewportGizmo } from 'three-viewport-gizmo';
@@ -133,7 +133,7 @@ class renderScene {
       gltf: new GLTFLoader(),
       obj: new OBJLoader(),
       stl: new STLLoader(),
-      usdz: new USDZLoader(),
+      usdz: new USDLoader(),
     };
     this.modelProgressCallback = null;
     this.onWindowResizesListener = null;
@@ -225,8 +225,8 @@ class renderScene {
    */
   async initScene(): Promise<void> {
     this.scene = new THREE.Scene();
-    const rgbeLoader = new RGBELoader();
-    const texture = await rgbeLoader.loadAsync('hdr/view-hdr-11.hdr');
+    const hdrLoader = new HDRLoader();
+    const texture = await hdrLoader.loadAsync('hdr/view-hdr-11.hdr');
     texture.mapping = THREE.EquirectangularReflectionMapping;
 
     this.scene.background = new THREE.Color(FOG_COLOR_VALUE);
@@ -712,7 +712,6 @@ class renderScene {
   getDracoLoader() {
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('draco/');
-    dracoLoader.setDecoderConfig({ type: 'js' });
     dracoLoader.preload();
     return new GLTFLoader().setDRACOLoader(dracoLoader);
   }

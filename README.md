@@ -40,7 +40,7 @@ ThreeFlow:一个基于 `Three.js+Vue3+Vite+Typescript `实现的3D场景编辑�
 | ------------------------ | ------- | ------------ | ----- |
 | Vue                      | 3.5.13  | Typescript   | 5.7.x |
 | Vite                     | 6.1.x   | Element-plus | 2.9.4 |
-| Three                   | 182     | Pinia        | 2.3.x |
+| Three                   | 185     | Pinia        | 2.3.x |
 | TWEEN                   | 18.5.0  | 详见 `package.json` | 🤗    |
 
 ### 🌺 开发环境
