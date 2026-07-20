@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Timer } from 'three';
 import { toRaw } from 'vue';
 import type { ActionParams } from '@/types/rightPanelTypes';
 import { useSceneStore } from '@/store/sceneEditStore';
@@ -13,14 +14,15 @@ class animationModules {
   animationMixers: Map<string, THREE.AnimationMixer>;
   // 当前动画
   currentActions: Map<string, THREE.AnimationAction[]>;
-  // 动画时钟实例
-  animationClock: THREE.Clock;
+  // 动画计时器（替代已弃用的 Clock）
+  animationTimer: Timer;
   // 动画帧请求ID
   animationFrame: number | null;
   constructor() {
     this.animationMixers = new Map();
     this.currentActions = new Map();
-    this.animationClock = new THREE.Clock();
+    this.animationTimer = new Timer();
+    this.animationTimer.connect(document);
     this.animationFrame = null;
   }
 
@@ -84,8 +86,6 @@ class animationModules {
       model.userData.playAnimationList.push(animationClip.name);
     }
 
-    this.animationClock.start();
-
     if (!this.animationFrame) {
       this.animationFrameFun();
     }
@@ -94,15 +94,19 @@ class animationModules {
    * 动画帧请求
    */
   private animationFrameFun() {
-    this.animationFrame = requestAnimationFrame(() => this.animationFrameFun());
-    const delta = this.animationClock.getDelta();
+    this.animationFrame = requestAnimationFrame((timestamp) => {
+      this.animationTimer.update(timestamp);
+      const delta = this.animationTimer.getDelta();
 
-    // 更新所有模型的动画
-    this.animationMixers.forEach((mixer, modelId) => {
-      const actions = this.currentActions.get(modelId) || [];
-      actions.forEach((action) => {
-        if (!action.paused) mixer.update(delta);
+      // 更新所有模型的动画
+      this.animationMixers.forEach((mixer, modelId) => {
+        const actions = this.currentActions.get(modelId) || [];
+        actions.forEach((action) => {
+          if (!action.paused) mixer.update(delta);
+        });
       });
+
+      this.animationFrameFun();
     });
   }
   /**
@@ -184,7 +188,6 @@ class animationModules {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
     }
-    this.animationClock.stop();
   }
 }
 

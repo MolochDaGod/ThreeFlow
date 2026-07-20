@@ -4,7 +4,7 @@ import type {
   MaterialConfig,
   MaterialWithUniforms,
 } from '@/types/rightPanelTypes';
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import * as THREE from 'three';
 import type { MODEL_TYPE } from '@/enums/enum';
 import { LIGHT_ICON_TYPE } from '@/enums/enum';
@@ -507,7 +507,7 @@ export const generateMaterialMaps = (
  */
 export const updateMaterialMap = async (fileUrl: string, fileType: string) => {
   const loader =
-    fileType === 'hdr' ? new RGBELoader() : new THREE.TextureLoader();
+    fileType === 'hdr' ? new HDRLoader() : new THREE.TextureLoader();
   const textures = await loader.loadAsync(fileUrl);
   return textures;
 };

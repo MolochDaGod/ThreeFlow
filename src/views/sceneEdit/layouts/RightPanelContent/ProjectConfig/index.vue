@@ -259,6 +259,7 @@ import {
   shadowTypeOptions,
   backgroundOptions,
   environmentOptions,
+  normalizeShadowType,
 } from "@/config/propertyConfig";
 import { FOG_NEAR_VALUE, FOG_FAR_VALUE, FOG_DENSITY_VALUE, FOG_COLOR_VALUE } from "@/config/constant";
 import { onMounted, onUnmounted, reactive, getCurrentInstance } from "vue";
@@ -319,7 +320,7 @@ const initConfigData = () => {
   Object.assign(configData, {
     toneMapping: sceneConfig?.toneMapping,
     toneMappingExposure: sceneConfig?.toneMappingExposure,
-    shadowType: sceneConfig?.shadowType,
+    shadowType: normalizeShadowType(sceneConfig?.shadowType),
     background: sceneConfig?.background,
     backgroundColor: new THREE.Color(
       sceneConfig?.backgroundColor as string
@@ -346,7 +347,7 @@ const initConfigData = () => {
 const updateRenderConfig = () => {
   sceneApi!.renderer!.toneMapping = configData.toneMapping;
   sceneApi!.renderer!.toneMappingExposure = configData.toneMappingExposure;
-  sceneApi!.renderer!.shadowMap.type = configData.shadowType;
+  sceneApi!.renderer!.shadowMap.type = normalizeShadowType(configData.shadowType);
 };
 // 更新场景背景
 const updateSceneBackground = () => {
