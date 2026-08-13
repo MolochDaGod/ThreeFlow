@@ -24,6 +24,9 @@ import TransformControls from './TransformControls/index.vue';
 import SceneContent from './SceneContent/index.vue';
 import ProjectConfig from './ProjectConfig/index.vue';
 import HelpDescribe from './HelpDescribe/index.vue';
+import SystemsPanel from './SystemsPanel/index.vue';
+import ScriptPanel from './ScriptPanel/index.vue';
+import AiWorkerPanel from './AiWorkerPanel/index.vue';
 import { useSceneStore } from '@/store/sceneEditStore';
 const store = useSceneStore();
 const tabList = [
@@ -31,6 +34,21 @@ const tabList = [
     name: 'Scene',
     key: 'scene',
     component: SceneContent,
+  },
+  {
+    name: 'Systems',
+    key: 'systems',
+    component: SystemsPanel,
+  },
+  {
+    name: 'Script',
+    key: 'script',
+    component: ScriptPanel,
+  },
+  {
+    name: 'AI',
+    key: 'ai',
+    component: AiWorkerPanel,
   },
   {
     name: 'Project',

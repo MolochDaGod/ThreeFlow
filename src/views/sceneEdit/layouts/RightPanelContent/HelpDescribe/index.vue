@@ -51,6 +51,21 @@
         on Railway. SI: 1 unit = 1 m, human ~1.8 m. AGPL-3.0 — keep author
         answer / zhangbo126, logo, and name.
       </p>
+      <p>
+        <strong>Systems</strong> hosts fleet deps in this editor:
+        Rapier (<code>@dimforge/rapier3d-compat</code>), terrain BVH
+        (<code>three-mesh-bvh</code>), nav (<code>three-pathfinding</code>),
+        AI preview (<code>yuka</code>). Layers and brains use Forge names.
+        Recast bake, .gfscene play scripts, and the 70-tool AI worker stay on
+        <a href="https://forge.grudge-studio.com/editor" target="_blank"
+          >forge.grudge-studio.com</a
+        >
+        /
+        <a href="https://ai.grudge-studio.com" target="_blank"
+          >ai.grudge-studio.com</a
+        >
+        — pop them from the AI menu. Do not treat this SPA as a second Forge.
+      </p>
     </div>
     <div class="help-describe-title">Hotkeys</div>
     <div class="help-describe-content">

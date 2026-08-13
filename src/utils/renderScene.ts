@@ -1014,6 +1014,13 @@ class renderScene {
     });
   }
 
+  getSelectedObject(): THREE.Object3D | null {
+    if (!this.scene) return null;
+    const uuid = store.currentTransformMaterialUuid;
+    if (!uuid) return null;
+    return this.scene.getObjectByProperty('uuid', uuid) || null;
+  }
+
   /** Asset-to-ground: snap selection onto stamped terrain (or y=0). */
   snapSelectedToGround(): { ok: boolean; terrainId: string } {
     if (!this.scene) return { ok: false, terrainId: '' };

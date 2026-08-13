@@ -11,6 +11,26 @@
       <div class="header-right-item">
         <el-dropdown trigger="click">
           <el-button type="primary">
+            <span class="iconfont icon-hot">&nbsp;AI</span>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="openAiHub">
+                Pop AI hub (ai.*)
+              </el-dropdown-item>
+              <el-dropdown-item @click="openForgeEditor">
+                Pop Forge editor
+              </el-dropdown-item>
+              <el-dropdown-item @click="openCoder">
+                Pop Coder source
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
+      <div class="header-right-item">
+        <el-dropdown trigger="click">
+          <el-button type="primary">
             <span class="iconfont icon-changjing2">&nbsp;Play</span>
           </el-button>
           <template #dropdown>
@@ -40,6 +60,15 @@
             <el-dropdown-menu>
               <el-dropdown-item @click="addScene">
                 <span class="iconfont icon-changjing1">&nbsp;New scene</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="createHavenShore">
+                <span class="iconfont icon-changjing1">&nbsp;New · Haven Shore</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="createPirateLobby">
+                <span class="iconfont icon-changjing1">&nbsp;New · Pirate lobby</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="openForgeEditor">
+                <span class="iconfont icon-changjing1">&nbsp;Open in Forge…</span>
               </el-dropdown-item>
               <el-dropdown-item @click="saveSceneSnapshot">
                 <span class="iconfont icon-zhaoxiangji"> &nbsp;Scene snapshot (.png) </span>
@@ -106,7 +135,15 @@ import type { ExportType } from "@/types/rightPanelTypes";
 import { exportSceneModel } from "@/utils/sceneModules";
 import { EXPORT_TYPE } from "@/enums/enum";
 import { HD_DEPLOY_TARGETS, HD_SECTOR_TARGETS } from "@/config/hdTerrainDeploy";
-import { STUDIO_PLAY } from "@/config/branding";
+import {
+  popoutFleet,
+  STUDIO_AI,
+  STUDIO_CODER,
+  STUDIO_FORGE_EDITOR,
+  STUDIO_PLAY,
+} from "@/config/branding";
+import { PIRATE_LOBBY_URL } from "@/config/fleetSystems";
+import { MODEL_TYPE } from "@/enums/enum";
 import {
   collectHdTerrainRoots,
   exportHdTerrainPack,
@@ -118,6 +155,66 @@ const indexDbStore = useIndexDbStore();
 const playSectors = HD_SECTOR_TARGETS;
 const openPlay = (url: string) => {
   window.open(url || STUDIO_PLAY, "_blank");
+};
+const openAiHub = () => popoutFleet(STUDIO_AI, "grudge-ai-worker");
+const openForgeEditor = () => popoutFleet(STUDIO_FORGE_EDITOR, "grudge-forge");
+const openCoder = () => popoutFleet(STUDIO_CODER, "grudge-coder");
+
+const createHavenShore = async () => {
+  const api = store.sceneApi;
+  if (!api?.loadHdTerrain) return;
+  const target = HD_SECTOR_TARGETS.find((s) => s.id === "haven_shore");
+  loading.value = true;
+  loadingText.value = "Creating Haven Shore…";
+  try {
+    await api.loadHdTerrain(
+      "zone",
+      window.innerWidth * 0.5,
+      window.innerHeight * 0.5,
+      "haven_shore",
+      undefined,
+      "edit",
+      {
+        sectorId: "haven_shore",
+        terrainId: "haven_shore",
+        playUrl: target?.playUrl,
+      }
+    );
+    ElMessage.success("Haven Shore stamped");
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : "Create failed");
+  } finally {
+    loading.value = false;
+  }
+};
+
+const createPirateLobby = async () => {
+  const api = store.sceneApi;
+  if (!api?.loadModel) return;
+  loading.value = true;
+  loadingText.value = "Loading pirate lobby…";
+  try {
+    await api.loadModel(
+      PIRATE_LOBBY_URL,
+      MODEL_TYPE.GLB,
+      window.innerWidth * 0.5,
+      window.innerHeight * 0.5,
+      "pirate-islands",
+      {
+        group: "scenes",
+        sectorId: "pirate-islands",
+        terrainId: "chicken_gun_pirate_lobby",
+        isTerrain: true,
+        playUrl:
+          "https://grudgewarlords.com/island-3d?mode=lobby&map=pirate-islands",
+      }
+    );
+    ElMessage.success("Pirate lobby stamped");
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : "Create failed");
+  } finally {
+    loading.value = false;
+  }
 };
 
 const loading = ref(false);

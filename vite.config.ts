@@ -29,12 +29,15 @@ export default defineConfig((mode) => {
       },
     },
     assetsInclude: ['**/*.hdr', '**/*.glb'],
+    optimizeDeps: {
+      exclude: ['@dimforge/rapier3d-compat'],
+    },
     base: VITE_APP_BASE_URL,
     build: {
       assetsDir: 'static',
       emptyOutDir: true,
       minify: 'esbuild',
-      target: 'es2015',
+      target: 'es2022',
       sourcemap: false,
       chunkSizeWarningLimit: 2000,
       reportCompressedSize: false,
