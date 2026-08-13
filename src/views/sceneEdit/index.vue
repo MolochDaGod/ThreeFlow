@@ -99,19 +99,34 @@ const dropModel = async (e: DragEvent) => {
     // Lights
     store.sceneApi?.loadLight(currentDrag);
   } else {
-    const { filePath, fileType, name } = currentDrag.modelData as ModelType;
+    const modelData = currentDrag.modelData as ModelType & {
+      terrainPreset?: 'mountains' | 'crags' | 'zone';
+    };
+    const { filePath, fileType, name, terrainPreset } = modelData;
     try {
       Object.assign(loadingInfo, {
         loading: true,
         percentage: 0,
       });
-      await store.sceneApi?.loadModel(
-        filePath,
-        fileType,
-        clientX,
-        clientY,
-        name
-      );
+      if (terrainPreset && store.sceneApi?.loadHdTerrain) {
+        await store.sceneApi.loadHdTerrain(
+          terrainPreset,
+          clientX,
+          clientY,
+          name,
+          (pct) => {
+            loadingInfo.percentage = Math.round(pct);
+          }
+        );
+      } else {
+        await store.sceneApi?.loadModel(
+          filePath,
+          fileType,
+          clientX,
+          clientY,
+          name
+        );
+      }
     } finally {
       loadingInfo.loading = false;
       Object.assign(currentDrag, {

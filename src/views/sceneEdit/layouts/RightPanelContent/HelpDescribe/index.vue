@@ -35,6 +35,14 @@
         room. Island GLBs are large — drop one at a time.
       </p>
       <p>
+        <strong>HD zones</strong>: Hard Road erosion terrain
+        (<a href="https://hardroad.xyz/demos/ds2-terrain.html" target="_blank"
+          >hardroad.xyz/demos/ds2-terrain.html</a
+        >). Mountains, crags, and a flatter zone — SI metres, ~400 m across.
+        Editor mesh is 256² (the live demo is 1536²). Drop generates in-place;
+        do not scale the result to 1.2 m.
+      </p>
+      <p>
         Host: <code>assets.grudge-studio.com</code>. Player bag / roster stays
         on Railway. SI: 1 unit = 1 m, human ~1.8 m. AGPL-3.0 — keep author
         answer / zhangbo126, logo, and name.

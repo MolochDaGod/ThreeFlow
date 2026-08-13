@@ -14,12 +14,15 @@ export type WarlordsAssetGroup =
   | 'enemies'
   | 'weapons'
   | 'meshes'
-  | 'islands';
+  | 'islands'
+  | 'zones';
 
 export interface WarlordsDragItem extends ModelType {
   group: WarlordsAssetGroup;
   isAnimation?: boolean;
   modelType: DRAG_MODEL_TYPE;
+  /** Hard Road DS2 procedural terrain — https://hardroad.xyz/demos/ds2-terrain.html */
+  terrainPreset?: 'mountains' | 'crags' | 'zone';
 }
 
 export const WARLORDS_GROUP_LABELS: Record<WarlordsAssetGroup, string> = {
@@ -29,6 +32,7 @@ export const WARLORDS_GROUP_LABELS: Record<WarlordsAssetGroup, string> = {
   weapons: 'Weapons',
   meshes: 'Meshes',
   islands: 'Islands',
+  zones: 'HD zones',
 };
 
 const ENT = `${WARLORDS_CDN}/models/warlords/entities`;
@@ -43,7 +47,8 @@ function item(
   name: string,
   filePath: string,
   icon: string,
-  isAnimation = false
+  isAnimation = false,
+  extra?: Partial<WarlordsDragItem>
 ): WarlordsDragItem {
   return {
     group,
@@ -55,6 +60,7 @@ function item(
     icon,
     isAnimation,
     modelType: DRAG_MODEL_TYPE.Model,
+    ...extra,
   };
 }
 
@@ -254,6 +260,37 @@ export const WARLORDS_ISLANDS: WarlordsDragItem[] = [
   ),
 ];
 
+/** Hard Road DS2 erosion terrain — higher-def zones / mountains (not a GLB). */
+export const WARLORDS_HD_ZONES: WarlordsDragItem[] = [
+  item(
+    'zones',
+    'hd-mountains',
+    'HD mountains',
+    'hardroad://ds2-terrain?preset=mountains',
+    `${ICO}/Flag_Icon.png`,
+    false,
+    { terrainPreset: 'mountains' }
+  ),
+  item(
+    'zones',
+    'hd-crags',
+    'HD crags',
+    'hardroad://ds2-terrain?preset=crags',
+    `${ICO}/totem_4.png`,
+    false,
+    { terrainPreset: 'crags' }
+  ),
+  item(
+    'zones',
+    'hd-zone',
+    'HD zone',
+    'hardroad://ds2-terrain?preset=zone',
+    `${ICO}/House_Icon.png`,
+    false,
+    { terrainPreset: 'zone' }
+  ),
+];
+
 type PlaceableItem = {
   id: string;
   label: string;
@@ -303,6 +340,7 @@ export const WARLORDS_STATIC_LIBRARY: WarlordsDragItem[] = [
   ...WARLORDS_ENEMIES,
   ...WARLORDS_WEAPONS,
   ...WARLORDS_ISLANDS,
+  ...WARLORDS_HD_ZONES,
 ];
 
 export async function loadWarlordsLibrary(): Promise<WarlordsDragItem[]> {

@@ -18,6 +18,7 @@ The left **Warlords** tab is the existing Grudge CDN + ObjectStore catalog — n
 | **Weapons** | Hand axe, greataxe, greatswords, bows + siege | Verified `models/weapons/**` GLBs + catapult / bolt thrower |
 | **Meshes** | Camps, houses, benches, walls, ships, mounts | ObjectStore `ummorpg-placeables-for-forge.json` (GLB only) |
 | **Islands** | Home island, pirate-islands lobby, Lyoko, Spiral, Hoth | `islandDeployments` / `map-registry` meshes |
+| **HD zones** | Eroded mountains, crags, flatter zone | [Hard Road DS2 terrain](https://hardroad.xyz/demos/ds2-terrain.html) — CPU heightfield, SI ~400 m |
 
 **Rules**
 

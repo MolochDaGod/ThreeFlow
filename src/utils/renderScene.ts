@@ -44,6 +44,10 @@ import {
   getMousePosition,
   setModelPositionSize,
 } from './sceneModules';
+import {
+  generateDs2Terrain,
+  type Ds2PresetId,
+} from './sceneModules/ds2Terrain';
 
 const store = useSceneStore();
 
@@ -551,6 +555,38 @@ class renderScene {
       );
     });
   }
+
+  /**
+   * Hard Road DS2 heightfield (SI metres). Do not run setModelPositionSize —
+   * that would squash a 400 m zone to 1.2 m.
+   */
+  async loadHdTerrain(
+    preset: Ds2PresetId,
+    clientX: number,
+    clientY: number,
+    name: string,
+    onProgress?: (pct: number, msg: string) => void
+  ): Promise<void> {
+    if (!this.scene) throw new Error('Scene not initialized');
+    this.loadingStatus = false;
+    try {
+      const root = await generateDs2Terrain(preset, onProgress);
+      const mouse = getMousePosition(clientX, clientY);
+      root.name = name;
+      this.scene.add(root);
+      root.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(root);
+      const center = box.getCenter(new THREE.Vector3());
+      root.position.x += mouse.x - center.x;
+      root.position.z += mouse.z - center.z;
+      root.position.y += mouse.y - box.min.y;
+      root.updateMatrixWorld(true);
+      this.setObjectHighlight(root);
+    } finally {
+      this.loadingStatus = true;
+    }
+  }
+
   /**
    * 加载Geometry
    * @param dragGeometry - 拖拽Models
