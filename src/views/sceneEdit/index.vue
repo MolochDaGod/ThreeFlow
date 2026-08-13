@@ -106,6 +106,10 @@ const dropModel = async (e: DragEvent) => {
   } else {
     const modelData = currentDrag.modelData as ModelType & {
       terrainPreset?: 'mountains' | 'crags' | 'zone';
+      sectorId?: string;
+      terrainId?: string;
+      isTerrain?: boolean;
+      playUrl?: string;
     };
     const { filePath, fileType, name, terrainPreset } = modelData;
     try {
@@ -123,6 +127,12 @@ const dropModel = async (e: DragEvent) => {
           (pct, msg) => {
             loadingInfo.percentage = Math.round(pct);
             loadingInfo.text = `Load screen · ${msg}`;
+          },
+          'edit',
+          {
+            sectorId: modelData.sectorId,
+            terrainId: modelData.terrainId,
+            playUrl: modelData.playUrl,
           }
         );
       } else {
@@ -132,7 +142,13 @@ const dropModel = async (e: DragEvent) => {
           clientX,
           clientY,
           name,
-          { group: modelData.group }
+          {
+            group: modelData.group,
+            sectorId: modelData.sectorId,
+            terrainId: modelData.terrainId,
+            isTerrain: modelData.isTerrain,
+            playUrl: modelData.playUrl,
+          }
         );
       }
     } finally {

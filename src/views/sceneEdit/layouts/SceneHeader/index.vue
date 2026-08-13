@@ -3,11 +3,29 @@
     <div class="render-header-left">
       <img src="/icon.png" class="header-logo" alt="logo" />
       <div class="left-title">
-        ThreeFlow
-        <span class="author">author: answer</span>
+        Grudge Studio
+        <span class="author">Warlords Engine · WCS</span>
       </div>
     </div>
     <div class="render-header-right">
+      <div class="header-right-item">
+        <el-dropdown trigger="click">
+          <el-button type="primary">
+            <span class="iconfont icon-changjing2">&nbsp;Play</span>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="sec in playSectors"
+                :key="sec.id"
+                @click="openPlay(sec.playUrl)"
+              >
+                {{ sec.label }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
       <div class="header-right-item">
         <el-button type="primary" @click="debounceSaveScene">
           <span class="iconfont icon-baocun">&nbsp;Save scene</span>
@@ -87,7 +105,8 @@ import * as THREE from "three";
 import type { ExportType } from "@/types/rightPanelTypes";
 import { exportSceneModel } from "@/utils/sceneModules";
 import { EXPORT_TYPE } from "@/enums/enum";
-import { HD_DEPLOY_TARGETS } from "@/config/hdTerrainDeploy";
+import { HD_DEPLOY_TARGETS, HD_SECTOR_TARGETS } from "@/config/hdTerrainDeploy";
+import { STUDIO_PLAY } from "@/config/branding";
 import {
   collectHdTerrainRoots,
   exportHdTerrainPack,
@@ -96,6 +115,10 @@ import type { Ds2PresetId } from "@/utils/sceneModules/ds2Terrain";
 
 const store = useSceneStore();
 const indexDbStore = useIndexDbStore();
+const playSectors = HD_SECTOR_TARGETS;
+const openPlay = (url: string) => {
+  window.open(url || STUDIO_PLAY, "_blank");
+};
 
 const loading = ref(false);
 const loadingText = ref("Saving scene...");

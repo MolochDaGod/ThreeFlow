@@ -207,8 +207,16 @@ export function kindFromGroup(
   if (group === 'units') return 'unit';
   if (group === 'enemies') return 'enemy';
   if (group === 'weapons') return 'weapon';
-  if (group === 'islands' || group === 'zones') return 'island';
-  if (group === 'meshes') return 'mesh';
+  if (group === 'vfx') return 'weapon';
+  if (
+    group === 'islands' ||
+    group === 'zones' ||
+    group === 'sectors' ||
+    group === 'scenes'
+  )
+    return 'island';
+  if (group === 'meshes' || group === 'textures' || group === 'animations')
+    return 'mesh';
   const p = (filePath || '').toLowerCase();
   if (/\/characters\/|toon-rts|captain-/.test(p)) return 'captain';
   if (/\/weapons\//.test(p)) return 'weapon';

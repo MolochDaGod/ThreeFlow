@@ -51,6 +51,7 @@ import {
   raceIdFromName,
   setHoverMesh,
 } from './raceKit';
+import { snapObjectToTerrain, tagTerrain } from './terrainGround';
 import {
   generateDs2Terrain,
   type Ds2PresetId,
@@ -521,7 +522,13 @@ class renderScene {
     clientX: number,
     clientY: number,
     name: string,
-    opts?: { group?: string }
+    opts?: {
+      group?: string;
+      sectorId?: string;
+      terrainId?: string;
+      isTerrain?: boolean;
+      playUrl?: string;
+    }
   ): Promise<void | boolean> {
     return new Promise((resolve, reject) => {
       if (!this.scene) {
@@ -552,6 +559,19 @@ class renderScene {
               bootstrapRaceKit(model, raceIdFromName(name, filePath));
             }
             setModelPositionSize(model, mousePosition, kind);
+            if (opts?.isTerrain || kind === 'island') {
+              tagTerrain(model, {
+                terrainId: opts?.terrainId || opts?.sectorId || name,
+                sectorId: opts?.sectorId,
+                kind:
+                  opts?.group === 'sectors'
+                    ? 'sector'
+                    : opts?.group === 'scenes'
+                      ? 'map'
+                      : 'island',
+                playUrl: opts?.playUrl,
+              });
+            }
             this.scene.add(model);
             this.setObjectHighlight(model);
             this.bindRaceKitHover();
@@ -580,7 +600,8 @@ class renderScene {
     clientY: number,
     name: string,
     onProgress?: (pct: number, msg: string) => void,
-    quality: Ds2Quality = 'edit'
+    quality: Ds2Quality = 'edit',
+    stamp?: { sectorId?: string; terrainId?: string; playUrl?: string }
   ): Promise<void> {
     if (!this.scene) throw new Error('Scene not initialized');
     this.loadingStatus = false;
@@ -596,6 +617,12 @@ class renderScene {
       root.position.z += mouse.z - center.z;
       root.position.y += mouse.y - box.min.y;
       root.updateMatrixWorld(true);
+      tagTerrain(root, {
+        terrainId: stamp?.terrainId || stamp?.sectorId || `hd-${preset}`,
+        sectorId: stamp?.sectorId,
+        kind: stamp?.sectorId ? 'sector' : 'hd',
+        playUrl: stamp?.playUrl,
+      });
       this.setObjectHighlight(root);
     } finally {
       this.loadingStatus = true;
@@ -985,6 +1012,20 @@ class renderScene {
       setHoverMesh(root, name);
       store.setTransformMaterialRandomId();
     });
+  }
+
+  /** Asset-to-ground: snap selection onto stamped terrain (or y=0). */
+  snapSelectedToGround(): { ok: boolean; terrainId: string } {
+    if (!this.scene) return { ok: false, terrainId: '' };
+    const uuid = store.currentTransformMaterialUuid;
+    const obj = uuid
+      ? this.scene.getObjectByProperty('uuid', uuid) || null
+      : null;
+    if (!obj) return { ok: false, terrainId: '' };
+    const root = findRaceKitRoot(obj) || obj;
+    const result = snapObjectToTerrain(root, this.scene);
+    this.setObjectHighlight(root);
+    return result;
   }
   /**
    * update geometry

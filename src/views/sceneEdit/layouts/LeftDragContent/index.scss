@@ -3,8 +3,8 @@
   display: flex;
   width: 180px;
   height: calc(100vh - 32px);
-  color: #a9b1d6;
-  background-color: #181b2bd6;
+  color: #d4c4a0;
+  background-color: #12151cd6;
   transition: transform 0.3s ease;
   .drag-tab-container {
     display: flex;
@@ -28,7 +28,7 @@
         border-bottom: none;
       }
       .is-active {
-        background-color: rgba(82, 90, 119, 0.8);
+        background-color: rgba(160, 120, 32, 0.55);
         span {
           color: #fff;
         }

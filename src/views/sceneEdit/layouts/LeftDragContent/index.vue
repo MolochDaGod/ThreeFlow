@@ -18,7 +18,7 @@
           <!-- Warlords / uMMORPG CDN library -->
           <el-scrollbar
             max-height="calc(100vh - 215px)"
-            v-if="activeTabKey === DRAG_MODEL_TYPE.Model"
+            v-if="isAssetLibraryTab"
           >
             <div class="asset-filter">
               <select v-model="activeAssetGroup" class="asset-filter-select">
@@ -115,9 +115,9 @@
       <!-- spacer so the commercial banner does not cover items -->
       <div class="bottom-spacer"></div>
     </el-scrollbar>
-    <div class="commercial-version" @click="openCommercialVersion">
+    <div class="commercial-version" @click="openStudio">
         <span class="iconfont icon-hot"></span>
-        <span>Pro: ThreeFlowX</span>
+        <span>WCS · Grudge Studio</span>
     </div>
     <!-- toggle -->
     <div class="collapse-button" @click="toggleCollapse">
@@ -132,6 +132,7 @@
 import { defaultGeometryList, defaultLightList } from '@/config/defaultDragList';
 import {
   defaultModelList,
+  itemsForTab,
   itemsInGroup,
   loadWarlordsLibrary,
   WARLORDS_GROUP_LABELS,
@@ -141,17 +142,41 @@ import {
 import { type ElUpload, type UploadFile } from 'element-plus';
 import type { DragModelType } from '@/types/renderModelTypes';
 import { DRAG_TAB_ITEMS } from './config';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { DRAG_MODEL_TYPE } from '@/enums/enum';
 
 const emit = defineEmits(['drag-model-start', 'choose-outside-file']);
 
 const activeTabKey = ref<DRAG_MODEL_TYPE>(DRAG_MODEL_TYPE.Model);
-const activeAssetGroup = ref<WarlordsAssetGroup | 'all'>('captains');
+const activeAssetGroup = ref<WarlordsAssetGroup | 'all'>('sectors');
 const libraryItems = ref<WarlordsDragItem[]>([...defaultModelList]);
-const visibleModels = computed(() =>
-  itemsInGroup(libraryItems.value, activeAssetGroup.value)
+const isAssetLibraryTab = computed(() =>
+  [
+    DRAG_MODEL_TYPE.Model,
+    DRAG_MODEL_TYPE.D1,
+    DRAG_MODEL_TYPE.R2,
+    DRAG_MODEL_TYPE.Vfx,
+  ].includes(activeTabKey.value)
 );
+
+const libraryTab = computed<'warlords' | 'd1' | 'r2' | 'vfx'>(() => {
+  if (activeTabKey.value === DRAG_MODEL_TYPE.D1) return 'd1';
+  if (activeTabKey.value === DRAG_MODEL_TYPE.R2) return 'r2';
+  if (activeTabKey.value === DRAG_MODEL_TYPE.Vfx) return 'vfx';
+  return 'warlords';
+});
+
+const visibleModels = computed(() => {
+  const tabbed = itemsForTab(libraryItems.value, libraryTab.value);
+  return itemsInGroup(tabbed, activeAssetGroup.value);
+});
+
+watch(activeTabKey, (key) => {
+  if (key === DRAG_MODEL_TYPE.Vfx) activeAssetGroup.value = 'vfx';
+  else if (key === DRAG_MODEL_TYPE.R2) activeAssetGroup.value = 'all';
+  else if (key === DRAG_MODEL_TYPE.D1) activeAssetGroup.value = 'all';
+  else if (key === DRAG_MODEL_TYPE.Model) activeAssetGroup.value = 'sectors';
+});
 
 onMounted(async () => {
   libraryItems.value = await loadWarlordsLibrary();
@@ -180,8 +205,8 @@ const changeFile = () => {
   if (input instanceof HTMLInputElement) input.click();
 };
 // open commercial edition
-const openCommercialVersion = () => {
-  window.open('http://threeflowx.cn/edit/', '_blank');
+const openStudio = () => {
+  window.open('https://wcs.grudge-studio.com/', '_blank');
 };
 </script>
 <style lang="scss" scoped src="./index.scss"></style>

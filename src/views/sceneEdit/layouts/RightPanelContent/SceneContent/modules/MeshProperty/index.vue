@@ -42,6 +42,14 @@
           </div>
         </div>
       </div>
+      <div class="property-item">
+        <div class="property-item-label">Terrain</div>
+        <div class="property-item-value">
+          <el-button size="small" type="primary" @click="groundToTerrain">
+            Asset to ground
+          </el-button>
+        </div>
+      </div>
       <div
         class="property-item"
         v-for="item in shadowProperties"
@@ -216,8 +224,18 @@ import type {
 import { disposeMaterial } from '@/utils/utils';
 import { PREDEFINE_COLORS } from '@/config/propertyConfig';
 import { SCENE_OBJECT_NAME } from '@/enums/enum';
+import { ElMessage } from 'element-plus';
 
 const store = useSceneStore();
+
+const groundToTerrain = () => {
+  const api = store.sceneApi as
+    | { snapSelectedToGround?: () => { ok: boolean; terrainId: string } }
+    | null;
+  const result = api?.snapSelectedToGround?.();
+  if (result?.ok) ElMessage.success(`Grounded on ${result.terrainId}`);
+  else ElMessage.warning('Drop a sector first, then select the asset');
+};
 
 const { meshProperty } = defineProps({
   meshProperty: {

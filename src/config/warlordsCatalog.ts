@@ -15,7 +15,12 @@ export type WarlordsAssetGroup =
   | 'weapons'
   | 'meshes'
   | 'islands'
-  | 'zones';
+  | 'zones'
+  | 'sectors'
+  | 'scenes'
+  | 'vfx'
+  | 'textures'
+  | 'animations';
 
 export interface WarlordsDragItem extends ModelType {
   group: WarlordsAssetGroup;
@@ -23,6 +28,12 @@ export interface WarlordsDragItem extends ModelType {
   modelType: DRAG_MODEL_TYPE;
   /** Hard Road DS2 procedural terrain — https://hardroad.xyz/demos/ds2-terrain.html */
   terrainPreset?: 'mountains' | 'crags' | 'zone';
+  /** Warlords sector / map id for terrain snap + play URL */
+  sectorId?: string;
+  terrainId?: string;
+  isTerrain?: boolean;
+  playUrl?: string;
+  tab?: 'warlords' | 'd1' | 'r2' | 'vfx';
 }
 
 export const WARLORDS_GROUP_LABELS: Record<WarlordsAssetGroup, string> = {
@@ -33,6 +44,11 @@ export const WARLORDS_GROUP_LABELS: Record<WarlordsAssetGroup, string> = {
   meshes: 'Meshes',
   islands: 'Islands',
   zones: 'HD zones',
+  sectors: '9 sectors',
+  scenes: 'Scenes',
+  vfx: 'VFX',
+  textures: 'Textures',
+  animations: 'Anims',
 };
 
 const ENT = `${WARLORDS_CDN}/models/warlords/entities`;
@@ -291,6 +307,189 @@ export const WARLORDS_HD_ZONES: WarlordsDragItem[] = [
   ),
 ];
 
+/** map-registry / worldMapSectors.ts — do not invent sector names. */
+export const WARLORDS_SECTOR_IDS = [
+  'frostbite_expanse',
+  'stormbreak_reef',
+  'thornwood_wilds',
+  'ashen_wastes',
+  'convergence_nexus',
+  'ethereal_falls',
+  'abyssal_trench',
+  'ember_depths',
+  'haven_shore',
+] as const;
+
+function sectorPreset(id: string): 'mountains' | 'crags' | 'zone' {
+  if (id.includes('frost') || id.includes('abyssal') || id.includes('storm'))
+    return 'crags';
+  if (id.includes('haven') || id.includes('thorn')) return 'zone';
+  return 'mountains';
+}
+
+function sectorIcon(id: string): string {
+  if (id.includes('haven')) return `${ICO}/House_Icon.png`;
+  if (id.includes('ember') || id.includes('ashen')) return `${ICO}/totem_3.png`;
+  if (id.includes('frost') || id.includes('storm')) return `${ICO}/undead_crypt.png`;
+  if (id.includes('ethereal') || id.includes('convergence')) return `${ICO}/Flag_Icon.png`;
+  return `${ICO}/totem_4.png`;
+}
+
+/** 9 Warlords era MMO sectors — HD terrain stamped with sectorId for ground snap. */
+export const WARLORDS_SECTORS: WarlordsDragItem[] = WARLORDS_SECTOR_IDS.map(
+  (id) =>
+    item(
+      'sectors',
+      `sector-${id}`,
+      id.replace(/_/g, ' '),
+      `hardroad://ds2-terrain?preset=${sectorPreset(id)}&sector=${id}`,
+      sectorIcon(id),
+      false,
+      {
+        terrainPreset: sectorPreset(id),
+        sectorId: id,
+        terrainId: id,
+        isTerrain: true,
+        playUrl: `https://grudgewarlords.com/play?sector=${id}&mode=zone&worldSeed=grudge-world-1`,
+        tab: 'warlords',
+      }
+    )
+);
+
+/** Chicken Gun pirate lobby + Haven Fruzer + dojo/training plates. */
+export const WARLORDS_SCENES: WarlordsDragItem[] = [
+  item(
+    'scenes',
+    'chicken-gun-pirate',
+    'Chicken Gun · pirate lobby',
+    `${WARLORDS_CDN}/models/lobby/pirate-islands/scene.glb`,
+    `${ICO}/Boat_Icon.png`,
+    false,
+    {
+      sectorId: 'pirate-islands',
+      terrainId: 'chicken_gun_pirate_lobby',
+      isTerrain: true,
+      playUrl:
+        'https://grudgewarlords.com/island-3d?mode=lobby&map=pirate-islands',
+    }
+  ),
+  item(
+    'scenes',
+    'haven-fruzer',
+    'Haven Shore · Fruzer islands',
+    `${WARLORDS_CDN}/models/warlords/haven_shore/fruzer_islands.glb`,
+    `${ICO}/House_Icon.png`,
+    false,
+    {
+      sectorId: 'haven_shore',
+      terrainId: 'haven_shore',
+      isTerrain: true,
+      playUrl:
+        'https://grudgewarlords.com/play?sector=haven_shore&mode=zone&city=haven_port',
+    }
+  ),
+  item(
+    'scenes',
+    'dojo-hoth',
+    'Dojo · Hoth boss room',
+    `${WARLORDS_CDN}/models/biomes/frozen/hoth_boss_room_low_poly.glb`,
+    `${ICO}/undead_crypt.png`,
+    false,
+    {
+      sectorId: 'dojo',
+      terrainId: 'dojo_hoth',
+      isTerrain: true,
+    }
+  ),
+];
+
+const VFX = `${WARLORDS_CDN}/models/vfx`;
+export const WARLORDS_VFX: WarlordsDragItem[] = [
+  ['explosion', 'Explosion'],
+  ['muzzle', 'Muzzle'],
+  ['fireball', 'Fireball'],
+  ['lightning', 'Lightning'],
+  ['energy-beam', 'Energy beam'],
+  ['strawberry-strike', 'Strike'],
+  ['aoe-warning', 'AoE warning'],
+  ['spell-glyph', 'Spell glyph'],
+  ['laser-beam', 'Laser'],
+  ['light-beam', 'Light beam'],
+].map(([id, name]) =>
+  item('vfx', `vfx-${id}`, name, `${VFX}/${id}.glb`, `${ICO}/totem1.png`, false, {
+    tab: 'vfx',
+  })
+);
+
+export const WARLORDS_TEXTURES: WarlordsDragItem[] = [
+  item(
+    'textures',
+    'tex-wk',
+    'WK atlas',
+    `${WARLORDS_CDN}/textures/grudge6/western-kingdoms/WK_Standard_Units.webp`,
+    `${ICO}/Human_Warrior.png`,
+    false,
+    { tab: 'r2' }
+  ),
+  item(
+    'textures',
+    'tex-brb',
+    'BRB atlas',
+    `${WARLORDS_CDN}/textures/grudge6/barbarians/BRB_StandardUnits_texture.webp`,
+    `${ICO}/barb_warrior.png`,
+    false,
+    { tab: 'r2' }
+  ),
+  item(
+    'textures',
+    'tex-elf',
+    'ELF atlas',
+    `${WARLORDS_CDN}/textures/grudge6/elves/ELF_HighElves_Texture.webp`,
+    `${ICO}/elf_warrior.png`,
+    false,
+    { tab: 'r2' }
+  ),
+  item(
+    'textures',
+    'tex-orc',
+    'ORC atlas',
+    `${WARLORDS_CDN}/textures/grudge6/orcs/ORC_StandardUnits.webp`,
+    `${ICO}/orc_warrior.png`,
+    false,
+    { tab: 'r2' }
+  ),
+];
+
+export const WARLORDS_ANIMS: WarlordsDragItem[] = [
+  item(
+    'animations',
+    'anim-sword',
+    'sword_shield pack',
+    `${WARLORDS_CDN}/anims/baked/sword_shield/idle.glb`,
+    `${WPN_ICO}/Sword_30.png`,
+    true,
+    { tab: 'r2' }
+  ),
+  item(
+    'animations',
+    'anim-bow',
+    'longbow pack',
+    `${WARLORDS_CDN}/anims/baked/longbow/idle.glb`,
+    `${WPN_ICO}/Bow_01.png`,
+    true,
+    { tab: 'r2' }
+  ),
+  item(
+    'animations',
+    'anim-magic',
+    'magic pack',
+    `${WARLORDS_CDN}/anims/baked/magic/idle.glb`,
+    `${ICO}/totem_2.png`,
+    true,
+    { tab: 'r2' }
+  ),
+];
+
 type PlaceableItem = {
   id: string;
   label: string;
@@ -335,13 +534,37 @@ function mergeByKey(base: WarlordsDragItem[], extra: WarlordsDragItem[]): Warlor
 
 /** Static SSOT snapshot — captains / units / enemies / weapons / islands always available. */
 export const WARLORDS_STATIC_LIBRARY: WarlordsDragItem[] = [
+  ...WARLORDS_SECTORS,
+  ...WARLORDS_SCENES,
   ...WARLORDS_CAPTAINS,
   ...WARLORDS_UNITS,
   ...WARLORDS_ENEMIES,
   ...WARLORDS_WEAPONS,
   ...WARLORDS_ISLANDS,
   ...WARLORDS_HD_ZONES,
+  ...WARLORDS_VFX,
+  ...WARLORDS_TEXTURES,
+  ...WARLORDS_ANIMS,
 ];
+
+export function itemsForTab(
+  list: WarlordsDragItem[],
+  tab: 'warlords' | 'd1' | 'r2' | 'vfx'
+): WarlordsDragItem[] {
+  if (tab === 'vfx') return list.filter((r) => r.group === 'vfx');
+  if (tab === 'r2')
+    return list.filter(
+      (r) =>
+        r.tab === 'r2' ||
+        r.group === 'textures' ||
+        r.group === 'animations' ||
+        r.group === 'weapons' ||
+        r.group === 'meshes'
+    );
+  if (tab === 'd1')
+    return list.filter((r) => r.key.startsWith('ummorpg-') || r.tab === 'd1');
+  return list.filter((r) => r.group !== 'vfx' && r.tab !== 'r2');
+}
 
 export async function loadWarlordsLibrary(): Promise<WarlordsDragItem[]> {
   try {

@@ -25,12 +25,18 @@
         <span class="iconfont icon-a-disanrencheng1x"></span>
       </el-tooltip>
     </div>
+    <div class="transform-controls-item" @click="groundSelected">
+      <el-tooltip content="Asset to ground (G)" placement="left">
+        <span class="iconfont icon-moxing"></span>
+      </el-tooltip>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useSceneStore } from '@/store/sceneEditStore';
 import { TRANSFORM_CONTROLS_TYPE } from '@/enums/enum';
+import { ElMessage } from 'element-plus';
 
 const transformTypeList = [
   {
@@ -100,6 +106,9 @@ const keyDownEventListener = (event: KeyboardEvent) => {
     //Ctrl+Shift+Z Redo
     event.preventDefault();
     store.sceneApi?.historyModules.redo();
+  } else if (event.key.toLowerCase() === 'g') {
+    event.preventDefault();
+    groundSelected();
   } else if (event.key.toLowerCase() === 'f') {
     //F Focus
     event.preventDefault();
@@ -112,6 +121,13 @@ const keyDownEventListener = (event: KeyboardEvent) => {
     }
   }
 };
+const groundSelected = () => {
+  const api = store.sceneApi as { snapSelectedToGround?: () => { ok: boolean; terrainId: string } } | null;
+  const result = api?.snapSelectedToGround?.();
+  if (result?.ok) ElMessage.success(`Grounded on ${result.terrainId}`);
+  else ElMessage.warning('Select an asset first (drop a sector for terrain)');
+};
+
 // switch transform mode
 const handleTransformControlsType = (type: TRANSFORM_CONTROLS_TYPE) => {
   transformControlsType.value = type;

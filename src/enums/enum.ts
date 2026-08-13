@@ -169,9 +169,11 @@ export enum ENVIRONMENT_TYPE {
  */
 export enum DRAG_MODEL_TYPE {
   Model = 'model',
+  D1 = 'd1',
+  R2 = 'r2',
+  Vfx = 'vfx',
   Geometry = 'geometry',
   Light = 'light',
-
 }
 
 /**
