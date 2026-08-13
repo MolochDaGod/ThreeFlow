@@ -9,7 +9,11 @@
       <RightPanelContent :pageLoading="loadingInfo.pageLoading" />
     </div>
     <!-- loading state -->
-    <Loading :percentage="loadingInfo.percentage" :loading="loadingInfo.loading" />
+    <Loading
+      :percentage="loadingInfo.percentage"
+      :loading="loadingInfo.loading"
+      :loadingText="loadingInfo.text"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -44,6 +48,7 @@ const loadingInfo = shallowReactive({
   percentage: 0,
   loading: false,
   pageLoading: false,
+  text: 'First load can take a while. Please wait...',
 });
 
 onMounted(async () => {
@@ -109,13 +114,15 @@ const dropModel = async (e: DragEvent) => {
         percentage: 0,
       });
       if (terrainPreset && store.sceneApi?.loadHdTerrain) {
+        loadingInfo.text = 'Load screen · generating HD terrain…';
         await store.sceneApi.loadHdTerrain(
           terrainPreset,
           clientX,
           clientY,
           name,
-          (pct) => {
+          (pct, msg) => {
             loadingInfo.percentage = Math.round(pct);
+            loadingInfo.text = `Load screen · ${msg}`;
           }
         );
       } else {
@@ -124,7 +131,8 @@ const dropModel = async (e: DragEvent) => {
           fileType,
           clientX,
           clientY,
-          name
+          name,
+          { group: modelData.group }
         );
       }
     } finally {

@@ -44,9 +44,17 @@ import {
   getMousePosition,
   setModelPositionSize,
 } from './sceneModules';
+import { kindFromGroup, type PlaceKind } from './siPlace';
+import {
+  bootstrapRaceKit,
+  findRaceKitRoot,
+  raceIdFromName,
+  setHoverMesh,
+} from './raceKit';
 import {
   generateDs2Terrain,
   type Ds2PresetId,
+  type Ds2Quality,
 } from './sceneModules/ds2Terrain';
 
 const store = useSceneStore();
@@ -512,7 +520,8 @@ class renderScene {
     fileType: MODEL_TYPE,
     clientX: number,
     clientY: number,
-    name: string
+    name: string,
+    opts?: { group?: string }
   ): Promise<void | boolean> {
     return new Promise((resolve, reject) => {
       if (!this.scene) {
@@ -525,6 +534,7 @@ class renderScene {
       const loader = ['glb', 'gltf'].includes(fileType)
         ? this.getDracoLoader()
         : this.fileLoaderMap[fileType];
+      const kind: PlaceKind = kindFromGroup(opts?.group, filePath);
 
       loader.load(
         filePath,
@@ -537,10 +547,14 @@ class renderScene {
           const mousePosition = getMousePosition(clientX, clientY);
 
           if (this.scene && model) {
-            setModelPositionSize(model, mousePosition);
             model.name = name;
+            if (kind === 'captain' || kind === 'unit') {
+              bootstrapRaceKit(model, raceIdFromName(name, filePath));
+            }
+            setModelPositionSize(model, mousePosition, kind);
             this.scene.add(model);
             this.setObjectHighlight(model);
+            this.bindRaceKitHover();
           }
 
           this.loadingStatus = true;
@@ -565,12 +579,13 @@ class renderScene {
     clientX: number,
     clientY: number,
     name: string,
-    onProgress?: (pct: number, msg: string) => void
+    onProgress?: (pct: number, msg: string) => void,
+    quality: Ds2Quality = 'edit'
   ): Promise<void> {
     if (!this.scene) throw new Error('Scene not initialized');
     this.loadingStatus = false;
     try {
-      const root = await generateDs2Terrain(preset, onProgress);
+      const root = await generateDs2Terrain(preset, onProgress, quality);
       const mouse = getMousePosition(clientX, clientY);
       root.name = name;
       this.scene.add(root);
@@ -941,6 +956,35 @@ class renderScene {
     } else {
       this.boxHelper.visible = true;
     }
+  }
+
+  /** Hover armour pieces on the selected race kit (emissive preview). */
+  bindRaceKitHover() {
+    const canvas = this.renderer?.domElement;
+    if (!canvas || (canvas as HTMLCanvasElement).dataset.raceHover === '1')
+      return;
+    (canvas as HTMLCanvasElement).dataset.raceHover = '1';
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    canvas.addEventListener('pointermove', (ev: PointerEvent) => {
+      const uuid = store.currentTransformMaterialUuid;
+      const selected = uuid
+        ? this.scene?.getObjectByProperty('uuid', uuid) || null
+        : null;
+      const root = findRaceKitRoot(selected);
+      if (!root || !this.camera || !this.container) return;
+      const rect = this.container.getBoundingClientRect();
+      pointer.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, this.camera);
+      const hits = raycaster.intersectObject(root, true);
+      const mesh = hits.find((h) => (h.object as THREE.Mesh).isMesh)?.object;
+      const name = mesh?.name || null;
+      const kit = root.userData.raceKit as { hoverMesh?: string | null } | undefined;
+      if (kit && kit.hoverMesh === name) return;
+      setHoverMesh(root, name);
+      store.setTransformMaterialRandomId();
+    });
   }
   /**
    * update geometry

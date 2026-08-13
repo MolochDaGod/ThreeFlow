@@ -32,6 +32,12 @@
               <el-dropdown-item @click="importScene">
                 <span class="iconfont icon-daoru">&nbsp;Import scene (.json)</span>
               </el-dropdown-item>
+              <el-dropdown-item @click="generateHdDeployPack">
+                <span class="iconfont icon-daochu">&nbsp;HD terrain deploy pack…</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="exportExistingHdPack">
+                <span class="iconfont icon-glb">&nbsp;Export scene HD terrains…</span>
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -81,6 +87,12 @@ import * as THREE from "three";
 import type { ExportType } from "@/types/rightPanelTypes";
 import { exportSceneModel } from "@/utils/sceneModules";
 import { EXPORT_TYPE } from "@/enums/enum";
+import { HD_DEPLOY_TARGETS } from "@/config/hdTerrainDeploy";
+import {
+  collectHdTerrainRoots,
+  exportHdTerrainPack,
+} from "@/utils/sceneModules/hdTerrainExport";
+import type { Ds2PresetId } from "@/utils/sceneModules/ds2Terrain";
 
 const store = useSceneStore();
 const indexDbStore = useIndexDbStore();
@@ -280,6 +292,88 @@ const chooseSceneJson = async (file: File) => {
     }
   } catch {
     ElMessage.error("Failed to import scene");
+  } finally {
+    loading.value = false;
+  }
+};
+
+const pickHdTarget = async () => {
+  const { value } = await ElMessageBox.prompt(
+    HD_DEPLOY_TARGETS.map((t) => `${t.id} — ${t.label}`).join("\n"),
+    "Sector / map target",
+    {
+      confirmButtonText: "Use target",
+      inputPlaceholder: "haven_shore",
+      inputValue: "haven_shore",
+    }
+  );
+  const target = HD_DEPLOY_TARGETS.find((t) => t.id === String(value).trim());
+  if (!target) throw new Error("Unknown sector/map id");
+  return target;
+};
+
+const generateHdDeployPack = async () => {
+  if (!store.sceneApi?.scene) return;
+  try {
+    const { value: presetRaw } = await ElMessageBox.prompt(
+      "Preset: mountains | crags | zone",
+      "Generate HD terrain",
+      { inputValue: "mountains", confirmButtonText: "Next" }
+    );
+    const preset = String(presetRaw).trim() as Ds2PresetId;
+    if (!["mountains", "crags", "zone"].includes(preset)) {
+      throw new Error("Preset must be mountains, crags, or zone");
+    }
+    const target = await pickHdTarget();
+    loading.value = true;
+    loadingText.value = "Load screen · generating deploy mesh…";
+    const box = store.sceneApi.container?.getBoundingClientRect();
+    const cx = box ? box.left + box.width / 2 : 0;
+    const cy = box ? box.top + box.height / 2 : 0;
+    await store.sceneApi.loadHdTerrain(
+      preset,
+      cx,
+      cy,
+      `HD ${preset} · ${target.id}`,
+      (pct, msg) => {
+        loadingText.value = `Load screen · ${msg}`;
+      },
+      "deploy"
+    );
+    loadingText.value = "Load screen · exporting GLB + deploy.json…";
+    const roots = collectHdTerrainRoots(store.sceneApi.scene);
+    const files = await exportHdTerrainPack(roots.slice(-1), target);
+    ElMessage.success(
+      `Downloaded ${files.rawName} + ${files.jsonName}. Put them in deploys/hd-terrain/in then run pnpm bake:hd-terrain`
+    );
+  } catch (err) {
+    if (err !== "cancel") {
+      ElMessage.error(err instanceof Error ? err.message : "HD pack failed");
+    }
+  } finally {
+    loading.value = false;
+  }
+};
+
+const exportExistingHdPack = async () => {
+  if (!store.sceneApi?.scene) return;
+  try {
+    const roots = collectHdTerrainRoots(store.sceneApi.scene);
+    if (!roots.length) {
+      ElMessage.warning("No HD terrain in the scene — generate or drop one first");
+      return;
+    }
+    const target = await pickHdTarget();
+    loading.value = true;
+    loadingText.value = "Load screen · exporting GLB + deploy.json…";
+    const files = await exportHdTerrainPack(roots, target);
+    ElMessage.success(
+      `Downloaded ${files.rawName} + ${files.jsonName}. Move into deploys/hd-terrain/in then pnpm bake:hd-terrain`
+    );
+  } catch (err) {
+    if (err !== "cancel") {
+      ElMessage.error(err instanceof Error ? err.message : "Export failed");
+    }
   } finally {
     loading.value = false;
   }

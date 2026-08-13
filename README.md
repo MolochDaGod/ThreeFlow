@@ -18,7 +18,7 @@ The left **Warlords** tab is the existing Grudge CDN + ObjectStore catalog — n
 | **Weapons** | Hand axe, greataxe, greatswords, bows + siege | Verified `models/weapons/**` GLBs + catapult / bolt thrower |
 | **Meshes** | Camps, houses, benches, walls, ships, mounts | ObjectStore `ummorpg-placeables-for-forge.json` (GLB only) |
 | **Islands** | Home island, pirate-islands lobby, Lyoko, Spiral, Hoth | `islandDeployments` / `map-registry` meshes |
-| **HD zones** | Eroded mountains, crags, flatter zone | [Hard Road DS2 terrain](https://hardroad.xyz/demos/ds2-terrain.html) — CPU heightfield, SI ~400 m |
+| **HD zones** | Eroded mountains, crags, flatter zone | [Hard Road DS2](https://hardroad.xyz/demos/ds2-terrain.html) — generate in editor, **deploy pack** + Node Draco for sectors/maps |
 
 **Rules**
 
@@ -28,6 +28,17 @@ The left **Warlords** tab is the existing Grudge CDN + ObjectStore catalog — n
 - SI: 1 unit = 1 m. Human ~1.8 m. Do not scale kits into 100× giants.
 - Player bag / roster / wallet stay on Railway. This editor does not invent a second character DB.
 - Island GLBs are whole maps. Drop one at a time. Isolate children when placing props — do not treat `example_home_island.glb` as one harvest entity in play.
+
+### HD terrain → sector / map deploy
+
+1. Drop an HD zone **or** **Scene → HD terrain deploy pack…** (preset + `haven_shore` / other map-registry sector or pirate/home map).
+2. Load screen stays up while the heightfield runs, then while GLB + `deploy.json` download.
+3. Move `hd-{id}.raw.glb` and `hd-{id}.deploy.json` into `deploys/hd-terrain/in/`.
+4. `pnpm bake:hd-terrain` — Node Draco via ObjectStore `glb2glb` (no `--height` on maps), else `gltf-transform draco`.
+5. Output: `deploys/hd-terrain/out/{id}/terrain.glb` + `deploy.json` (`r2Key`, HelpersLoadScreen contract, `WorldMeshNode`).
+6. `wrangler r2 object put` using the command in that JSON. Play/Open must show the load screen until the CDN GLB HEADs 200 — never hot-swap an unfinished sector.
+
+Code: `src/config/hdTerrainDeploy.ts` · `src/utils/sceneModules/hdTerrainExport.ts` · `scripts/bake-hd-terrain.mjs`.
 
 Code: `src/config/warlordsCatalog.ts` → left drag list. About copy is the **About** tab in the right panel.
 

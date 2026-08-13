@@ -7,6 +7,7 @@ import * as THREE from 'three';
  */
 
 export type Ds2PresetId = 'mountains' | 'crags' | 'zone';
+export type Ds2Quality = 'edit' | 'deploy';
 
 export interface Ds2Params {
   seed: number;
@@ -24,6 +25,18 @@ export interface Ds2Params {
 }
 
 export const DS2_SOURCE = 'https://hardroad.xyz/demos/ds2-terrain.html';
+
+/** Editor = viewport-safe. Deploy = denser mesh for Node/Draco sector bake. */
+export function paramsForQuality(base: Ds2Params, quality: Ds2Quality): Ds2Params {
+  if (quality === 'edit') return { ...base };
+  return {
+    ...base,
+    sim: Math.min(256, base.sim + 64),
+    mesh: 384,
+    fluvIters: base.fluvIters + 10,
+    droplets: Math.round(base.droplets * 1.35),
+  };
+}
 
 export const DS2_PRESETS: Record<Ds2PresetId, Ds2Params> = {
   mountains: {
@@ -475,9 +488,10 @@ function imposeWash(map: Float32Array, n: number, washW: number, pa: number, pb:
 
 export async function generateDs2Terrain(
   preset: Ds2PresetId,
-  onProgress?: (pct: number, msg: string) => void
+  onProgress?: (pct: number, msg: string) => void,
+  quality: Ds2Quality = 'edit'
 ): Promise<THREE.Group> {
-  const P = DS2_PRESETS[preset];
+  const P = paramsForQuality(DS2_PRESETS[preset], quality);
   const report = async (pct: number, msg: string) => {
     onProgress?.(pct, msg);
     await tick();
@@ -583,7 +597,10 @@ export async function generateDs2Terrain(
     isTransformControls: true,
     hardroad: DS2_SOURCE,
     ds2Preset: preset,
+    ds2Quality: quality,
     worldMeters: P.world,
+    sim: P.sim,
+    mesh: P.mesh,
   };
   root.add(mesh);
   await report(100, 'ready');

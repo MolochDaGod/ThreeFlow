@@ -39,8 +39,12 @@
         (<a href="https://hardroad.xyz/demos/ds2-terrain.html" target="_blank"
           >hardroad.xyz/demos/ds2-terrain.html</a
         >). Mountains, crags, and a flatter zone — SI metres, ~400 m across.
-        Editor mesh is 256² (the live demo is 1536²). Drop generates in-place;
-        do not scale the result to 1.2 m.
+        Editor drop is 256². <strong>Scene → HD terrain deploy pack</strong>
+        generates a denser mesh, downloads <code>.raw.glb</code> +
+        <code>.deploy.json</code> (sector/map + HelpersLoadScreen contract),
+        then <code>pnpm bake:hd-terrain</code> Draco-compresses via ObjectStore
+        <code>glb2glb</code>. Keep the load screen up until the baked GLB is
+        on CDN. Targets are existing Warlords 9 sectors + pirate/home maps.
       </p>
       <p>
         Host: <code>assets.grudge-studio.com</code>. Player bag / roster stays
