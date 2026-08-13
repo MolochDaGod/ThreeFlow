@@ -18,6 +18,7 @@ import {
 } from '@/config/constant';
 import { normalizeShadowType } from '@/config/propertyConfig';
 import { cloneDeep } from 'lodash-es';
+import { placeAssetSi, type PlaceKind } from '@/utils/siPlace';
 
 const store = useSceneStore();
 
@@ -284,7 +285,8 @@ export const getFilename = (ext: string): string =>
  */
 export const setModelPositionSize = (
   model: THREE.Object3D,
-  mousePosition: THREE.Vector3
+  mousePosition: THREE.Vector3,
+  kind?: PlaceKind
 ) => {
   const { controls, camera, container } = store.sceneApi || {};
   if (!model || !controls || !camera || !container) return;
@@ -295,23 +297,13 @@ export const setModelPositionSize = (
       child.receiveShadow = true;
     }
   });
-  // 更新Models的世界矩阵
-  model.position.set(mousePosition.x, mousePosition.y, mousePosition.z);
-  model.updateMatrixWorld();
-
   model.userData = {
     ...model.userData,
     isTransformControls: true,
   };
-  // 计算Models包围盒
-  const box = new THREE.Box3().setFromObject(model);
-  const size = box.getSize(new THREE.Vector3());
-  const maxSize = Math.max(size.x, size.y, size.z);
-  const scale = 1.2 / (maxSize > 1 ? maxSize : 0.5);
-
+  const report = placeAssetSi(model, kind || 'import', mousePosition);
+  model.userData.siPlace = report;
   camera?.updateProjectionMatrix();
-
-  model.scale.set(scale, scale, scale);
 };
 
 /**

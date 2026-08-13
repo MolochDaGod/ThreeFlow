@@ -37,6 +37,7 @@ export interface ModelType {
   id: number | string;
   key: string;
   name: string;
+  group?: string;
 }
 
 export interface GeometryType {

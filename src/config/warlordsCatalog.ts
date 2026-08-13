@@ -64,7 +64,7 @@ function item(
   };
 }
 
-/** Play bodies — Toon RTS GLB (grudge6-cdn-ssot). Not races bake / FBX / Meshy. */
+/** Play bodies — Toon RTS GLB (grudge6-cdn-ssot). SI place + race kit equip on drop. */
 export const WARLORDS_CAPTAINS: WarlordsDragItem[] = (
   [
     ['human', 'Human captain'],

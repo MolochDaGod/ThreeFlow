@@ -77,6 +77,9 @@
         <el-tab-pane label="Animation" :name="TAB_TYPE.Animation" v-if="animationsList.length">
           <AnimationsProperty :animationsList="animationsList" />
         </el-tab-pane>
+        <el-tab-pane label="Race kit" :name="TAB_TYPE.Race" v-if="hasRaceKit">
+          <RaceKitPanel />
+        </el-tab-pane>
       </el-tabs>
     </div>
   </div>
@@ -94,9 +97,18 @@ import MaterialProperty from "./modules/MaterialProperty/index.vue";
 import MeshProperty from "./modules/MeshProperty/index.vue";
 import GeometryProperty from "./modules/GeometryProperty/index.vue";
 import AnimationsProperty from "./modules/AnimationsProperty/index.vue";
+import RaceKitPanel from "./modules/RaceKitPanel/index.vue";
+import { findRaceKitRoot } from "@/utils/raceKit";
 import { SCENE_OBJECT_NAME, TAB_TYPE } from "@/enums/enum";
 
 const store = useSceneStore();
+const hasRaceKit = computed(() => {
+  const uuid = store.currentTransformMaterialUuid;
+  const scene = store.sceneApi?.scene;
+  if (!uuid || !scene) return false;
+  const obj = scene.getObjectByProperty("uuid", uuid);
+  return Boolean(findRaceKitRoot(obj as THREE.Object3D | null));
+});
 
 // format scene data
 const formattedSceneData = computed(() => {
@@ -147,6 +159,10 @@ const controlsEventListener = ref();
 const expandedKeys = ref<string[]>([]);
 
 // latest material data
+watch(hasRaceKit, (on) => {
+  if (on) currentTab.value = TAB_TYPE.Race;
+});
+
 watch(currentTransformMaterialUuid, async () => {
   const material = store.sceneApi?.scene?.getObjectByProperty(
     "uuid",

@@ -298,4 +298,5 @@ export enum TAB_TYPE {
   Material = 'material',
   Geometry = 'geometry',
   Animation = 'animation',
+  Race = 'race',
 }
