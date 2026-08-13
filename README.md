@@ -1,244 +1,96 @@
-# ThreeFlow (English)
+# Grudge Studio · Warlords Engine (ThreeFlow)
 
-Grudge fork: [MolochDaGod/ThreeFlow](https://github.com/MolochDaGod/ThreeFlow).  
-Live: [https://threeflow.vercel.app](https://threeflow.vercel.app).  
-UI, menus, toasts, and this README are English. Production `base` is `/` for Vercel (`VITE_APP_BASE_URL`).
+Grudge fork of [zhangbo126/ThreeFlow](https://github.com/zhangbo126/ThreeFlow) for **Warlords-era** scene layout.
 
-Upstream author: answer / zhangbo126. License: AGPL-3.0 (keep logo, name, and author notice).
+| | |
+|--|--|
+| **Live** | https://threeflow-grudgenexus.vercel.app/ |
+| **Repo** | https://github.com/MolochDaGod/ThreeFlow |
+| **Play** | https://grudgewarlords.com |
+| **Forge (product editor)** | https://forge.grudge-studio.com/editor |
+| **AI worker** | https://ai.grudge-studio.com |
 
-### Warlords / uMMORPG library
+This SPA is a **Warlords layout / library / systems host**. It is **not** a second Forge, not a player DB, and not ThreeFlowX.
 
-The left **Warlords** tab is the existing Grudge CDN + ObjectStore catalog — not a new asset pack and not the original demo police / taxi GLBs.
+Upstream author: **answer / zhangbo126**. License: **AGPL-3.0** — keep logo, project name, and author notice.
 
-| Tab | What to drag | Source |
-|-----|----------------|--------|
-| **Captains** | Human, barbarian, elf, dwarf, orc, undead | Play kits `asset-packs/toon-rts-characters/glb/characters/{race}.glb` |
-| **Units** | Warrior / archer per race | `models/warlords/entities/*.glb` (`cdn_ready` uMMORPG extract) |
-| **Enemies** | Drake, ifrit, lava golem, reptile, monster pack, crab, skeletons | `models/creatures/land/*` + `models/skeletons/*` |
-| **Weapons** | Hand axe, greataxe, greatswords, bows + siege | Verified `models/weapons/**` GLBs + catapult / bolt thrower |
-| **Meshes** | Camps, houses, benches, walls, ships, mounts | ObjectStore `ummorpg-placeables-for-forge.json` (GLB only) |
-| **Islands** | Home island, pirate-islands lobby, Lyoko, Spiral, Hoth | `islandDeployments` / `map-registry` meshes |
-| **HD zones** | Eroded mountains, crags, flatter zone | [Hard Road DS2](https://hardroad.xyz/demos/ds2-terrain.html) — generate in editor, **deploy pack** + Node Draco for sectors/maps |
+## What it is
 
-**Rules**
+Vue 3 + Vite + Three.js `^0.185` editor. Left library loads **game-ready CDN GLBs**. Right tabs: Scene · Systems · Script · AI · Project · About.
 
-- Host: `https://assets.grudge-studio.com` only. Catalog: `https://objectstore.grudge-studio.com/api/v1/ummorpg-placeables-for-forge.json`.
-- Skip `unity_prefab_only` and race-kit **FBX** rows (mage / paladin / merc still need unique GLB bakes).
-- Captains here are **look / layout** — Warlords play still loads via `loadRaceKit` (`js/grudge6-kit.js`).
-- SI: 1 unit = 1 m. Human ~1.8 m. Do not scale kits into 100× giants.
-- Player bag / roster / wallet stay on Railway. This editor does not invent a second character DB.
-- Island GLBs are whole maps. Drop one at a time. Isolate children when placing props — do not treat `example_home_island.glb` as one harvest entity in play.
+| Column | Rule |
+|--------|------|
+| Meshes | `https://assets.grudge-studio.com` only (R2). Unique entity `.glb` — never fused race packs or Unity `.prefab` |
+| Index | D1 / ObjectStore catalogs. Prefabs: `client.grudge-studio.com/api/v1/warlords-entity-prefabs.json` |
+| Placeables | `objectstore.grudge-studio.com/api/v1/ummorpg-placeables-for-forge.json` — `cdn_ready` **GLB only** |
+| Player SSOT | Railway (bag / roster / wallet). Not this editor |
+| Physics | One world: `@dimforge/rapier3d-compat` |
+| Nav (editor) | `three-pathfinding` from stamped terrain. Play bake stays Forge recast |
+| AI motion | Yuka `^0.7` on the **root**. One mixer on the kit |
+| SI | 1 unit = 1 m. Human ~1.8 m. Never squash islands/weapons to 1.2 m |
 
-### HD terrain → sector / map deploy
+## Left library
 
-1. Drop an HD zone **or** **Scene → HD terrain deploy pack…** (preset + `haven_shore` / other map-registry sector or pirate/home map).
-2. Load screen stays up while the heightfield runs, then while GLB + `deploy.json` download.
-3. Move `hd-{id}.raw.glb` and `hd-{id}.deploy.json` into `deploys/hd-terrain/in/`.
-4. `pnpm bake:hd-terrain` — Node Draco via ObjectStore `glb2glb` (no `--height` on maps), else `gltf-transform draco`.
-5. Output: `deploys/hd-terrain/out/{id}/terrain.glb` + `deploy.json` (`r2Key`, HelpersLoadScreen contract, `WorldMeshNode`).
-6. `wrangler r2 object put` using the command in that JSON. Play/Open must show the load screen until the CDN GLB HEADs 200 — never hot-swap an unfinished sector.
+| Filter | What you drop |
+|--------|----------------|
+| **9 sectors** | Warlords map-registry ids as stamped HD terrain |
+| **Captains** | Toon RTS `{race}.glb` — look/layout; play still uses `loadRaceKit` |
+| **Units** | Unique `models/warlords/entities/{id}.glb` (archer/warrior per race) |
+| **Prefabs** | Same GLBs + `prefabId` / kind / SI / default scripts from the prefab index |
+| **Enemies** | Land creatures + skeleton residuals |
+| **Weapons** | Verified weapon GLBs + catapult / bolt thrower |
+| **Meshes** | Camps, houses, ships, mounts — unique entity GLB |
+| **Islands / Scenes** | Home island, pirate lobby, Fruzer, Hoth dojo stand-in |
+| **HD zones** | Hard Road DS2 — generate, then Scene → HD terrain deploy pack |
+| **D1 / R2 / VFX** | Catalog / binaries / VFX GLBs |
 
-Code: `src/config/hdTerrainDeploy.ts` · `src/utils/sceneModules/hdTerrainExport.ts` · `scripts/bake-hd-terrain.mjs`.
+**Skipped on purpose:** `unity_prefab_only`, `.fbx`, `icon_only` (no mesh), `kit_linked` fused `*_characters.glb`, whole `free_survival_asset_kit.glb`. Mage / paladin / merc still need unique GLB bakes.
 
-Code: `src/config/warlordsCatalog.ts` → left drag list. About copy is the **About** tab in the right panel.
+**New prefab assets:** convert to meshopt GLB (`grudge-asset-convert`) → upload R2 `models/warlords/entities/{slug}.glb` → register ObjectStore + prefab JSON. Do not commit multi-GB binaries to this repo.
 
-### Project Name: ThreeFlow (3D Scene Editor)
-<a href='https://gitee.com/ZHANG_6666/three-flow/stargazers'><img src='https://gitee.com/ZHANG_6666/three-flow/badge/star.svg?theme=dark' alt='star'></img></a> 
-<a href='https://gitee.com/ZHANG_6666/three-flow/members'><img src='https://gitee.com/ZHANG_6666/three-flow/badge/fork.svg?theme=dark' alt='fork'></img></a>
-<a target="_black" href="https://github.com/zhangbo126/ThreeFlow">
-<img alt="github-starts" src="https://img.shields.io/github/stars/zhangbo126/ThreeFlow?style=social">
-</a><a target="_black" href="https://github.com/zhangbo126/ThreeFlow">
-<img alt="github-fork" src="https://img.shields.io/github/forks/zhangbo126/ThreeFlow?style=social">
-</a>
-<a target="_black" href="https://space.bilibili.com/284991231">
-<img alt="github-fork" src="https://img.shields.io/badge/dynamic/json?url=https://api.bilibili.com/x/relation/stat?vmid=284991231&query=data.follower&color=282c34&label=%E7%AD%94%E6%A1%88&labelColor=FE7398&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAD7ElEQVR4nO2dW9WrMBCFK6ESkFAJSKiESqgEHCABCZWAhEpAAhL2ecik5dDc%2FpXLBDLfWnlqy0xmJ5BMQnq5CIIgCIIgCIIgCIIgCEIBAHQAemYfrgCunD6wAKAHsEKxALgx+bCQD8%2FS9tmgVqeDr1lLigDgZvDhXso+K9TyTBQRwRJ8AHjntl0Flh5QRAQK%2FmKxPeayWx2OXpBNBKiHvi34b7T2MC4pAvW6twR%2FRwkRKPizBN8CgEcuESj4Lwm+BwBjahEk+H8EwJRKhOaCDzW8e1JLfkUUH1NgmR3XmHffHR1l+72BSs8d7w8U+JDAnZERQMcV+CtUi7dNqFqibB4J7vtrq7xKCuAasbTMXCL4T+5aVk6+2xHUrWdhruAR6HIJcOeu2UHI8zyAe2ytWfEdWz9PVvQ8YAmIQ5dDAB9LFsMVAv8oMO2zAGrC5WNIarRiAuKR9jYEd9pY08aa6uUzIHGRdkgKd8pY0yc1WjEBAqypDYoAG0QAZkQAZkQAZkQAZk4vANQenjsSzS3I%2FwcSbXU5jQBUkRtdf4Rar90v8kSv3+I3ffCCSpk8I%2Fw+lgDkdI%2Fv2rEp2CaiWm1AsDQLlDAD+dlFXLMeAaCSeLZdaSFE5VUQNot38cKuEeBgAsSuG0flVZBmEanbXfNQAsS0fgBYIn2fIu3%2FBBMHEyBmDXlFfA8IzeHb+Ems4WAChKykrVA9ZfsQTL57jXzRg4A5wC%2FA8N4ADiZAZwm2XjW75Qh2KOTfA0p4kygPw28OJcCVgn3nDnYo2EwEYRgGH0qAMyICMCMCMCMCMCMCMCMCMCMCfP3qwHDOQ4AAUekTk8FaBRihJnZdYbvtCGC7LvmkM63GjVDINPFrQgCq5ETXfmMzI90FXzPvfqt7x4rEu%2FZaEcCUxFvgz2zO+BUn6UkoaEEAsptiMSX5e8FoRYCN7cVgb4Vq7U%2FH50Pq4JNP7Qiw8UFnJwcK+tXy+Wj6PLEvPgHSHv5UgwA1IQIwwyFAyLJin9RoxYgAzAQIkPwNmf26busC+OIx5TDqo5nDT+F%2FSS%2F9CYzwb+No49zNy2evkYv0LywGGAXUvp6eSneycqOic0w20k7CNgKE7jJunSGLACTCxF27ylmQc98T5MQUH49swd+I0HPXslLKnT0N+wnkrTKi9JZL%2FL9i1SorMmdeQ4TQQ7OFMxIMzGD45w8nUL1im7efENZLJpgPSw0pfz0cdt4U3230Td%2FTvx2R6d2FrHhEWLkq5PELOMsRPHCPnAZGv1xJteL7jbJiaW3sB2nDvPC%2FosSYvjRQz4cJ6n7KO3rYQL7M+L6nVtfDVRAEQRAEQRAEQRAEIZ5%2FSAXmdfXaoQsAAAAASUVORK5CYII%3D&cacheSeconds=3600">
-</a>
+On drop, prefabs stamp `userData.warlordsPrefab` plus:
 
-### Project Description
+| Kind | Script / collider |
+|------|-------------------|
+| unit / mount | `behavior=patrol` + MMO aggro/threat/cast + Rapier capsule NPC |
+| structure | Terrain / fixed / cuboid |
+| siege | Item / fixed / cuboid |
+| vehicle | Default / kinematic / cuboid |
 
-ThreeFlow is a 3D scene editor built with **Three.js + Vue 3 + Vite + TypeScript**.
+Aggro rings: 25 / 15 / 30 / 50 m (`AGGRO_CONFIG`). Skill: `grudge-ai-brains`.
 
-The project follows enterprise-level development standards and integrates **ESLint**, **Stylelint**, **Prettier**, **Husky**, and **CommitLint** to ensure a robust code quality and automation pipeline.
+## Systems / Script / AI
 
-Core Three.js operation modules are abstracted and modularized, which significantly reduces the cost and complexity of using Three.js within a modern frontend framework (Vue 3).
+- **Systems** — scene templates, BVH, nav zone, Rapier preview, brain stamp, MMO telegraph
+- **Script** — three.js editor pad (`THREE`, `scene`, `camera`, `selected`). Play scripts stay on Forge
+- **AI** — pop live `ai.*` / Forge worker (not 70 tools copied into Vue)
 
-### 🌐 Install / Dev / Build (see `package.json` for details)
+## Dev / build
 
 ```bash
 pnpm install
-
-pnpm serve
-
-pnpm build
-# or
-pnpm build:pro
+pnpm serve          # Vite, port 1000
+pnpm build          # vue-tsc + vite
+pnpm bake:hd-terrain
 ```
 
-### 💚 Support the Project ⭐
+Vercel production: `npm install --legacy-peer-deps` (`vercel.json`). Node ≥ 20.
 
-If this project is helpful to you, please consider giving it a **star**.  
-Your support is the greatest motivation for the author to keep spending late-night hours improving and maintaining this open-source project.
+HD deploy pack: drop HD zone → **Scene → HD terrain deploy pack…** → `deploys/hd-terrain/in/` → `pnpm bake:hd-terrain` → R2 put from the JSON. Play keeps the load screen until CDN HEAD 200.
 
-### 🎵 Tech Stack
+## Stack
 
-| Name         | Version | Name         | Version |
-| ------------ | ------- | ------------ | ------- |
-| Vue          | 3.5.13  | TypeScript   | 5.7.x   |
-| Vite         | 6.1.x   | Element Plus | 2.9.4   |
-| Three        | 185    | Pinia        | 2.3.x   |
-| TWEEN        | 18.5.0  | More in `package.json` | 🤗 |
+| Package | Pin | Role |
+|---------|-----|------|
+| `three` | ^0.185 | Scene |
+| `@dimforge/rapier3d-compat` | ^0.19 | Physics |
+| `three-mesh-bvh` | ^0.9 | Terrain queries |
+| `three-pathfinding` | ^1.3 | Editor nav |
+| `yuka` | ^0.7 | Root steering |
+| Vue 3.5 / Vite 6 / Element Plus / Pinia | — | Shell |
 
-### 🌺 Development Environment
+## License (AGPL-3.0)
 
-| Name  | Version | Name   | Version |
-| ----- | ------- | ------ | ------- |
-| node  | 21.3.0  | npm    | 10.2.4  |
-| yarn  | 1.22.21 | Windows| 10      |
-| pnpm  | 9.15.1  | mac    | M1–M4   |
+You may use and modify. If you run a modified network service, you must publish that complete source. Keep author notices (logo, name, answer / zhangbo126).
 
-### ⚖️ License
-
-This project is released under the **AGPL-3.0** open-source license.
-
-**You may:**
-- ✅ **Use freely**: For personal learning, research, or commercial projects.
-- ✅ **Modify and extend**: You can freely modify the source code according to your needs.
-
-**However, you MUST comply with the following obligations:**
-- ❗ **Copyleft requirement**: If you modify the code and provide it as a network service (e.g. SaaS, web application), you **must make the complete source code of that service available to all its users**.
-- ❗ **Preserve notices**: You must retain the original author's copyright notices (project logo, project name, author name, etc.) and the license statement.
-
-**⚠️ Any losses or legal risks caused by your failure to comply with the license shall be borne by yourself.**
-
-### 📚 Commercial Pro Version (ThreeFlowX)
-
-**ThreeFlowX (3D Low-code Scene Editor)**:  
-On top of all the existing features of *ThreeFlow*, the Pro version offers:
-
-- Richer and more diverse 3D scene elements
-- More powerful low-code customization capabilities
-- Better performance optimizations
-- More flexible and convenient interaction and editing experience
-- Solutions for loading / rendering / storing multiple models and large-scale scenes
-
-**Online Documentation**:  
-`http://threeflowx.cn/docs/`
-
-**Online Editor**:  
-`http://threeflowx.cn/edit/`
-
-### Project Screenshots
-
-![Preview 1](public/image/demo-1.png)
-![Preview 2](public/image/demo-2.png)
-
-### 👷 Project Directory Structure
-
-Below is a brief overview of the core directories and files.
-
-### 1. Entry Files
-
-- `App.vue`: Root component of the application, containing the router view.
-- `main.js`: Application entry, responsible for initializing the Vue app, registering global components, global state, directives, and plugins.
-
-### 2. `/assets` Directory
-
-Static asset files:
-
-- `iconFont/`: Iconfont assets from Alibaba Iconfont (URL: `https://www.iconfont.cn/`)
-- `image/`: Image assets
-- `previewIcon/`: Model preview images
-- `textures/`: Texture assets
-
-### 3. `/components` Directory
-
-Global components:
-
-- `Loading/`: Custom page loading component
-- `index.ts`: Component export entry
-
-### 4. `/config` Directory
-
-Constant configuration and static data:
-
-- `constant.ts`: Constant definitions
-- `defaultDragList.ts`: Geometry / lights; re-exports the Warlords model list
-- `warlordsCatalog.ts`: Captains, units, enemies, weapons, meshes, island maps from CDN / ObjectStore
-- `propertyConfig.ts`: Static property configuration items
-
-### 5. `/enums` Directory
-
-Global enum definitions:
-
-- `enum.ts`: Enums related to scene, transform controls, materials, etc.
-- `indexDb.ts`: Enums related to IndexedDB databases
-
-### 6. `/layouts` Directory
-
-Layout components:
-
-- `RenderView.vue`: Main layout component for the rendering view; serves as the primary container of the application.
-
-### 7. `/router` Directory
-
-Routing configuration:
-
-- `index.ts`: Vue Router configuration entry, defining application navigation rules.
-
-### 8. `/store` Directory
-
-Pinia state management:
-
-- `indexDbStore.ts`: State management for IndexedDB operations
-- `pinia.ts`: Pinia instance initialization
-- `sceneEditStore.ts`: Core state management for the scene editor (scene objects, selected state, etc.)
-
-### 9. `/style` Directory
-
-Global styles:
-
-- `iconFont.scss`: Iconfont styles
-- `index.scss`: Global common style entry
-- `reset.scss`: Browser default style reset
-
-### 10. `/types` Directory
-
-TypeScript type declarations:
-
-- `global.d.ts`: Global shared type declarations
-- `indexDbTypes.ts`: IndexedDB-related data structure types
-- `renderModelTypes.ts`: Interfaces related to rendered models
-- `rightPanelTypes.ts`: Type definitions for the right-side property panel configuration
-- `three-css3d.d.ts`: Type declarations for the CSS3D renderer
-- `three-utils.d.ts`: Type declarations for Three.js utility functions
-
-### 11. `/utils` Directory
-
-Core utilities and logic:
-
-- `directive.ts`: Vue custom directive registration
-- `globalComponent.ts`: Global component auto-registration
-- `globalProperties.ts`: Vue global property registration
-- `historyModules/`: History module for undo/redo operations
-- `indexedDB.ts`: Encapsulated class for IndexedDB operations
-- `renderScene.ts`: **Core file** encapsulating Three.js scene rendering logic (initialization, render loop, event listeners, etc.)
-- `sceneModules/`: Scene feature modules (lights, animation, transform controls, etc.)
-- `utils.ts`: Common helper functions
-
-### 12. `/views` Directory
-
-Page views:
-
-- `sceneEdit/`: Main view for the 3D scene editor
-  - `index.vue`: Entry component of the editor
-  - `layouts/`: Internal layout components of the editor (left drag panel, right property panel, top toolbar, etc.)
-
-### 🍻 Related links
-
-###### Three.js: [https://threejs.org/](https://threejs.org/)
-
-###### 3D Models Download Website: [https://sketchfab.com/feed](https://sketchfab.com/feed)
-
-###### Texture Assets Website: [https://polyhaven.com/](https://polyhaven.com/)
-
-###### Image Format Conversion Website: [https://onlineconvertfree.com/zh/convert/hdr/](https://onlineconvertfree.com/zh/convert/hdr/)
+Upstream screenshots: `public/image/demo-1.png`. Commercial ThreeFlowX is a **different product** (`threeflowx.cn`) — not this fork.

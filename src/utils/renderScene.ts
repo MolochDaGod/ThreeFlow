@@ -52,6 +52,7 @@ import {
   setHoverMesh,
 } from './raceKit';
 import { snapObjectToTerrain, tagTerrain } from './terrainGround';
+import { stampWarlordsPrefab, type PrefabKind } from './prefabStamp';
 import {
   generateDs2Terrain,
   type Ds2PresetId,
@@ -528,6 +529,9 @@ class renderScene {
       terrainId?: string;
       isTerrain?: boolean;
       playUrl?: string;
+      prefabId?: string;
+      prefabKind?: PrefabKind;
+      siHeightM?: number;
     }
   ): Promise<void | boolean> {
     return new Promise((resolve, reject) => {
@@ -559,6 +563,13 @@ class renderScene {
               bootstrapRaceKit(model, raceIdFromName(name, filePath));
             }
             setModelPositionSize(model, mousePosition, kind);
+            if (opts?.prefabId && opts.prefabKind) {
+              stampWarlordsPrefab(model, {
+                prefabId: opts.prefabId,
+                prefabKind: opts.prefabKind,
+                siHeightM: opts.siHeightM,
+              });
+            }
             if (opts?.isTerrain || kind === 'island') {
               tagTerrain(model, {
                 terrainId: opts?.terrainId || opts?.sectorId || name,

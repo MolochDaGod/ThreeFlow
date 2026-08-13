@@ -1,5 +1,6 @@
 import { DRAG_MODEL_TYPE, MODEL_TYPE } from '@/enums/enum';
 import type { ModelType } from '@/types/renderModelTypes';
+import { slugPrefabId, type PrefabKind } from '@/utils/prefabStamp';
 
 /** Canonical binaries — assets.grudge-studio.com (R2). Do not invent hosts. */
 export const WARLORDS_CDN = 'https://assets.grudge-studio.com';
@@ -7,6 +8,10 @@ export const WARLORDS_CDN = 'https://assets.grudge-studio.com';
 /** Live ObjectStore placeables (uMMORPG + Warlords entity extract). */
 export const UMMORPG_PLACEABLES_URL =
   'https://objectstore.grudge-studio.com/api/v1/ummorpg-placeables-for-forge.json';
+
+/** Warlords entity prefab index — metadata. Unique GLB comes from placeables. */
+export const WARLORDS_PREFABS_URL =
+  'https://client.grudge-studio.com/api/v1/warlords-entity-prefabs.json';
 
 export type WarlordsAssetGroup =
   | 'captains'
@@ -20,7 +25,8 @@ export type WarlordsAssetGroup =
   | 'scenes'
   | 'vfx'
   | 'textures'
-  | 'animations';
+  | 'animations'
+  | 'prefabs';
 
 export interface WarlordsDragItem extends ModelType {
   group: WarlordsAssetGroup;
@@ -34,6 +40,10 @@ export interface WarlordsDragItem extends ModelType {
   isTerrain?: boolean;
   playUrl?: string;
   tab?: 'warlords' | 'd1' | 'r2' | 'vfx';
+  prefabId?: string;
+  prefabKind?: 'unit' | 'structure' | 'vehicle' | 'siege' | 'mount';
+  siHeightM?: number;
+  placeable?: boolean;
 }
 
 export const WARLORDS_GROUP_LABELS: Record<WarlordsAssetGroup, string> = {
@@ -49,6 +59,7 @@ export const WARLORDS_GROUP_LABELS: Record<WarlordsAssetGroup, string> = {
   vfx: 'VFX',
   textures: 'Textures',
   animations: 'Anims',
+  prefabs: 'Prefabs',
 };
 
 const ENT = `${WARLORDS_CDN}/models/warlords/entities`;
@@ -510,15 +521,54 @@ function placeableGroup(row: PlaceableItem): WarlordsAssetGroup | null {
   return 'meshes';
 }
 
+function isUniqueEntityGlb(url: string): boolean {
+  const u = url.toLowerCase();
+  if (!u.endsWith('.glb')) return false;
+  if (u.endsWith('.fbx')) return false;
+  if (u.includes('/prod/gltf/characters/')) return false;
+  if (u.includes('free_survival_asset_kit')) return false;
+  if (u.includes('3_medieval_towers')) return false;
+  return true;
+}
+
 export function placeableToDragItem(row: PlaceableItem): WarlordsDragItem | null {
   const url = row.modelUrl ?? '';
   if (row.meshStatus !== 'cdn_ready') return null;
   if (!url.startsWith('https://assets.grudge-studio.com/')) return null;
-  if (!url.toLowerCase().endsWith('.glb')) return null;
+  if (!isUniqueEntityGlb(url)) return null;
   const group = placeableGroup(row);
   if (!group) return null;
   const key = row.id.replace(/^ummorpg-placeable\//, 'ummorpg-');
-  return item(group, key, row.label, url, row.iconUrl || `${ICO}/Flag_Icon.png`);
+  return item(group, key, row.label, url, row.iconUrl || `${ICO}/Flag_Icon.png`, false, {
+    prefabKind: (row.kind as PrefabKind | undefined) || undefined,
+    tab: 'd1',
+  });
+}
+
+type PrefabRow = {
+  prefabId?: string;
+  id: string;
+  kind?: string;
+  name?: string;
+  displayName?: string;
+  si?: { heightM?: number };
+  game?: { placeable?: boolean };
+  mesh?: { cdnUrl?: string | null; status?: string };
+};
+
+function attachPrefabMeta(list: WarlordsDragItem[], prefabs: PrefabRow[]) {
+  const bySlug = new Map<string, PrefabRow>();
+  for (const p of prefabs) bySlug.set(slugPrefabId(p.id), p);
+  for (const row of list) {
+    const hit =
+      bySlug.get(slugPrefabId(row.key)) ||
+      bySlug.get(slugPrefabId(row.id.toString()));
+    if (!hit) continue;
+    row.prefabId = hit.prefabId || hit.id;
+    row.prefabKind = (hit.kind as PrefabKind) || row.prefabKind;
+    row.siHeightM = hit.si?.heightM;
+    row.placeable = hit.game?.placeable;
+  }
 }
 
 function mergeByKey(base: WarlordsDragItem[], extra: WarlordsDragItem[]): WarlordsDragItem[] {
@@ -562,19 +612,35 @@ export function itemsForTab(
         r.group === 'meshes'
     );
   if (tab === 'd1')
-    return list.filter((r) => r.key.startsWith('ummorpg-') || r.tab === 'd1');
+    return list.filter(
+      (r) =>
+        r.key.startsWith('ummorpg-') ||
+        r.tab === 'd1' ||
+        r.group === 'prefabs' ||
+        Boolean(r.prefabId)
+    );
   return list.filter((r) => r.group !== 'vfx' && r.tab !== 'r2');
 }
 
 export async function loadWarlordsLibrary(): Promise<WarlordsDragItem[]> {
   try {
-    const res = await fetch(UMMORPG_PLACEABLES_URL);
-    if (!res.ok) return WARLORDS_STATIC_LIBRARY;
-    const data = (await res.json()) as { items?: PlaceableItem[] };
-    const live = (data.items ?? [])
-      .map(placeableToDragItem)
-      .filter((row): row is WarlordsDragItem => Boolean(row));
-    return mergeByKey(WARLORDS_STATIC_LIBRARY, live);
+    const [placeRes, prefabRes] = await Promise.all([
+      fetch(UMMORPG_PLACEABLES_URL),
+      fetch(WARLORDS_PREFABS_URL),
+    ]);
+    let merged = [...WARLORDS_STATIC_LIBRARY];
+    if (placeRes.ok) {
+      const data = (await placeRes.json()) as { items?: PlaceableItem[] };
+      const live = (data.items ?? [])
+        .map(placeableToDragItem)
+        .filter((row): row is WarlordsDragItem => Boolean(row));
+      merged = mergeByKey(merged, live);
+    }
+    if (prefabRes.ok) {
+      const data = (await prefabRes.json()) as { prefabs?: PrefabRow[] };
+      attachPrefabMeta(merged, data.prefabs ?? []);
+    }
+    return merged;
   } catch {
     return WARLORDS_STATIC_LIBRARY;
   }
@@ -585,6 +651,7 @@ export function itemsInGroup(
   group: WarlordsAssetGroup | 'all'
 ): WarlordsDragItem[] {
   if (group === 'all') return list;
+  if (group === 'prefabs') return list.filter((row) => Boolean(row.prefabId));
   return list.filter((row) => row.group === group);
 }
 

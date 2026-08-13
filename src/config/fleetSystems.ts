@@ -301,6 +301,17 @@ console.log(selected.name, selected.userData);
 return selected.userData;`,
   },
   {
+    name: 'List Warlords prefabs',
+    source: `const rows = [];
+scene.traverse((o) => {
+  if (o.userData && o.userData.prefabId) {
+    rows.push({ name: o.name, prefabId: o.userData.prefabId, kind: o.userData.prefabKind });
+  }
+});
+console.log(rows);
+return rows;`,
+  },
+  {
     name: 'Rotate selected 90° Y',
     source: `if (!selected) return 'nothing selected';
 selected.rotation.y += Math.PI / 2;

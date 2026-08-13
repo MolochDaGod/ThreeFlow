@@ -110,6 +110,9 @@ const dropModel = async (e: DragEvent) => {
       terrainId?: string;
       isTerrain?: boolean;
       playUrl?: string;
+      prefabId?: string;
+      prefabKind?: 'unit' | 'structure' | 'vehicle' | 'siege' | 'mount';
+      siHeightM?: number;
     };
     const { filePath, fileType, name, terrainPreset } = modelData;
     try {
@@ -148,6 +151,9 @@ const dropModel = async (e: DragEvent) => {
             terrainId: modelData.terrainId,
             isTerrain: modelData.isTerrain,
             playUrl: modelData.playUrl,
+            prefabId: modelData.prefabId,
+            prefabKind: modelData.prefabKind,
+            siHeightM: modelData.siHeightM,
           }
         );
       }

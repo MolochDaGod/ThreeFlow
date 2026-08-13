@@ -3,74 +3,65 @@
     <div class="help-describe-title">About</div>
     <div class="help-describe-content about-block">
       <p>
-        Grudge fork of ThreeFlow for Warlords-era layout. Left library loads
-        <strong>game-ready CDN GLBs</strong> — not demo police / taxi packs.
+        <strong>Grudge Studio · Warlords Engine</strong> — fork of ThreeFlow for
+        era layout. Live
+        <a href="https://threeflow-grudgenexus.vercel.app/" target="_blank"
+          >threeflow-grudgenexus.vercel.app</a
+        >.
+        Not a second Forge, not ThreeFlowX, not a player database.
       </p>
       <p>
-        <strong>Captains</strong> are Toon RTS play kits
-        (<code>asset-packs/toon-rts-characters/glb/characters/{race}.glb</code>).
-        Play code still uses <code>loadRaceKit</code>. This viewer only places
-        the mesh.
+        <strong>Captains</strong> — Toon RTS
+        <code>asset-packs/toon-rts-characters/glb/characters/{race}.glb</code>.
+        This editor places the kit. Play still uses <code>loadRaceKit</code>.
       </p>
       <p>
-        <strong>Units, buildings, mounts, ships, siege</strong> come from
-        ObjectStore
-        <code>ummorpg-placeables-for-forge.json</code> — <code>cdn_ready</code>
-        GLBs only. Mage / paladin / merc rows that still point at race FBX kits
-        are skipped.
+        <strong>Prefabs</strong> — Warlords entity index
+        (<code>warlords-entity-prefabs.json</code>) bound to unique
+        <code>models/warlords/entities/*.glb</code>. File type is
+        <strong>meshopt GLB on CDN</strong>. Skipped: Unity
+        <code>.prefab</code>, FBX, <code>icon_only</code>, fused
+        <code>*_characters.glb</code> kits, whole survival packs. Drop stamps
+        <code>prefabId</code> + SI + scripts (unit patrol/aggro, structure
+        collider). New meshes: convert → R2 → register. Do not git-blob them.
       </p>
       <p>
-        <strong>Enemies / monsters</strong> are the migrated land creatures
-        (<code>drake</code>, <code>ifrit</code>, <code>lava_golem</code>,
-        reptile, monster pack, crab) plus skeleton residuals.
+        <strong>Units / buildings / ships / siege</strong> — ObjectStore
+        <code>ummorpg-placeables-for-forge.json</code>,
+        <code>cdn_ready</code> GLB only. Mage / paladin / merc still point at
+        race FBX kits and are not listed until unique GLBs exist.
       </p>
       <p>
-        <strong>Weapons</strong> are verified CDN meshes (hand axe, greataxe,
-        greatswords, bows) plus uMMORPG siege (catapult, bolt thrower). Many
-        Fantasy Weapons keys are still FBX-only and are not listed.
+        <strong>Enemies</strong> — drake, ifrit, lava golem, reptile, monster
+        pack, crab, skeleton residuals.
       </p>
       <p>
-        <strong>Islands</strong>: home island concept mesh, pirate-islands lobby
-        (uMMORPG / Chicken Gun opening map), Lyoko, Spiral Mountain, Hoth boss
-        room. Island GLBs are large — drop one at a time.
+        <strong>Weapons</strong> — verified CDN meshes plus catapult / bolt
+        thrower. Fantasy Weapons still FBX-only stay out of the list.
       </p>
       <p>
-        <strong>HD zones</strong>: Hard Road erosion terrain
+        <strong>Islands / scenes</strong> — home island, pirate lobby (Chicken
+        Gun), Fruzer, Lyoko, Spiral, Hoth dojo stand-in. Drop one large GLB at
+        a time.
+      </p>
+      <p>
+        <strong>9 sectors + HD zones</strong> — Hard Road DS2
         (<a href="https://hardroad.xyz/demos/ds2-terrain.html" target="_blank"
-          >hardroad.xyz/demos/ds2-terrain.html</a
-        >). Mountains, crags, and a flatter zone — SI metres, ~400 m across.
-        Editor drop is 256². <strong>Scene → HD terrain deploy pack</strong>
-        generates a denser mesh, downloads <code>.raw.glb</code> +
-        <code>.deploy.json</code> (sector/map + HelpersLoadScreen contract),
-        then <code>pnpm bake:hd-terrain</code> Draco-compresses via ObjectStore
-        <code>glb2glb</code>. Keep the load screen up until the baked GLB is
-        on CDN. Targets are existing Warlords 9 sectors + pirate/home maps.
+          >hardroad.xyz</a
+        >). <strong>Scene → HD terrain deploy pack</strong> then
+        <code>pnpm bake:hd-terrain</code>. Load screen stays up until CDN HEAD
+        200.
       </p>
       <p>
-        Host: <code>assets.grudge-studio.com</code>. Player bag / roster stays
-        on Railway. SI: 1 unit = 1 m, human ~1.8 m. AGPL-3.0 — keep author
-        answer / zhangbo126, logo, and name.
+        Host <code>assets.grudge-studio.com</code>. Railway owns bag / roster.
+        SI: 1 unit = 1 m, human ~1.8 m. AGPL-3.0 — keep author answer /
+        zhangbo126, logo, and name.
       </p>
       <p>
-        <strong>Systems</strong> hosts fleet deps in this editor:
-        Rapier (<code>@dimforge/rapier3d-compat</code>), terrain BVH
-        (<code>three-mesh-bvh</code>), nav (<code>three-pathfinding</code>),
-        AI preview (<code>yuka</code>). Layers and brains use Forge names.
-        <strong>MMO AI</strong> (Systems tab): aggro rings 25/15/30/50 m from
-        Warlords <code>AGGRO_CONFIG</code>, a real threat table (not nearest
-        player), enemy <code>castTimeSec</code>, and aoe/cone/incoming
-        telegraphs. Yuka 0.7 steers the root only. Skill
-        <code>grudge-ai-brains</code>. Unity uMMORPG C# is not on disk — the
-        contract is the Warlords port.
-        Recast bake, .gfscene play scripts, and the 70-tool AI worker stay on
-        <a href="https://forge.grudge-studio.com/editor" target="_blank"
-          >forge.grudge-studio.com</a
-        >
-        /
-        <a href="https://ai.grudge-studio.com" target="_blank"
-          >ai.grudge-studio.com</a
-        >
-        — pop them from the AI menu. Do not treat this SPA as a second Forge.
+        <strong>Systems</strong> — Rapier, BVH, pathfinding, Yuka (root only).
+        MMO aggro 25/15/30/50 m, threat table, cast telegraphs
+        (<code>grudge-ai-brains</code>). Pop Forge / AI hub from the AI menu —
+        do not treat this SPA as a second Forge.
       </p>
     </div>
     <div class="help-describe-title">Hotkeys</div>
