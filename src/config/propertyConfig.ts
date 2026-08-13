@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { BACKGROUND_TYPE, ENVIRONMENT_TYPE, FOG_TYPE } from '@/enums/enum';
 
-// 模型属性可编辑属性
+// editable model properties
 export const groupTypePropertyKeys = [
   'type',
   'name',
@@ -13,15 +13,15 @@ export const groupTypePropertyKeys = [
   'receiveShadow',
 ];
 
-// 几何体参数边界值配置
+// geometry parameter limits
 export const GEOMETRY_PARAMETER_LIMITS = {
-  // 通用参数
+  // common parameters
   radius: { min: 0.5, max: 50 },
   width: { min: 0.5, max: 40 },
   height: { min: 0.5, max: 40 },
   depth: { min: 0.5, max: 30 },
 
-  // 分段相关
+  // segment parameters
   segments: { min: 3, max: 64 },
   radiusSegments: { min: 1, max: 30 },
   widthSegments: { min: 1, max: 10 },
@@ -30,13 +30,13 @@ export const GEOMETRY_PARAMETER_LIMITS = {
   radialSegments: { min: 3, max: 64 },
   tubularSegments: { min: 3, max: 300 },
 
-  // 角度相关（弧度制）
+  // angles (radians)
   thetaStart: { min: 0, max: Math.PI * 2 },
   thetaLength: { min: 0, max: Math.PI * 2 },
   phiStart: { min: 0, max: Math.PI * 2 },
   phiLength: { min: 0, max: Math.PI * 2 },
 
-  // 特殊参数
+  // special parameters
   tube: { min: 0.1, max: 10 },
   detail: { min: 0, max: 5 },
   P: { min: 1, max: 10 },
@@ -48,7 +48,7 @@ export const GEOMETRY_PARAMETER_LIMITS = {
   radiusTop: { min: 0.1, max: 50 },
   radiusBottom: { min: 0.1, max: 50 },
 } as const;
-//颜色选择器配置
+//color选择器配置
 export const PREDEFINE_COLORS = [
   '#ff4500',
   '#ff8c00',
@@ -66,140 +66,140 @@ export const PREDEFINE_COLORS = [
   '#c7158577',
 ];
 
-// 材质类型
+// material types
 export const materialTypeList = [
   {
     type: 'MeshPhysicalMaterial',
-    name: '物理材质',
+    name: 'Physical',
   },
   {
     type: 'MeshStandardMaterial',
-    name: '标准材质',
+    name: 'Standard',
   },
   {
     type: 'MeshBasicMaterial',
-    name: '基础材质',
+    name: 'Basic',
   },
   {
     type: 'MeshLambertMaterial',
-    name: 'Lambert材质',
+    name: 'LambertMaterial',
   },
   {
     type: 'MeshPhongMaterial',
-    name: 'Phong材质',
+    name: 'PhongMaterial',
   },
   {
     type: 'MeshToonMaterial',
-    name: '卡通材质',
+    name: 'Toon',
   },
   {
     type: 'MeshNormalMaterial',
-    name: '法线材质',
+    name: 'Normal',
   },
   {
     type: 'MeshDepthMaterial',
-    name: '深度材质',
+    name: 'DepthMaterial',
   },
   {
     type: 'MeshMatcapMaterial',
-    name: 'Matcap材质',
+    name: 'MatcapMaterial',
   },
   {
     type: 'LineBasicMaterial',
-    name: '线条基础材质',
+    name: 'Line basic',
   },
   {
     type: 'LineDashedMaterial',
-    name: '虚线材质',
+    name: 'Dashed line',
   },
   {
     type: 'PointsMaterial',
-    name: '点材质',
+    name: 'Points',
   },
 ];
 
-// 渲染器色调映射
+// RendererTone mapping
 export const toneMappingOptions = [
   {
-    label: '自定义色调映射(CustomToneMapping)',
+    label: 'Custom',
     value: THREE.CustomToneMapping,
   },
   {
-    label: '无色调映射(NoToneMapping)',
+    label: 'NoneTone mapping(NoToneMapping)',
     value: THREE.NoToneMapping,
   },
   {
-    label: '线性色调映射(LinearToneMapping)',
+    label: 'Linear',
     value: THREE.LinearToneMapping,
   },
   {
-    label: 'Reinhard色调映射(ReinhardToneMapping)',
+    label: 'ReinhardTone mapping(ReinhardToneMapping)',
     value: THREE.ReinhardToneMapping,
   },
   {
-    label: 'Cineon色调映射(CineonToneMapping)',
+    label: 'CineonTone mapping(CineonToneMapping)',
     value: THREE.CineonToneMapping,
   },
   {
-    label: 'ACES色调映射(ACESFilmicToneMapping)',
+    label: 'ACESTone mapping(ACESFilmicToneMapping)',
     value: THREE.ACESFilmicToneMapping,
   },
   {
-    label: 'AgX色调映射(AgXToneMapping)',
+    label: 'AgXTone mapping(AgXToneMapping)',
     value: THREE.AgXToneMapping,
   },
   {
-    label: 'Neutral色调映射(NeutralToneMapping)',
+    label: 'NeutralTone mapping(NeutralToneMapping)',
     value: THREE.NeutralToneMapping,
   },
 ];
-// 场景阴影
+// SceneShadows
 export const shadowTypeOptions = [
   {
-    label: '无阴影(NoShadow)',
+    label: 'NoneShadows(NoShadow)',
     value: THREE.BasicShadowMap,
   },
   {
-    // r182+：PCFShadowMap 已自带软阴影，PCFSoftShadowMap 已弃用
-    label: 'PCF软阴影(PCFShadowMap)',
+    // r182+：PCFShadowMap includes soft shadows; PCFSoftShadowMap is deprecated
+    label: 'PCF soft',
     value: THREE.PCFShadowMap,
   },
   {
-    label: 'VSM阴影(VSMShadowMap)',
+    label: 'VSMShadows(VSMShadowMap)',
     value: THREE.VSMShadowMap,
   },
 ];
 
-/** 将旧版 PCFSoftShadowMap 归一为 PCFShadowMap，避免升级后选项无法匹配 */
+/** normalize legacy PCFSoftShadowMap to PCFShadowMap */
 export const normalizeShadowType = (
   type?: THREE.ShadowMapType | null
 ): THREE.ShadowMapType => {
-  // PCFSoftShadowMap 历史枚举值为 2
+  // PCFSoftShadowMap legacy enum value is 2
   if (type === 2) {
     return THREE.PCFShadowMap;
   }
   return type ?? THREE.BasicShadowMap;
 };
-// 场景背景
+// SceneBackground
 export const backgroundOptions = [
   {
-    label: '无背景',
+    label: 'NoneBackground',
     value: BACKGROUND_TYPE.NoBackground,
   },
   {
-    label: '颜色(Color)',
+    label: 'Color',
     value: BACKGROUND_TYPE.Color,
   },
   {
-    label: '图片(Texture)',
+    label: 'Texture',
     value: BACKGROUND_TYPE.Texture,
   },
 ];
 
-// 场景环境光
+// scene environment
 export const environmentOptions = [
   {
-    label: '无',
+    label: 'None',
     value: ENVIRONMENT_TYPE.NoEnvironment,
   },
   {
@@ -211,15 +211,15 @@ export const environmentOptions = [
 
 export const fogOptions = [
   {
-    label: '无',
+    label: 'None',
     value: FOG_TYPE.None,
   },
   {
-    label: '雾(Fog)',
+    label: 'Fog',
     value: FOG_TYPE.Fog,
   },
   {
-    label: '雾(FogExp2)',
+    label: 'FogExp2',
     value: FOG_TYPE.FogExp2,
   },
 ];

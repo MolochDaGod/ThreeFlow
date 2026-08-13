@@ -18,21 +18,21 @@ export const useSceneStore = defineStore('modelStore', (): ModelStoreType => {
 
   const currentTransformMaterialUuid = ref<string | null>(null);
   /**
-   *  transformMaterialRandomId 变换材质随机值
+   *  transformMaterialRandomId 变换Material随机值
    * ps:用于触发 Vue 的响应式更新
    */
   const transformMaterialRandomId = ref<string>('');
    /**
-    * 设置场景API
-    * @param api - 场景API
+    * 设置SceneAPI
+    * @param api - SceneAPI
     */
   const setSceneApi = (api: renderModel | null) => {
     sceneApi.value = api;
   };
 
   /**
-   * 设置当前变换材质UUID
-   * @param uuid - 材质UUID
+   * 设置当前变换MaterialUUID
+   * @param uuid - MaterialUUID
    */
   const setCurrentTransformMaterialUuid = <T extends string | null>(
     uuid: T
@@ -41,7 +41,7 @@ export const useSceneStore = defineStore('modelStore', (): ModelStoreType => {
   };
 
   /**
-   * 设置更新变换材质随机值
+   * 设置更新变换Material随机值
    * ps:用于触发 Vue 的响应式更新
    */
   const setTransformMaterialRandomId = () =>transformMaterialRandomId.value = generateUniqueId();

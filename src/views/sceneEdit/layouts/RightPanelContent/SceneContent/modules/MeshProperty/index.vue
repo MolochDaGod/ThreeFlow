@@ -1,7 +1,7 @@
 <template>
   <el-scrollbar max-height="calc(100vh - 420px)">
     <div class="property-content">
-      <!-- 基础属性 -->
+      <!-- base properties -->
       <div class="property-item" v-for="item in baseProperties" :key="item.key">
         <div class="property-item-label">{{ item.label }}</div>
         <div class="property-item-value" v-if="item.key === 'name'">
@@ -14,7 +14,7 @@
           {{ meshProperty[item.key] }}
         </div>
       </div>
-      <!-- 变换属性 -->
+      <!-- transform properties -->
       <div
         class="property-item"
         v-for="transform in transformProperties"
@@ -55,10 +55,10 @@
           />
         </div>
       </div>
-      <!-- 相机属性 -->
+      <!-- camera properties -->
       <template v-if="meshProperty.type === 'PerspectiveCamera'">
         <div class="property-item">
-          <div class="property-item-label">视角(fov)</div>
+          <div class="property-item-label">FOV</div>
           <div class="property-item-value">
             <el-input-number
               @change="updateCameraProperty('fov', $event)"
@@ -68,7 +68,7 @@
           </div>
         </div>
         <div class="property-item">
-          <div class="property-item-label">近点(near)</div>
+          <div class="property-item-label">Near</div>
           <div class="property-item-value">
             <el-input-number
               @change="updateCameraProperty('near', $event)"
@@ -80,7 +80,7 @@
           </div>
         </div>
         <div class="property-item">
-          <div class="property-item-label">远点(far)</div>
+          <div class="property-item-label">Far</div>
           <div class="property-item-value">
             <el-input-number
               @change="updateCameraProperty('far', $event)"
@@ -92,10 +92,10 @@
           </div>
         </div>
       </template>
-      <!-- 灯光属性 -->
+      <!-- LightsProperties -->
       <template v-if="meshProperty.isLight">
         <div class="property-item" v-if="lightHelper">
-          <div class="property-item-label">灯光辅助线</div>
+          <div class="property-item-label">Light helper</div>
           <div class="property-item-value">
             <el-switch
               v-model="lightHelper.visible"
@@ -104,7 +104,7 @@
           </div>
         </div>
         <div class="property-item">
-          <div class="property-item-label">颜色</div>
+          <div class="property-item-label">Color</div>
           <div class="property-item-value">
             <el-color-picker
               v-model="lightColor.color"
@@ -114,7 +114,7 @@
           </div>
         </div>
         <div class="property-item" v-if="meshProperty.isHemisphereLight">
-          <div class="property-item-label">地面颜色</div>
+          <div class="property-item-label">Ground color</div>
           <div class="property-item-value">
             <el-color-picker
               v-model="lightColor.groundColor"
@@ -124,7 +124,7 @@
           </div>
         </div>
         <div class="property-item">
-          <div class="property-item-label">强度</div>
+          <div class="property-item-label">Intensity</div>
           <div class="property-item-value">
             <el-slider
               :step="0.1"
@@ -139,7 +139,7 @@
         </div>
         <template v-if="meshProperty.isSpotLight">
           <div class="property-item">
-            <div class="property-item-label">范围</div>
+            <div class="property-item-label">Angle</div>
             <div class="property-item-value">
               <el-slider
                 @input="updateLightProperty('angle', $event)"
@@ -153,7 +153,7 @@
             </div>
           </div>
           <div class="property-item">
-            <div class="property-item-label">半影</div>
+            <div class="property-item-label">Penumbra</div>
             <div class="property-item-value">
               <el-slider
                 @input="updateLightProperty('penumbra', $event)"
@@ -167,7 +167,7 @@
             </div>
           </div>
           <div class="property-item" v-if="meshProperty.shadow">
-            <div class="property-item-label">焦距</div>
+            <div class="property-item-label">Focus</div>
             <div class="property-item-value">
               <el-slider
                 @input="updateLightProperty('focus', $event)"
@@ -181,7 +181,7 @@
             </div>
           </div>
           <div class="property-item">
-            <div class="property-item-label">距离</div>
+            <div class="property-item-label">Distance</div>
             <div class="property-item-value">
               <el-slider
                 @input="updateLightProperty('distance', $event)"
@@ -226,12 +226,12 @@ const { meshProperty } = defineProps({
   },
 });
 
-// 当前选中的材质
+// selected object
 const currentTransformMaterialUuid = computed(
   () => store.currentTransformMaterialUuid
 );
 
-// 当前灯光
+// current light
 const currentLight = computed(() => {
   const light = store.sceneApi?.scene?.getObjectByProperty(
     'uuid',
@@ -254,13 +254,13 @@ const lightColor = shallowRef({
   groundColor: new THREE.Color(meshProperty.groundColor).getStyle(),
 });
 
-// 灯光辅助线
+// light helper
 const lightHelper = computed(() => {
   const { helper } = currentLight.value;
   return helper;
 });
 
-// 灯光强度范围
+// light intensity range
 const lightIntensityRange = computed(() => {
   if (meshProperty.isSpotLight) {
     return 20000;
@@ -274,13 +274,13 @@ const lightIntensityRange = computed(() => {
   return 30;
 });
 
-// 更新变换属性(位置、旋转、缩放)
+// update transform
 const updateTransformProperties = (
   propertyKey: string,
   axis: string,
   value: string | boolean
 ) => {
-  // 相机单独处理
+  // camera handled separately
   if (meshProperty.type === SCENE_OBJECT_NAME.PerspectiveCamera) {
     const camera = store.sceneApi?.camera;
     if (camera) {
@@ -308,7 +308,7 @@ const updateTransformProperties = (
   disposeMaterial(material as THREE.Mesh);
 };
 
-// 更新材质属性
+// update materialProperties
 const updateMaterialProperty = (
   propertyKey: string,
   value: string | boolean | number
@@ -334,7 +334,7 @@ const updateMaterialProperty = (
   }
 };
 
-// 更新灯光属性
+// update light properties
 const updateLightProperty = (propertyKey: string, value: string | boolean) => {
   const { light, helper } = currentLight.value;
   if (light) {
@@ -364,7 +364,7 @@ const updateLightProperty = (propertyKey: string, value: string | boolean) => {
   }
 };
 
-// 更新灯光辅助线
+// 更新light helper
 const updateLightHelper = (value: boolean) => {
   const { light } = currentLight.value;
   if (light) {
@@ -372,7 +372,7 @@ const updateLightHelper = (value: boolean) => {
   }
 };
 
-// 更新相机属性
+// update camera properties
 const updateCameraProperty = (propertyKey: string, value: number) => {
   const camera = store.sceneApi?.camera;
   if (camera) {

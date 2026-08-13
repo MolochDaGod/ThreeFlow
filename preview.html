@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ThreeFlow(3D场景编辑器)</title>
+  <title>ThreeFlow (3D Scene Editor)</title>
   <style>
     #loading-mark {
       position: absolute;
@@ -22,7 +22,7 @@
         width: 100%;
         height: 100%;
         transition: opacity 0.3s;
-        /* 更改背景渐变色为更柔和的色调 */
+        /* softer background gradient */
         background: linear-gradient(135deg, #2a2a3e 0%, #1f2937 100%);
 
         .loading {
@@ -33,7 +33,7 @@
           img {
             width: 120px;
             height: 120px;
-            /* 添加图片过渡效果 */
+            /* 添加image过渡效果 */
             opacity: 0.9;
             transition: opacity 0.3s;
           }
@@ -42,17 +42,17 @@
         .loading-txt {
           margin-top: 12px;
           font-size: 16px;
-          /* 更改文字颜色为更柔和的色调 */
+          /* 更改文字color为更柔和的色调 */
           color: #94a3b8;
           text-align: center;
           letter-spacing: 2px;
-          /* 添加更柔和的动画效果 */
+          /* softer animation */
           animation: pulse 2s ease-in-out infinite;
         }
       }
     }
 
-    /* 添加脉冲动画关键帧 */
+    /* pulse keyframes */
     @keyframes pulse {
       0% {
         opacity: 0.6;
@@ -75,7 +75,7 @@
       <div class="loading-box">
         <div class="loading">
           <img src="./image/loading.svg" />
-          <div class="loading-txt">加载中...</div>
+          <div class="loading-txt">Loading...</div>
         </div>
       </div>
     </div>

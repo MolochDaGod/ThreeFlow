@@ -8,11 +8,11 @@ export interface MaterialNode {
 export type ParametersType = Record<string, number | string | boolean> | null;
 
 export interface TransformMaterial {
-  // Mesh 属性
+  // Mesh Properties
   geometry?: THREE.BufferGeometry;
   material?: THREE.Material | THREE.Material[];
 
-  // Light 属性
+  // Light Properties
   color?: THREE.Color;
   intensity?: number;
   distance?: number;
@@ -20,7 +20,7 @@ export interface TransformMaterial {
   penumbra?: number;
   decay?: number;
   power?: number;
-  // Common 属性
+  // Common Properties
   type: string;
   name: string;
   visible: boolean;
@@ -34,17 +34,17 @@ export interface TransformMaterial {
   // Group 子对象
   children?: THREE.Object3D[];
 
-  // Light 特定属性
+  // Light 特定Properties
   shadow?: THREE.LightShadow & THREE.SpotLightShadow;
   target?: THREE.Object3D;
 
-  // SkinnedMesh 属性
+  // SkinnedMesh Properties
   skeleton?: THREE.Skeleton;
   bindMode?: string;
   bindMatrix?: THREE.Matrix4;
   bindMatrixInverse?: THREE.Matrix4;
 
-  // Camera 属性
+  // Camera Properties
   fov?: number;
   aspect?: number;
   near?: number;
@@ -52,17 +52,17 @@ export interface TransformMaterial {
   zoom?: number;
 
   isLight?: boolean;
-  // SpotLight 特定属性
+  // SpotLight 特定Properties
   isSpotLight?: boolean;
   map?: THREE.Texture;
 
-  // DirectionalLight 特定属性
+  // DirectionalLight 特定Properties
   isDirectionalLight?: boolean;
 
-  // PointLight 特定属性
+  // PointLight 特定Properties
   isPointLight?: boolean;
 
-  // HemisphereLight 特定属性
+  // HemisphereLight 特定Properties
   isHemisphereLight?: boolean;
   groundColor?: THREE.Color;
   userData?: {
@@ -181,11 +181,11 @@ import type { EFFECT_METHOD, FOG_TYPE ,TEXT_MATERIAL_TYPE} from '@/enums/enum';
 import * as THREE from 'three';
 
 /**
- * 材质数据接口
- * 包含所有支持的材质属性，提供强类型支持
+ * Material数据接口
+ * 包含所有支持的MaterialProperties，提供强类型支持
  */
 export interface MaterialData {
-  // 基础属性
+  // base properties
   type: string;
   uuid?: string;
   name?: string;
@@ -197,7 +197,7 @@ export interface MaterialData {
   alphaTest?: number;
   isMaterial?: boolean;
   
-  // 贴图相关
+  // maps
   map?: THREE.Texture | null;
   normalMap?: THREE.Texture | null;
   bumpMap?: THREE.Texture | null;
@@ -217,7 +217,7 @@ export interface MaterialData {
   transmissionMap?: THREE.Texture | null;
   matcap?: THREE.Texture | null;
 
-  // 物理/标准材质属性
+  // 物理/标准MaterialProperties
   metalness?: number;
   roughness?: number;
   emissive?: THREE.Color | string | number;
@@ -230,7 +230,7 @@ export interface MaterialData {
   displacementScale?: number;
   displacementBias?: number;
 
-  // PBR 高级属性
+  // PBR 高级Properties
   clearcoat?: number;
   clearcoatRoughness?: number;
   transmission?: number;
@@ -246,12 +246,12 @@ export interface MaterialData {
   attenuationDistance?: number;
   attenuationColor?: THREE.Color | string | number;
 
-  // Phong/Lambert 材质属性
+  // Phong/Lambert MaterialProperties
   specular?: THREE.Color | string | number;
   shininess?: number;
   combine?: THREE.Combine;
 
-  // 线条/点材质属性
+  // 线条/点MaterialProperties
   linewidth?: number;
   dashSize?: number;
   gapSize?: number;
@@ -259,10 +259,10 @@ export interface MaterialData {
   size?: number;
   sizeAttenuation?: boolean;
 
-  // Sprite 材质属性
+  // Sprite MaterialProperties
   rotation?: number;
 
-  // 通用渲染属性
+  // 通用渲染Properties
   wireframe?: boolean;
   wireframeLinewidth?: number;
   flatShading?: boolean;
@@ -271,7 +271,7 @@ export interface MaterialData {
   depthPacking?: number; // MeshDepthMaterial
   blending?: THREE.Blending;
   
-  // 动画/变形
+  // Animation/变形
   morphTargets?: boolean;
   morphNormals?: boolean;
   
@@ -285,14 +285,14 @@ export interface MaterialData {
   vertexShader?: string;
   fragmentShader?: string;
 
-  // 内部使用的隐式属性 (对应 MaterialProperty/index.vue 中的 hidePropertyKey)
+  // 内部使用的隐式Properties (对应 MaterialProperty/index.vue 中的 hidePropertyKey)
   _clearcoat?: number;
   _iridescence?: number;
   _sheen?: number;
 }
 
 export type MaterialConfig = {
-  // 通用参数
+  // common parameters
   color?: string | number | THREE.Color;
   opacity?: number;
   transparent?: boolean;
@@ -301,16 +301,16 @@ export type MaterialConfig = {
   normalMap?: THREE.Texture | null;
   wireframe?: boolean;
 
-  // 线条材质参数
+  // 线条Material参数
   linewidth?: number;
   dashSize?: number;
   gapSize?: number;
 
-  // 点材质参数
+  // 点Material参数
   size?: number;
   sizeAttenuation?: boolean;
 
-  // 精灵材质参数
+  // 精灵Material参数
   rotation?: number;
 
   // 着色器参数
@@ -318,17 +318,17 @@ export type MaterialConfig = {
   fragmentShader?: string;
   uniforms?: { [key: string]: THREE.Uniform };
 
-  // 物理/标准材质扩展参数
+  // 物理/标准Material扩展参数
   metalness?: number;
   roughness?: number;
   clearcoat?: number;
   clearcoatRoughness?: number;
 
-  // Phong材质参数
+  // PhongMaterial参数
   shininess?: number;
   specular?: THREE.Color;
 
-  // 其他可能的材质参数
+  // 其他可能的Material参数
   matcap?: THREE.Texture | null;
   bumpScale?: number;
   [key: string]:

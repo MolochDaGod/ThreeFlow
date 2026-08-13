@@ -117,7 +117,7 @@ export interface MaterialData {
 export interface ModelData {
   uuid: string;
   name: string;
-  children?: MaterialData[]; // 使用可选属性
+  children?: MaterialData[]; // 使用可选Properties
 }
 
 export interface EffectData {
@@ -148,15 +148,15 @@ export interface EffectParamsOptions {
 }
 
 export interface WeatherOptions {
-  weather?: WeatherType; // 天气类型
+  weather?: WeatherType; // weather types
   count?: number; // 粒子数量
   speed?: number; // 下落速度
   size?: number; // 粒子大小
-  opacity?: number; // 透明度
-  color?: string; // 颜色
+  opacity?: number; // Transparent度
+  color?: string; // color
   area?: number; // 覆盖区域范围
-  height?: number; // 下落高度
-  planeGeometry?: string | null; // 地面材质
+  height?: number; // 下落Height
+  planeGeometry?: string | null; // 地面Material
 }
 export type WeatherType = 'rain' | 'snow' | 'none';
 

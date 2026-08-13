@@ -4,7 +4,7 @@
       <div class="loading">
         <img src="@/assets/image/loading.svg" />
         <div class="progress-txt" v-if="percentage > 0">
-          已加载 <b>{{ percentage }}</b> %
+          Loaded <b>{{ percentage }}</b> %
           <div class="progress-bar">
             <div class="progress" :style="{ width: `${percentage}%` }"></div>
           </div>
@@ -27,7 +27,7 @@ const { percentage, loading, loadingText } = defineProps({
   },
   loadingText: {
     type: String,
-    default: '首次加载需要较长时间，请耐心等待...',
+    default: 'First load can take a while. Please wait...',
   },
 });
 </script>

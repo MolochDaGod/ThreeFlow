@@ -30,7 +30,7 @@ class LightModules {
         }
         let helper: THREE.Object3D | null = null;
 
-        // 根据灯光类型创建对应的辅助线
+        // 根据light types创建对应的辅助线
         if (child instanceof THREE.DirectionalLight) {
           helper = new THREE.DirectionalLightHelper(child, 0.5);
         } else if (child instanceof THREE.SpotLight) {
@@ -101,7 +101,7 @@ class LightModules {
       case LIGHT_TYPE.HemisphereLight:
         light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
         light.position.copy(position);
-        // 半球光朝向正下方
+        // Hemisphere light朝向正下方
         light.lookAt(targetPosition);
         helper = new THREE.HemisphereLightHelper(light, 0.5);
         break;
@@ -117,7 +117,7 @@ class LightModules {
       isTransformControls: true,
     };
 
-    // 添加到场景
+    // 添加到Scene
     store.sceneApi.scene.add(light);
     store.setCurrentTransformMaterialUuid(light.uuid);
 

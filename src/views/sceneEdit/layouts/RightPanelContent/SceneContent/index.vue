@@ -1,6 +1,6 @@
 <template>
   <div class="scene-content">
-    <!-- 场景内容 -->
+    <!-- Scene -->
     <el-scrollbar
       max-height="300px"
       height="300px"
@@ -17,7 +17,7 @@
         }"
         :expand-on-click-node="false"
         node-key="uuid"
-        empty-text="暂无数据"
+        empty-text="No data"
         :current-node-key="currentTransformMaterialUuid"
         @current-change="changeMaterialsNode"
         @node-expand="handleNodeExpand"
@@ -50,14 +50,14 @@
         </template>
       </el-tree>
     </el-scrollbar>
-    <!-- 场景内容属性-->
+    <!-- SceneProperties-->
     <div class="scene-content-property" v-if="currentTransformMaterialUuid">
       <el-tabs type="border-card" v-model="currentTab">
-        <el-tab-pane label="属性" :name="TAB_TYPE.Property" v-if="meshProperty">
+        <el-tab-pane label="Properties" :name="TAB_TYPE.Property" v-if="meshProperty">
           <MeshProperty :meshProperty="meshProperty" />
         </el-tab-pane>
         <el-tab-pane
-          label="材质"
+          label="Material"
           :name="TAB_TYPE.Material"
           v-if="meshMaterial?.isMaterial"
         >
@@ -68,13 +68,13 @@
           />
         </el-tab-pane>
         <el-tab-pane
-          label="几何体参数"
+          label="Geometry"
           :name="TAB_TYPE.Geometry"
           v-if="geometryParameters?.parameters"
         >
           <GeometryProperty :geometryParameters="geometryParameters" />
         </el-tab-pane>
-        <el-tab-pane label="动画" :name="TAB_TYPE.Animation" v-if="animationsList.length">
+        <el-tab-pane label="Animation" :name="TAB_TYPE.Animation" v-if="animationsList.length">
           <AnimationsProperty :animationsList="animationsList" />
         </el-tab-pane>
       </el-tabs>
@@ -98,7 +98,7 @@ import { SCENE_OBJECT_NAME, TAB_TYPE } from "@/enums/enum";
 
 const store = useSceneStore();
 
-// 格式化场景数据
+// format scene data
 const formattedSceneData = computed(() => {
   if (store.sceneApi?.scene) {
     const camera = store.sceneApi?.camera;
@@ -115,45 +115,45 @@ const formattedSceneData = computed(() => {
   }
   return [];
 });
-// 变换材质随机id
+// material refresh id
 const transformMaterialRandomId = computed(() => store.transformMaterialRandomId);
-// 当前变换材质uuid
+// selected object uuid
 const currentTransformMaterialUuid = computed(() => store.currentTransformMaterialUuid);
-// 材质属性
+// MaterialProperties
 const meshProperty = ref<TransformMaterial | null>(null);
-// 滚动条
+// scrollbar
 const scrollbarRef = ref<typeof ElScrollbar | null>(null);
-// 树形结构
+// tree
 const treeRef = ref<typeof ElTree | null>(null);
-// 材质属性
+// MaterialProperties
 const materialPropertyRef = ref<typeof MaterialProperty | null>(null);
-// 是否点击选择
+// clicked selection
 const isClickChoose = ref(false);
-// 当前选中的标签
+// current tab
 const currentTab = ref(TAB_TYPE.Material);
-// 几何体参数
+// Geometry
 const geometryParameters = reactive<GeometryParameters>({
   type: "",
   uuid: "",
   parameters: null,
 });
-// 材质
+// Material
 const meshMaterial = ref<MaterialData>({ type: "" });
-//动画
+//Animation
 const animationsList = ref<THREE.AnimationClip[]>([]);
-// 控制器事件监听器
+// control listeners
 const controlsEventListener = ref();
-// 是否展开
+// expanded
 const expandedKeys = ref<string[]>([]);
 
-// 获取当前材质最新的数据
+// latest material data
 watch(currentTransformMaterialUuid, async () => {
   const material = store.sceneApi?.scene?.getObjectByProperty(
     "uuid",
     currentTransformMaterialUuid.value
   ) as THREE.Mesh;
   await updateCurrentMaterial(material);
-  // 如果未点击选择，则滚动到当前选中节点
+  // scroll to selected node if not clicked
   if (!isClickChoose.value) {
     scrollToTreeNode(
       treeRef.value,
@@ -164,7 +164,7 @@ watch(currentTransformMaterialUuid, async () => {
   }
   isClickChoose.value = false;
 });
-// 监听变化控制器操作
+// listen to transform changes
 watch(transformMaterialRandomId, () => {
   const material = store.sceneApi?.scene?.getObjectByProperty(
     "uuid",
@@ -174,7 +174,7 @@ watch(transformMaterialRandomId, () => {
   updateCurrentMaterial(material);
 });
 
-// 动态设置当前tab
+// set current tab
 const availableTabs = computed(() => {
   const tabs = [];
   if (meshProperty.value) tabs.push(TAB_TYPE.Property);
@@ -184,7 +184,7 @@ const availableTabs = computed(() => {
   return tabs;
 });
 
-// 监听availableTabs变化
+// watch available tabs
 watch([availableTabs, currentTab], ([tabs, tab]) => {
   if (!tabs.includes(tab) && tabs.length > 0) {
     currentTab.value = tabs[0];
@@ -192,7 +192,7 @@ watch([availableTabs, currentTab], ([tabs, tab]) => {
 });
 
 onMounted(() => {
-  //动态相机相关参数
+  //camera parameters
   controlsEventListener.value = store.sceneApi?.controls?.addEventListener(
     "change",
     () => {
@@ -208,23 +208,23 @@ onUnmounted(() => {
   store.sceneApi?.controls?.removeEventListener("change", controlsEventListener.value);
 });
 
-// 更新当前材质
+// update current material
 const updateCurrentMaterial = async (mesh: THREE.Mesh) => {
   if (!mesh) return;
-  // .stl模型特殊处理
+  // STL special case
   if (mesh.userData.isSTLModel) {
     meshProperty.value = null;
     meshMaterial.value = { type: "" };
     geometryParameters.parameters = null;
     animationsList.value = [];
-    // 材质
+    // Material
     meshMaterial.value = { ...(mesh.material as MaterialData) };
     await materialPropertyRef.value?.getNewMaterialPropertyList();
     return;
   }
-  // 材质属性
+  // MaterialProperties
   meshProperty.value = (mesh.clone() as unknown) as TransformMaterial;
-  // 几何体
+  // Geometry
   const geometry = mesh.geometry as THREE.BoxGeometry;
   Object.assign(geometryParameters, {
     parameters: geometry?.parameters || null,
@@ -232,17 +232,17 @@ const updateCurrentMaterial = async (mesh: THREE.Mesh) => {
     uuid: mesh.uuid,
   });
 
-  // 材质
+  // Material
   meshMaterial.value = { ...((mesh.material as unknown) as MaterialData) };
   await materialPropertyRef.value?.getNewMaterialPropertyList();
-  //动画
+  //Animation
   animationsList.value = mesh?.animations || [];
 };
-// 更新材质
+// update material
 const updateMeshMaterial = (mesh: THREE.Mesh) => {
   meshMaterial.value = { ...((mesh.material as unknown) as MaterialData) };
 };
-// 选择材质
+// select object
 const changeMaterialsNode = (node: MaterialNode) => {
   isClickChoose.value = true;
   store.setCurrentTransformMaterialUuid(node.uuid);
@@ -258,12 +258,12 @@ const changeMaterialsNode = (node: MaterialNode) => {
   store.sceneApi?.chooseMaterial(node);
 };
 
-// 删除材质
+// delete object
 const deleteMaterial = async (node: MaterialNode) => {
   expandedKeys.value = expandedKeys.value.filter((key) => key !== node.uuid);
   try {
     await store.sceneApi?.deleteSceneMaterial(node);
-    ElMessage.success("删除材质成功");
+    ElMessage.success("Deleted");
     if (node.uuid === currentTransformMaterialUuid.value) {
       geometryParameters.parameters = null;
       meshMaterial.value = { type: "" };
@@ -271,15 +271,15 @@ const deleteMaterial = async (node: MaterialNode) => {
       animationsList.value = [];
     }
   } catch (error) {
-    console.error("删除材质失败:", error);
+    console.error("delete failed:", error);
   }
 };
-// 复制材质
+// copy object
 const copyMaterial = (node: MaterialNode) => {
   store.sceneApi?.copySceneMaterial(node.uuid);
 };
 
-// 双击材质
+// double-click object
 const handleNodeDblClick = (data: MaterialNode) => {
   isClickChoose.value = false;
   const material = store.sceneApi?.scene?.getObjectByProperty("uuid", data.uuid);
@@ -287,7 +287,7 @@ const handleNodeDblClick = (data: MaterialNode) => {
     store.sceneApi?.transformControlsModules?.focusOnObject(material);
   }
 };
-// 展开节点
+// expand node
 const handleNodeExpand = (node: MaterialNode) => {
   expandedKeys.value = Array.from(new Set([...expandedKeys.value, node.uuid]));
 };

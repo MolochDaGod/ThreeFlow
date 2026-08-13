@@ -6,17 +6,17 @@ export const DRAG_TAB_ITEMS: {
   key: DRAG_MODEL_TYPE;
 }[] = [
   {
-    name: '模型',
+    name: 'Models',
     icon: 'icon-model-lib',
     key: DRAG_MODEL_TYPE.Model,
   },
   {
-    name: '几何体',
+    name: 'Geometry',
     icon: 'icon-moxing',
     key: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '灯光',
+    name: 'Lights',
     icon: 'icon-juguangdeng1',
     key: DRAG_MODEL_TYPE.Light,
   },

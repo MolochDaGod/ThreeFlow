@@ -1,14 +1,14 @@
-// 预览地址
+// preview URL
 export const PREVIEW_URL = '/preview';
 
-// 雾近值
+// fog near
 export const FOG_NEAR_VALUE = 1;
 
-// 雾远值
+// fog far
 export const FOG_FAR_VALUE = 200;
 
-// 雾密度值
+// fog density
 export const FOG_DENSITY_VALUE = 0.001;
 
-// 雾颜色值
+// 雾color值
 export const FOG_COLOR_VALUE = '#EFD1B5';

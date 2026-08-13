@@ -1,0 +1,9 @@
+{
+  "buildCommand": "pnpm build:pro",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/preview", "destination": "/preview.html" },
+    { "source": "/((?!assets|js|static|threeFile|image|icon).*)", "destination": "/index.html" }
+  ]
+}

@@ -14,7 +14,7 @@
         <component :is="item.component" />
       </el-tab-pane>
     </el-tabs>
-    <!-- 变换控制器模型切换 -->
+    <!-- transform mode switch -->
     <TransformControls />
   </div>
 </template>
@@ -28,17 +28,17 @@ import { useSceneStore } from '@/store/sceneEditStore';
 const store = useSceneStore();
 const tabList = [
   {
-    name: '场景内容',
+    name: 'Scene',
     key: 'scene',
     component: SceneContent,
   },
   {
-    name: '项目配置',
+    name: 'Project',
     key: 'projectConfig',
     component: ProjectConfig,
   },
   {
-    name: '帮助',
+    name: 'Help',
     key: 'help',
     component: HelpDescribe,
   },

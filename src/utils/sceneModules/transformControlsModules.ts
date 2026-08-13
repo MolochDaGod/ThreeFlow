@@ -88,7 +88,7 @@ class TransformControlsModules {
    */
   createTransformControls() {
     this.destroy();
-    // 获取当前路由路径
+    // 获取当前路由Path
     const currentPath = router.currentRoute.value.path;
     if (currentPath != PREVIEW_URL) {
       this.init();
@@ -131,7 +131,7 @@ class TransformControlsModules {
         event.clientY - rect.top
       );
 
-      // 如果鼠标移动距离超过阈值，认为是拖拽操作，不处理点击
+      // 如果鼠标Move距离超过阈值，认为是拖拽操作，不处理点击
       const DRAG_THRESHOLD = 5; // 像素
       if (this.mouseDownPosition.distanceTo(currentPosition) > DRAG_THRESHOLD) {
         return;
@@ -271,7 +271,7 @@ class TransformControlsModules {
         obj instanceof THREE.Sprite
       )
         return true;
-      // 检查是否是灯光辅助对象
+      // 检查是否是Lights辅助对象
       if (
         obj.parent instanceof THREE.DirectionalLightHelper ||
         obj.parent instanceof THREE.PointLightHelper ||
@@ -287,7 +287,7 @@ class TransformControlsModules {
     if (validIntersects.length === 0) return null;
 
     const selectedObject = validIntersects[0].object;
-    // 如果选中的是灯光辅助对象，返回其关联的灯光对象
+    // 如果选中的是Lights辅助对象，返回其关联的Lights对象
     if (
       selectedObject.parent instanceof THREE.DirectionalLightHelper ||
       selectedObject.parent instanceof THREE.PointLightHelper ||
@@ -299,7 +299,7 @@ class TransformControlsModules {
     return selectedObject;
   }
   /**
-   * @description 聚焦对象
+   * @description Focus对象
    * @param object - 对象
    */
   focusOnObject(object: THREE.Object3D) {
@@ -308,7 +308,7 @@ class TransformControlsModules {
 
     const box = new THREE.Box3();
 
-    // 是否存在有效的几何体
+    // 是否存在有效的Geometry
     let hasValidGeometry = false;
 
     object.traverse((child: THREE.Object3D) => {
@@ -318,7 +318,7 @@ class TransformControlsModules {
         box.expandByObject(child);
         hasValidGeometry = true;
       } else if (child instanceof THREE.Points) {
-        // 粒子系统需要考虑位置属性
+        // 粒子系统需要考虑位置Properties
         if (child.geometry.attributes.position) {
           child.geometry.computeBoundingBox();
           box.expandByObject(child);
@@ -327,7 +327,7 @@ class TransformControlsModules {
       }
     });
 
-    // 如果没有找到有效的几何体，使用对象的位置作为后备
+    // 如果没有找到有效的Geometry，使用对象的位置作为后备
     if (!hasValidGeometry || box.isEmpty()) {
       box.expandByPoint(object.position);
       // 在点周围添加一个小缓冲区
@@ -370,7 +370,7 @@ class TransformControlsModules {
       center.z + distance * Math.cos(theta) * Math.cos(phi)
     );
 
-    // 更平滑的动画，更好的用户体验
+    // 更平滑的Animation，更好的用户体验
     new TWEEN.Tween(camera.position)
       .to(
         {

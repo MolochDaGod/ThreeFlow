@@ -14,14 +14,14 @@
       </el-tooltip>
     </div>
     <div class="transform-controls-item" v-if="currentView">
-      <el-tooltip content="当前视角：第一人称" placement="left">
+      <el-tooltip content="View: first person" placement="left">
         <span
           class="iconfont icon-shubiaozhizhen-diyirenchengmanyou-yidong"
         ></span>
       </el-tooltip>
     </div>
     <div class="transform-controls-item" @click="switchCurrentView" v-else>
-      <el-tooltip content="当前视角：第三人称" placement="left">
+      <el-tooltip content="View: third person" placement="left">
         <span class="iconfont icon-a-disanrencheng1x"></span>
       </el-tooltip>
     </div>
@@ -36,17 +36,17 @@ const transformTypeList = [
   {
     type: TRANSFORM_CONTROLS_TYPE.Translate,
     icon: 'icon-tuozhuai',
-    tooltip: '拖拽（快捷键：W）',
+    tooltip: 'Move (W)',
   },
   {
     type: TRANSFORM_CONTROLS_TYPE.Rotate,
     icon: 'icon-xuanzhuan',
-    tooltip: '旋转（快捷键：E）',
+    tooltip: 'Rotate (E)',
   },
   {
     type: TRANSFORM_CONTROLS_TYPE.Scale,
     icon: 'icon-suofang',
-    tooltip: '缩放（快捷键：R）',
+    tooltip: 'Scale (R)',
   },
 ];
 
@@ -61,7 +61,7 @@ const transformKeyMap = {
 
 const store = useSceneStore();
 
-// 当前视角
+// current view
 const currentView = computed(() => {
   return store.sceneApi?.pointerLockControls ? true : false;
 });
@@ -84,7 +84,7 @@ const keyDownEventListener = (event: KeyboardEvent) => {
     transformControlsType.value = type;
     store.sceneApi?.transformControlsModules.transformControls?.setMode(type);
   }
-  // Ctrl/Cmd + Z: 撤销
+  // Ctrl/Cmd + Z: Undo
   if (
     (event.ctrlKey || event.metaKey) &&
     !event.shiftKey &&
@@ -97,11 +97,11 @@ const keyDownEventListener = (event: KeyboardEvent) => {
     event.shiftKey &&
     event.key.toLowerCase() === 'z'
   ) {
-    //Ctrl+Shift+Z 重做
+    //Ctrl+Shift+Z Redo
     event.preventDefault();
     store.sceneApi?.historyModules.redo();
   } else if (event.key.toLowerCase() === 'f') {
-    //F 聚焦
+    //F Focus
     event.preventDefault();
     const mesh = store.sceneApi?.scene?.getObjectByProperty(
       'uuid',
@@ -112,7 +112,7 @@ const keyDownEventListener = (event: KeyboardEvent) => {
     }
   }
 };
-// 变换控制器类型切换
+// switch transform mode
 const handleTransformControlsType = (type: TRANSFORM_CONTROLS_TYPE) => {
   transformControlsType.value = type;
   store.sceneApi?.transformControlsModules.transformControls?.setMode(type);

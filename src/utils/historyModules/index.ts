@@ -33,7 +33,7 @@ export default class HistoryModules {
       }
     }
 
-    // 清空重做列表
+    // 清空Redo列表
     this.redos = [];
 
     // 执行命令
@@ -41,7 +41,7 @@ export default class HistoryModules {
     this.lastCommandTime = Date.now();
   }
 
-  // 撤销操作
+  // Undo操作
   undo(steps: number = 1) {
     for (let i = 0; i < steps && this.undos.length > 0; i++) {
       const command = this.undos.pop();
@@ -52,7 +52,7 @@ export default class HistoryModules {
     }
   }
 
-  // 重做操作
+  // Redo操作
   redo(steps: number = 1) {
     for (let i = 0; i < steps && this.redos.length > 0; i++) {
       const command = this.redos.pop();
@@ -70,12 +70,12 @@ export default class HistoryModules {
     this.lastCommandTime = 0;
   }
 
-  // 获取可撤销的步数
+  // 获取可Undo的步数
   getUndoSteps(): number {
     return this.undos.length;
   }
 
-  // 获取可重做的步数
+  // 获取可Redo的步数
   getRedoSteps(): number {
     return this.redos.length;
   }

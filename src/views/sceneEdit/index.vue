@@ -8,7 +8,7 @@
       <div id="scene-render" @drop="dropModel" @dragover.prevent></div>
       <RightPanelContent :pageLoading="loadingInfo.pageLoading" />
     </div>
-    <!-- 加载状态 -->
+    <!-- loading state -->
     <Loading :percentage="loadingInfo.percentage" :loading="loadingInfo.loading" />
   </div>
 </template>
@@ -32,7 +32,7 @@ const store = useSceneStore();
 const indexDbStore = useIndexDbStore();
 const { $eventBus } = getCurrentInstance()?.proxy || {};
 
-// 当前拖拽模型
+// current drag model
 const currentDrag = shallowReactive<CurrentDragModelData>({
   clientX: 0,
   clientY: 0,
@@ -50,7 +50,7 @@ onMounted(async () => {
   await indexDbStore.initIndexDb();
   const renderSceneApi = new renderScene('#scene-render');
   store.setSceneApi(renderSceneApi);
-  // 初始化模型渲染器
+  // init model renderer
   Object.assign(loadingInfo, {
     pageLoading: true,
     loading: true,
@@ -60,13 +60,13 @@ onMounted(async () => {
     pageLoading: false,
     loading: false,
   });
-  // 模型加载进度条
+  // model load progress
   renderSceneApi.onProgress((progressNum: number, totalSize: number) => {
     loadingInfo.percentage = Number(
       ((progressNum / totalSize) * 100).toFixed(0)
     );
   });
-  // 监听页面加载状态
+  // listen for page loading
   $eventBus?.on(MITT_ON_KEY.PAGE_LOADING, (value) => {
     loadingInfo.loading = value;
     loadingInfo.percentage = 0;
@@ -81,22 +81,22 @@ onUnmounted(() => {
   store.setSceneApi(null);
 });
 
-// 更新拖拽模型
+// update drag model
 const updateCurrentDragModel = (model: DragModelType | any) => {
   currentDrag.modelData = model;
   currentDrag.modelType = model.modelType;
 };
 
-// 拖拽添加各类模型
+// drop to add models
 const dropModel = async (e: DragEvent) => {
   const { clientX, clientY } = e;
   currentDrag.clientX = clientX;
   currentDrag.clientY = clientY;
   if (currentDrag.modelType === DRAG_MODEL_TYPE.Geometry) {
-    // 几何模型
+    // geometry
     store.sceneApi?.loadGeometry(currentDrag);
   } else if (currentDrag.modelType === DRAG_MODEL_TYPE.Light) {
-    // 灯光
+    // Lights
     store.sceneApi?.loadLight(currentDrag);
   } else {
     const { filePath, fileType, name } = currentDrag.modelData as ModelType;
@@ -124,14 +124,14 @@ const dropModel = async (e: DragEvent) => {
   }
 };
 
-// 选择外部模型
+// pick an external model
 const chooseOutsideFile = async (file: UploadFile) => {
   const size = file?.size || 0;
   const raw: File = file.raw as File;
   const filePath = URL.createObjectURL(raw);
   const fileType = getFileType(raw.name);
 
-  // 提取加载模型的公共方法
+  // shared model load helper
   const loadModelFile = async () => {
     try {
       loadingInfo.loading = true;
@@ -139,18 +139,18 @@ const chooseOutsideFile = async (file: UploadFile) => {
       await store.sceneApi?.loadModel(filePath, fileType, 0, 0, raw.name);
     } finally {
       loadingInfo.loading = false;
-      URL.revokeObjectURL(filePath); // 释放创建的URL
+      URL.revokeObjectURL(filePath); // revoke object URL
     }
   };
 
   const FILE_SIZE_LIMIT = 50 * 1024 * 1024; // 50MB
   if (size > FILE_SIZE_LIMIT) {
     await ElMessageBox.confirm(
-      '当前文件大小超过50MB，页面可能会有卡顿',
-      '提示',
+      'This file is over 50MB. The page may hitch.',
+      'Notice',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
         type: 'warning',
       }
     ).then(loadModelFile);

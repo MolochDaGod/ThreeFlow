@@ -4,33 +4,33 @@
       <img src="/icon.png" class="header-logo" alt="logo" />
       <div class="left-title">
         ThreeFlow
-        <span class="author">作者:answer</span>
+        <span class="author">author: answer</span>
       </div>
     </div>
     <div class="render-header-right">
       <div class="header-right-item">
         <el-button type="primary" @click="debounceSaveScene">
-          <span class="iconfont icon-baocun">&nbsp;保存场景</span>
+          <span class="iconfont icon-baocun">&nbsp;Save scene</span>
         </el-button>
       </div>
       <div class="header-right-item">
         <el-dropdown trigger="click">
           <el-button type="primary">
-            <span class="iconfont icon-changjing2">&nbsp;场景</span>
+            <span class="iconfont icon-changjing2">&nbsp;Scene</span>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="addScene">
-                <span class="iconfont icon-changjing1">&nbsp;新增场景</span>
+                <span class="iconfont icon-changjing1">&nbsp;New scene</span>
               </el-dropdown-item>
               <el-dropdown-item @click="saveSceneSnapshot">
-                <span class="iconfont icon-zhaoxiangji"> &nbsp;场景快照(.png) </span>
+                <span class="iconfont icon-zhaoxiangji"> &nbsp;Scene snapshot (.png) </span>
               </el-dropdown-item>
               <el-dropdown-item @click="debounceExportScene">
-                <span class="iconfont icon-daochu">&nbsp;导出场景(.json)</span>
+                <span class="iconfont icon-daochu">&nbsp;Export scene (.json)</span>
               </el-dropdown-item>
               <el-dropdown-item @click="importScene">
-                <span class="iconfont icon-daoru">&nbsp;导入场景(.json)</span>
+                <span class="iconfont icon-daoru">&nbsp;Import scene (.json)</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -39,26 +39,26 @@
       <div class="header-right-item">
         <el-dropdown trigger="click">
           <el-button type="primary">
-            <span class="iconfont icon-moxing">&nbsp;模型</span>
+            <span class="iconfont icon-moxing">&nbsp;Model</span>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item @click="debounceExportModel(EXPORT_TYPE.GLTF)">
-                <span class="iconfont icon-glTF">&nbsp;导出模型(.gltf)</span>
+                <span class="iconfont icon-glTF">&nbsp;Export model (.gltf)</span>
               </el-dropdown-item>
               <el-dropdown-item @click="debounceExportModel(EXPORT_TYPE.GLB)">
-                <span class="iconfont icon-glb">&nbsp;导出模型(.glb)</span>
+                <span class="iconfont icon-glb">&nbsp;Export model (.glb)</span>
               </el-dropdown-item>
               <el-dropdown-item @click="debounceExportModel(EXPORT_TYPE.USDZ)">
-                <el-tooltip content="建议使用.gltf格式源,导出模型" placement="top">
-                  <span class="iconfont icon-filfvectorima">&nbsp;导出模型(.usdz)</span>
+                <el-tooltip content="Prefer a .gltf source when exporting" placement="top">
+                  <span class="iconfont icon-filfvectorima">&nbsp;Export model (.usdz)</span>
                 </el-tooltip>
               </el-dropdown-item>
               <el-dropdown-item @click="debounceExportModel(EXPORT_TYPE.STL)">
-                <span class="iconfont icon-STL">&nbsp;导出模型(.stl)</span>
+                <span class="iconfont icon-STL">&nbsp;Export model (.stl)</span>
               </el-dropdown-item>
               <el-dropdown-item @click="debounceExportModel(EXPORT_TYPE.OBJ)">
-                <span class="iconfont icon-obj">&nbsp;导出模型(.obj)</span>
+                <span class="iconfont icon-obj">&nbsp;Export model (.obj)</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -86,18 +86,18 @@ const store = useSceneStore();
 const indexDbStore = useIndexDbStore();
 
 const loading = ref(false);
-const loadingText = ref("保存场景中...");
+const loadingText = ref("Saving scene...");
 const loadingTimeout = ref<NodeJS.Timeout>();
 
 onUnmounted(() => {
   clearTimeout(toValue(loadingTimeout));
 });
 
-// 新增场景
+// new scene
 const addScene = () => {
-  ElMessageBox.confirm("当前场景将被清空,是否继续?", "提示", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
+  ElMessageBox.confirm("The current scene will be cleared. Continue?", "Notice", {
+    confirmButtonText: "OK",
+    cancelButtonText: "Cancel",
     type: "warning",
   })
     .then(() => {
@@ -108,30 +108,30 @@ const addScene = () => {
     .catch(() => {});
 };
 
-// 保存场景
+// save scene
 const debounceSaveScene = debounce(async () => {
-  loadingText.value = "保存场景中,页面可能会有卡顿请耐心等待...";
+  loadingText.value = "Saving scene. The page may hitch — please wait...";
   loading.value = true;
   loadingTimeout.value = setTimeout(async () => {
     try {
       clearTimeout(toValue(loadingTimeout));
       await saveSceneIndexDb();
       loading.value = false;
-      ElMessage.success("保存场景成功");
+      ElMessage.success("Scene saved");
     } catch {
       loading.value = false;
       clearTimeout(toValue(loadingTimeout));
-      ElMessage.error("保存场景失败");
+      ElMessage.error("Failed to save scene");
     }
   }, 1000);
 }, 1500);
 
-// 保存场景到indexDb
+// save scene to IndexedDB
 const saveSceneIndexDb = async () => {
   try {
     const sceneApi = store.sceneApi;
     if (!sceneApi) {
-      throw new Error("场景未初始化");
+      throw new Error("Scene is not initialized");
     }
     let newScene = cloneDeep(sceneApi?.scene);
 
@@ -172,12 +172,12 @@ const saveSceneIndexDb = async () => {
     disposeScene(newScene as THREE.Scene);
     return Promise.resolve();
   } catch (error: unknown) {
-    console.error("保存场景失败:", error);
+    console.error("Failed to save scene:", error);
     return Promise.reject(error);
   }
 };
 
-// 保存场景快照
+// save scene snapshot
 const saveSceneSnapshot = async () => {
   const canvas = store.sceneApi?.renderer?.domElement;
   if (!canvas) return;
@@ -187,13 +187,13 @@ const saveSceneSnapshot = async () => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  ElMessage.success("下载成功");
+  ElMessage.success("Download complete");
 };
 
-// 导出场景
+// export scene
 const debounceExportScene = debounce(async () => {
   loading.value = true;
-  loadingText.value = "导出场景中,页面可能会有卡顿请耐心等待...";
+  loadingText.value = "Exporting scene. The page may hitch — please wait...";
   loadingTimeout.value = setTimeout(() => {
     try {
       const sceneApi = store.sceneApi;
@@ -227,16 +227,16 @@ const debounceExportScene = debounce(async () => {
       URL.revokeObjectURL(url);
       loading.value = false;
       clearTimeout(toValue(loadingTimeout));
-      ElMessage.success("导出场景成功");
+      ElMessage.success("Scene exported");
     } catch {
-      ElMessage.error("导出场景失败");
+      ElMessage.error("Failed to export scene");
       loading.value = false;
       clearTimeout(toValue(loadingTimeout));
     }
   }, 1000);
 }, 1000);
 
-// 导入场景
+// import scene
 const importScene = () => {
   const input = document.createElement("input");
   input.type = "file";
@@ -251,54 +251,54 @@ const importScene = () => {
   input.click();
 };
 
-// 选择场景json
+// choose scene JSON
 const chooseSceneJson = async (file: File) => {
   try {
     loading.value = true;
-    loadingText.value = "导入场景中...";
+    loadingText.value = "Importing scene...";
     const reader = new FileReader();
     const fileContent = await new Promise<string>((resolve, reject) => {
       reader.onload = (e) => {
         if (e.target?.result) {
           resolve(e.target.result as string);
         } else {
-          reject(new Error("文件读取失败"));
+          reject(new Error("Failed to read file"));
         }
       };
-      reader.onerror = () => reject(new Error("文件读取失败"));
+      reader.onerror = () => reject(new Error("Failed to read file"));
       reader.readAsText(file);
     });
 
     const sceneData = JSON.parse(fileContent);
     if (!sceneData.scene || !sceneData.camera) {
-      throw new Error("无效的场景文件格式");
+      throw new Error("Invalid scene file format");
     }
 
     if (store.sceneApi) {
       await store.sceneApi.loadIndexDbSceneData(sceneData);
-      ElMessage.success("场景导入成功");
+      ElMessage.success("Scene imported");
     }
   } catch {
-    ElMessage.error("导入场景失败");
+    ElMessage.error("Failed to import scene");
   } finally {
     loading.value = false;
   }
 };
 
-// 导出模型
+// export model
 const debounceExportModel = debounce(async (type: ExportType) => {
 
   loading.value = true;
-  loadingText.value = "导出模型中,页面可能会有卡顿请耐心等待...";
+  loadingText.value = "Exporting model. The page may hitch — please wait...";
   loadingTimeout.value = setTimeout(() => {
     try {
       if (!store.sceneApi?.scene) return;
       exportSceneModel(type, store.sceneApi?.scene);
       loading.value = false;
       clearTimeout(toValue(loadingTimeout));
-      ElMessage.success("导出模型成功");
+      ElMessage.success("Model exported");
     } catch (error) {
-      ElMessage.error("导出模型失败");
+      ElMessage.error("Failed to export model");
       loading.value = false;
       clearTimeout(toValue(loadingTimeout));
     }

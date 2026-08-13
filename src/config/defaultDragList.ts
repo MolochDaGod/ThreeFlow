@@ -1,6 +1,6 @@
 import { CANVAS_METHOD, DRAG_MODEL_TYPE, EFFECT_METHOD } from '@/enums/enum';
 
-// 默认模型列表
+// default model list
 export const defaultModelList = [
   {
     name: 'characterMan',
@@ -180,51 +180,51 @@ export const defaultModelList = [
   },
 ];
 
-// 默认几何体列表
+// 默认geometry list
 export const defaultGeometryList = [
   {
-    name: '立方体',
+    name: 'Box',
     type: 'BoxGeometry',
-    width: 1, // X轴上面的宽度
-    height: 1, // Y轴上面的高度
-    depth: 1, // 轴上面的深度
-    widthSegments: 1, //宽度的分段数
-    heightSegments: 1, //高度的分段数
-    depthSegments: 1, //深度的分段数
+    width: 1, // width on X
+    height: 1, // height on Y
+    depth: 1, // depth on Z
+    widthSegments: 1, //width segments
+    heightSegments: 1, //height segments
+    depthSegments: 1, //depth segments
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '胶囊',
+    name: 'Capsule',
     type: 'CapsuleGeometry',
-    radius: 0.5, // 胶囊半径
-    length: 0.5, //中间区域的长度
-    capSegments: 10, // 构造盖子的曲线部分的个数
-    radialSegments: 10, //覆盖胶囊圆周的分离的面的个数
+    radius: 0.5, // CapsuleRadius
+    length: 0.5, //cylinder length
+    capSegments: 10, // cap curve segments
+    radialSegments: 10, //radial faces around capsule
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '圆形',
+    name: 'Circle',
     type: 'CircleGeometry',
-    radius: 0.5, // 半径
-    segments: 32, //分段（三角面）的数量
-    thetaStart: 0, // 第一个分段的起始角度
-    thetaLength: 6.44, //圆形扇区的中心角
+    radius: 0.5, // Radius
+    segments: 32, //triangle segments
+    thetaStart: 0, // first segment start angle
+    thetaLength: 6.44, //circle sector sweep
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '圆锥',
+    name: 'Cone',
     type: 'ConeGeometry',
-    radius: 5, // 半径
-    height: 10, //圆锥的高度
-    radialSegments: 8, // 圆锥侧面周围的分段数
-    heightSegments: 1, //圆形扇区的中心角
-    openEnded: false, //指明该圆锥的底面是开放的还是封顶的
+    radius: 5, // Radius
+    height: 10, //cone height
+    radialSegments: 8, // cone side segments
+    heightSegments: 1, //circle sector sweep
+    openEnded: false, //whether the cone base is open
     thetaStart: 0,
-    thetaLength: 6.283185307179586, //圆形扇区的中心角
+    thetaLength: 6.283185307179586, //circle sector sweep
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '圆柱',
+    name: 'Cylinder',
     type: 'CylinderGeometry',
     radiusTop: 4,
     radiusBottom: 4,
@@ -233,11 +233,11 @@ export const defaultGeometryList = [
     heightSegments: 1,
     openEnded: false,
     thetaStart: 0,
-    thetaLength: 6.283185307179586, //圆形扇区的中心角
+    thetaLength: 6.283185307179586, //circle sector sweep
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '十二面体',
+    name: 'Dodecahedron',
     type: 'DodecahedronGeometry',
     radius: 0.5,
     detail: 0,
@@ -245,30 +245,30 @@ export const defaultGeometryList = [
   },
 
   {
-    name: '二十面体',
+    name: 'Icosahedron',
     type: 'IcosahedronGeometry',
     radius: 0.5,
     detail: 0,
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '八面体',
+    name: 'Octahedron',
     type: 'OctahedronGeometry',
     radius: 0.5,
     detail: 0,
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '平面',
+    name: 'Plane',
     type: 'PlaneGeometry',
-    width: 1, // X轴上面的宽度
-    height: 1, // Y轴上面的高度
-    widthSegments: 1, //宽度的分段数
-    heightSegments: 1, //高度的分段数
+    width: 1, // width on X
+    height: 1, // height on Y
+    widthSegments: 1, //width segments
+    heightSegments: 1, //height segments
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '圆环',
+    name: 'Ring',
     type: 'RingGeometry',
     innerRadius: 0.44,
     outerRadius: 0.67,
@@ -279,7 +279,7 @@ export const defaultGeometryList = [
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '球',
+    name: 'Sphere',
     type: 'SphereGeometry',
     radius: 15,
     widthSegments: 32,
@@ -291,14 +291,14 @@ export const defaultGeometryList = [
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '四面体',
+    name: 'Tetrahedron',
     type: 'TetrahedronGeometry',
     radius: 0.5,
     detail: 0,
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '圆环',
+    name: 'Torus',
     type: 'TorusGeometry',
     radius: 10,
     tube: 3,
@@ -308,7 +308,7 @@ export const defaultGeometryList = [
     modelType: DRAG_MODEL_TYPE.Geometry,
   },
   {
-    name: '圆环扭结',
+    name: 'Torus knot',
     type: 'TorusKnotGeometry',
     radius: 10,
     tube: 3,
@@ -320,41 +320,41 @@ export const defaultGeometryList = [
   },
 ];
 
-// 默认灯光列表
+// default light list
 export const defaultLightList = [
   {
-    name: '点光源',
+    name: 'Point light',
     type: 'PointLight',
     modelType: DRAG_MODEL_TYPE.Light,
     iconClass: 'icon-dianguangyuan',
   },
   {
-    name: '平行光源',
+    name: 'Directional light',
     type: 'DirectionalLight',
     modelType: DRAG_MODEL_TYPE.Light,
     iconClass: 'icon-pinghangguang1',
   },
   {
-    name: '环境光',
+    name: 'Ambient light',
     type: 'AmbientLight',
     modelType: DRAG_MODEL_TYPE.Light,
     iconClass: 'icon-huanjingguang1',
   },
   {
-    name: '聚光灯',
+    name: 'Spot light',
     type: 'SpotLight',
     modelType: DRAG_MODEL_TYPE.Light,
     iconClass: 'icon-juguangdeng1',
   },
   {
-    name: '半球光',
+    name: 'Hemisphere light',
     type: 'HemisphereLight',
     modelType: DRAG_MODEL_TYPE.Light,
     iconClass: 'icon-banqiuguang1',
   },
 ];
 
-// 几何体颜色列表
+// Geometrycolor列表
 export const geometryColorList = [
   '#FF4500',
   '#90EE90',

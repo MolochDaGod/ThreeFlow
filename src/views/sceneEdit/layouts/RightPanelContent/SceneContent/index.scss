@@ -44,7 +44,7 @@
           padding: 4px;
           font-size: 14px;
 
-          // 更明亮的展开图标颜色
+          // 更明亮的展开图标color
           color: rgb(200 200 255 / 70%);
           transition: all 0.3s ease;
           &.expanded {
@@ -70,7 +70,7 @@
         align-items: center;
         font-size: 12px;
 
-        // 更明亮的基础文字颜色
+        // 更明亮的基础文字color
         color: #d8d5ea;
         transition: color 0.3s ease;
         span {
@@ -91,7 +91,7 @@
           color: #e9c611;
         }
         &:hover span {
-          // 更明亮的悬停文字颜色
+          // 更明亮的悬停文字color
           color: #ffffff;
           text-shadow: 0 0 8px rgb(255 255 255 / 10%);
         }
@@ -105,13 +105,13 @@
         .icon-style {
           padding: 4px;
 
-          // 更明亮的图标颜色
+          // 更明亮的图标color
           color: #b4b0d0;
           cursor: pointer;
           border-radius: 4px;
           transition: all 0.3s ease;
           &:hover {
-            // 更柔和的删除按钮颜色
+            // 更柔和的删除按钮color
             color: hsl(0deg 100% 50% / 81.2%);
             background: rgb(255 143 143 / 10%);
           }

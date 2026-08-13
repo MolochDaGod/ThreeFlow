@@ -16,7 +16,7 @@
             class="animation-icon"
             v-if="currentAnimationUUids.includes(item.uuid)"
           >
-            <span class="play-status"> 播放中 </span>
+            <span class="play-status"> Playing </span>
             <span class="iconfont icon-donghua"></span>
           </div>
         </div>
@@ -24,7 +24,7 @@
     </el-scrollbar>
     <div class="animation-form">
       <div class="form-item">
-        <div class="item-label">播放速度</div>
+        <div class="item-label">Playback speed</div>
         <div class="item-value">
           <el-slider
             :min="0"
@@ -39,7 +39,7 @@
         </div>
       </div>
       <div class="form-item">
-        <div class="item-label">动作幅度</div>
+        <div class="item-label">Weight</div>
         <div class="item-value">
           <el-slider
             :min="0"
@@ -68,7 +68,7 @@ defineProps<{
 
 const store = useSceneStore();
 
-// 动画参数
+// animation params
 const actionParams = shallowReactive<ActionParams>({
   loop: THREE.LoopRepeat,
   paused: false,
@@ -76,7 +76,7 @@ const actionParams = shallowReactive<ActionParams>({
   timeScale: 1,
 });
 
-//当前播放的动画uuid
+//playing animation uuid
 const currentAnimationUUids = computed(() => {
   const actions = store.sceneApi?.animationModules?.currentActions.get(
     store.currentTransformMaterialUuid || ''
@@ -88,7 +88,7 @@ const currentAnimationUUids = computed(() => {
   return uuids;
 });
 
-//当前模型
+//current model
 const currentModel = computed(() => {
   const uuid = store.currentTransformMaterialUuid;
   const model = store.sceneApi?.scene?.getObjectByProperty(
@@ -108,7 +108,7 @@ onMounted(() => {
   }
 });
 
-// 选择动画
+// choose animation
 const chooseAnimation = async (item: THREE.AnimationClip) => {
   if (currentAnimationUUids.value.includes(item.uuid)) {
     store.sceneApi?.animationModules?.updateActionAnimationMap(
@@ -122,7 +122,7 @@ const chooseAnimation = async (item: THREE.AnimationClip) => {
     store.sceneApi?.animationModules?.playAnimation(item, currentModel.value);
   }
 };
-// 更新动画参数
+// update animation params
 const updateActionParams = () => {
   store.sceneApi?.animationModules?.updateAnimationParams(
     actionParams,

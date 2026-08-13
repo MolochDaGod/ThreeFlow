@@ -1,7 +1,7 @@
 <template>
   <div class="property-content" v-if="geometryParameters.parameters">
     <div class="property-item">
-      <div class="property-item-label">类型</div>
+      <div class="property-item-label">Type</div>
       <div class="property-item-value">
         {{ geometryParameters.type }}
       </div>
@@ -52,7 +52,7 @@ const { geometryParameters } = defineProps<{
   geometryParameters: GeometryParameters;
 }>();
 
-// 几何体参数列表
+// geometry list
 const geometryParametersList = computed(() => {
   const params = geometryParameters.parameters;
   if (!params) return [];
@@ -73,7 +73,7 @@ const geometryParametersList = computed(() => {
     });
 });
 
-// 更新几何体参数
+// update geometry
 const updateGeometryParameter = (
   item: { labelKey: string },
   value: number | boolean

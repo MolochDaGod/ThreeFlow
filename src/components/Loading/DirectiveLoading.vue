@@ -3,7 +3,7 @@
     <div class="loading-box">
       <div class="loading">
         <img src="@/assets/image/loading.svg" />
-        <div class="loading-txt">加载中...</div>
+        <div class="loading-txt">Loading...</div>
       </div>
     </div>
   </div>

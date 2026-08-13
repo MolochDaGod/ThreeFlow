@@ -1,15 +1,15 @@
 <template>
   <div class="project-container">
     <div class="project-content">
-      <!-- 渲染器 -->
-      <div class="project-content-title">渲染器</div>
+      <!-- Renderer -->
+      <div class="project-content-title">Renderer</div>
       <div class="project-content-item">
-        <div class="item-label">色调映射</div>
+        <div class="item-label">Tone mapping</div>
         <div class="item-value">
           <el-select
             @change="updateRenderConfig"
             v-model="configData.toneMapping"
-            placeholder="请选择"
+            placeholder="Select"
           >
             <el-option
               v-for="item in toneMappingOptions"
@@ -21,12 +21,12 @@
         </div>
       </div>
       <div class="project-content-item">
-        <div class="item-label">阴影</div>
+        <div class="item-label">Shadows</div>
         <div class="item-value">
           <el-select
             @change="updateRenderConfig"
             v-model="configData.shadowType"
-            placeholder="请选择"
+            placeholder="Select"
           >
             <el-option
               v-for="item in shadowTypeOptions"
@@ -41,7 +41,7 @@
         class="project-content-item"
         v-if="configData.toneMapping != THREE.NoToneMapping"
       >
-        <div class="item-label">曝光度</div>
+        <div class="item-label">Exposure</div>
         <div class="item-value">
           <el-slider
             @change="updateRenderConfig"
@@ -53,15 +53,15 @@
           />
         </div>
       </div>
-      <!-- 场景 -->
-      <div class="project-content-title">场景</div>
+      <!-- Scene -->
+      <div class="project-content-title">Scene</div>
       <div class="project-content-item">
-        <div class="item-label">背景</div>
+        <div class="item-label">Background</div>
         <div class="item-value">
           <el-select
             v-model="configData.background"
             style="width: 120px"
-            placeholder="请选择"
+            placeholder="Select"
             @change="updateSceneBackground"
           >
             <el-option
@@ -71,14 +71,14 @@
               :value="item.value"
             ></el-option>
           </el-select>
-          <!-- 颜色 -->
+          <!-- color -->
           <el-color-picker
             :predefine="colorPickerOptions"
             @change="updateSceneBackgroundColor"
             v-if="configData.background === BACKGROUND_TYPE.Color"
             v-model="configData.backgroundColor"
           />
-          <!-- 图片 -->
+          <!-- image -->
           <el-upload
             v-if="configData.background === BACKGROUND_TYPE.Texture"
             :show-file-list="false"
@@ -92,7 +92,7 @@
             <el-tooltip
               class="item"
               effect="dark"
-              content="支持.jpg,.png,.hdr格式"
+              content="Supports .jpg, .png, .hdr"
               placement="top"
             >
               <el-image
@@ -113,7 +113,7 @@
         class="project-content-item"
         v-if="configData.background === BACKGROUND_TYPE.Texture"
       >
-        <div class="item-label">模糊度</div>
+        <div class="item-label">Blur</div>
         <div class="item-value">
           <el-slider
             v-model="configData.backgroundBlurriness"
@@ -129,7 +129,7 @@
         class="project-content-item"
         v-if="configData.background === BACKGROUND_TYPE.Texture"
       >
-        <div class="item-label">强度</div>
+        <div class="item-label">Intensity</div>
         <div class="item-value">
           <el-slider
             v-model="configData.backgroundIntensity"
@@ -142,12 +142,12 @@
         </div>
       </div>
       <div class="project-content-item">
-        <div class="item-label">环境</div>
+        <div class="item-label">Environment</div>
         <div class="item-value">
           <el-select
             v-model="configData.environment"
             style="width: 120px"
-            placeholder="请选择"
+            placeholder="Select"
             @change="updateSceneEnvironment"
           >
             <el-option
@@ -157,7 +157,7 @@
               :value="item.value"
             ></el-option>
           </el-select>
-          <!-- 图片 -->
+          <!-- image -->
           <el-upload
             v-if="configData.environment === ENVIRONMENT_TYPE.Environment"
             :show-file-list="false"
@@ -171,7 +171,7 @@
             <el-tooltip
               class="item"
               effect="dark"
-              content="支持.jpg,.png,.hdr格式"
+              content="Supports .jpg, .png, .hdr"
               placement="top"
             >
               <el-image
@@ -189,12 +189,12 @@
         </div>
       </div>
       <div class="project-content-item">
-        <div class="item-label">雾</div>
+        <div class="item-label">Fog</div>
         <div class="item-value">
           <el-space>
             <el-select
               style="width: 120px"
-              placeholder="请选择"
+              placeholder="Select"
               @change="updateSceneFogInfo"
               v-model="configData.fog"
             >
@@ -216,7 +216,7 @@
         </div>
       </div>
       <div class="project-content-item" v-if="configData.fog != FOG_TYPE.None">
-        <div class="item-label">雾浓度</div>
+        <div class="item-label">Fog density</div>
         <div class="item-value">
           <el-space v-if="configData.fog == FOG_TYPE.Fog">
             <el-input-number
@@ -343,13 +343,13 @@ const initConfigData = () => {
     environmentTexture: sceneConfig?.environmentTexture,
   });
 };
-// 更新渲染配置
+// update renderer config
 const updateRenderConfig = () => {
   sceneApi!.renderer!.toneMapping = configData.toneMapping;
   sceneApi!.renderer!.toneMappingExposure = configData.toneMappingExposure;
   sceneApi!.renderer!.shadowMap.type = normalizeShadowType(configData.shadowType);
 };
-// 更新场景背景
+// update scene background
 const updateSceneBackground = () => {
   if (configData.background === BACKGROUND_TYPE.Color) {
     sceneApi!.scene!.background = new THREE.Color(configData.backgroundColor as string);
@@ -359,7 +359,7 @@ const updateSceneBackground = () => {
     sceneApi!.scene!.background = new THREE.Color(0xa0a0a0);
   }
 };
-// 更新场景环境
+// update scene environment
 const updateSceneEnvironment = () => {
   if (configData.environment === ENVIRONMENT_TYPE.Environment) {
     sceneApi!.scene!.environment = configData.environmentTexture;
@@ -367,17 +367,17 @@ const updateSceneEnvironment = () => {
     sceneApi!.scene!.environment = null;
   }
 };
-// 更新场景背景颜色
+// update background color
 const updateSceneBackgroundColor = () => {
   sceneApi!.scene!.background = new THREE.Color(configData.backgroundColor as string);
 };
-// 更新场景背景模糊度
+// update background blur
 const updateSceneBlurrinessAndIntensity = () => {
   sceneApi!.scene!.backgroundBlurriness = configData.backgroundBlurriness;
   sceneApi!.scene!.backgroundIntensity = configData.backgroundIntensity;
 };
 
-// 上传背景图片
+// upload background image
 const uploadBackgroundMapFile = async (valueKey: string, file: UploadFile) => {
   try {
     const filePath = URL.createObjectURL(file?.raw as Blob);
@@ -402,7 +402,7 @@ const uploadBackgroundMapFile = async (valueKey: string, file: UploadFile) => {
   }
 };
 
-// 更新场景雾
+// update scene fog
 const updateSceneFogInfo = () => {
   const fogInfo = {
     fog: configData.fog,

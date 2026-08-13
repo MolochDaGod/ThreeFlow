@@ -22,8 +22,8 @@ import { cloneDeep } from 'lodash-es';
 const store = useSceneStore();
 
 /**
- * @description 获取场景配置数据
- * @returns 场景配置
+ * @description 获取Scene配置数据
+ * @returns Scene配置
  */
 export const getSceneConfig = () => {
   const { scene, renderer } = store.sceneApi || {};
@@ -41,7 +41,7 @@ export const getSceneConfig = () => {
     background = BACKGROUND_TYPE.NoBackground;
   }
 
-  // 获取地面材质
+  // 获取地面Material
   const planeGeometry = scene?.getObjectByName('customPlane') as THREE.Mesh;
   const planeGeometryKey = planeGeometry?.userData.planeGeometry as string;
 
@@ -86,7 +86,7 @@ export const getSceneConfig = () => {
 /**
  * 更新地面
  * @description 更新地面
- * @param planeGeometry - 地面几何体
+ * @param planeGeometry - 地面Geometry
  */
 export const updatePlaneGeometry = async (plane: PlaneGeometry) => {
   const { scene } = store.sceneApi || {};
@@ -129,8 +129,8 @@ export const updatePlaneGeometry = async (plane: PlaneGeometry) => {
 };
 
 /**
- * 更新场景雾
- * @description 更新场景雾
+ * update scene fog
+ * @description update scene fog
  * @param fogInfo - 雾信息
  */
 export const updateSceneFog = (
@@ -154,8 +154,8 @@ export const updateSceneFog = (
 };
 
 /**
- * 获取鼠标在3D场景中的位置
- * @description 获取鼠标在3D场景中的位置
+ * 获取鼠标在3DScene中的位置
+ * @description 获取鼠标在3DScene中的位置
  * @param clientX - 鼠标X坐标
  * @param clientY - 鼠标Y坐标
  * @returns THREE.Vector3 | null - 返回3D坐标位置，如果未找到则返回null
@@ -200,8 +200,8 @@ export const getMousePosition = (
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, store.sceneApi?.camera);
 
-  // 计算射线与 XY 平面的交点
-  const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0)); // 修改为水平面
+  // 计算射线与 XY Plane的交点
+  const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0)); // 修改为水Plane
   const target = new THREE.Vector3();
   const intersected = raycaster.ray.intersectPlane(plane, target);
 
@@ -238,8 +238,8 @@ export const getMousePosition = (
 };
 
 /**
- * 根据文件类型创建模型
- * @description 根据文件类型创建模型
+ * 根据文件类型创建Models
+ * @description 根据文件类型创建Models
  * @param result - 加载结果
  * @param fileType - 文件类型
  * @returns THREE.Object3D | null
@@ -277,9 +277,9 @@ export const getFilename = (ext: string): string =>
   `${new Date().toLocaleString()}.${ext}`.replace(/[:]/g, '-');
 
 /**
- * 设置模型位置和大小
- * @description 设置模型位置和大小
- * @param model - 模型
+ * 设置Models位置和大小
+ * @description 设置Models位置和大小
+ * @param model - Models
  * @param mousePosition - 鼠标位置
  */
 export const setModelPositionSize = (
@@ -295,7 +295,7 @@ export const setModelPositionSize = (
       child.receiveShadow = true;
     }
   });
-  // 更新模型的世界矩阵
+  // 更新Models的世界矩阵
   model.position.set(mousePosition.x, mousePosition.y, mousePosition.z);
   model.updateMatrixWorld();
 
@@ -303,7 +303,7 @@ export const setModelPositionSize = (
     ...model.userData,
     isTransformControls: true,
   };
-  // 计算模型包围盒
+  // 计算Models包围盒
   const box = new THREE.Box3().setFromObject(model);
   const size = box.getSize(new THREE.Vector3());
   const maxSize = Math.max(size.x, size.y, size.z);
@@ -315,10 +315,10 @@ export const setModelPositionSize = (
 };
 
 /**
- * 导出模型
- * @description 导出模型
- * @param type - 导出类型
- * @param scene - 场景
+ * export model
+ * @description export model
+ * @param type - export types
+ * @param scene - Scene
  * @param options - 导出选项
  */
 export const exportSceneModel = async (
@@ -352,13 +352,13 @@ export const exportSceneModel = async (
     } else {
       modelList.forEach(processModel);
     }
-    // 如果导出usdz模型，则将所有双面材质改为单面材质
+    // 如果导出usdzModels，则将所有双面Material改为单面Material
     if (type === MODEL_TYPE.USDZ) {
       modelGroup.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           const material = child.material as THREE.Material;
           if (material.side === THREE.DoubleSide) {
-            material.side = THREE.FrontSide; // 改为单面材质
+            material.side = THREE.FrontSide; // 改为单面Material
           }
         }
       });
@@ -428,7 +428,7 @@ export const exportSceneModel = async (
     disposeScene(newScene);
   } catch (error) {
     console.error('Export failed:', error);
-    ElMessage.error('导出失败');
+    ElMessage.error('Export failed');
     throw error;
   }
 };

@@ -30,7 +30,7 @@ export class TransformCommand extends Command {
     this.newRotation = newRotation.clone();
     this.newScale = newScale.clone();
 
-    // 如果是定向光或聚光灯，保存初始目标位置
+    // 如果是定向光或Spot light，保存初始目标位置
     if (
       object instanceof THREE.DirectionalLight ||
       object instanceof THREE.SpotLight
@@ -62,7 +62,7 @@ export class TransformCommand extends Command {
   }
 
   /**
-   * 撤销变换操作
+   * Undo变换操作
    */
   undo() {
     this.object.position.copy(this.oldPosition);

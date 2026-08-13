@@ -7,16 +7,16 @@ import { useSceneStore } from '@/store/sceneEditStore';
 const store = useSceneStore();
 
 /**
- * @description 动画模块
+ * @description Animation模块
  */
 class animationModules {
-  // 动画混合器
+  // Animation混合器
   animationMixers: Map<string, THREE.AnimationMixer>;
-  // 当前动画
+  // 当前Animation
   currentActions: Map<string, THREE.AnimationAction[]>;
-  // 动画计时器（替代已弃用的 Clock）
+  // Animation计时器（替代已弃用的 Clock）
   animationTimer: Timer;
-  // 动画帧请求ID
+  // Animation帧请求ID
   animationFrame: number | null;
   constructor() {
     this.animationMixers = new Map();
@@ -27,12 +27,12 @@ class animationModules {
   }
 
   /**
-   * 初始化场景中所有带动画的模型
-   * @param scene 场景对象
+   * 初始化Scene中所有带Animation的Models
+   * @param scene Scene对象
    */
   initializeAnimations() {
     const scene = store.sceneApi?.scene;
-    // 找到需要播放动画的模型
+    // 找到需要播放Animation的Models
     const animationModelList = scene?.children.filter((item) => {
       return (
         item.userData.playAnimationList &&
@@ -58,9 +58,9 @@ class animationModules {
   }
 
   /**
-   * 播放动画
-   * @param animationClip 动画片段
-   * @param model 模型
+   * 播放Animation
+   * @param animationClip Animation片段
+   * @param model Models
    */
   playAnimation(animationClip: THREE.AnimationClip, model: THREE.Object3D) {
     let currentMixer = this.animationMixers.get(model.uuid);
@@ -71,17 +71,17 @@ class animationModules {
     const newAction = currentMixer.clipAction(toRaw(animationClip));
     const currentActions = this.currentActions.get(model.uuid) || [];
 
-    // 同时播放新动画（不停止旧动画）
+    // 同时播放新Animation（不停止旧Animation）
     newAction.reset().setEffectiveTimeScale(1).setEffectiveWeight(1).play();
 
     this.currentActions.set(model.uuid, [...currentActions, toRaw(newAction)]); // 存储所有动作
 
-    // 更新模型userData中的动画名称列表
+    // 更新ModelsuserData中的Animation名称列表
     if (!model.userData.playAnimationList) {
       model.userData.playAnimationList = [];
     }
 
-    // 注意 ⚠️ 将当前模型已播放的动画名称，存储下来 页面初始化加载时，需要用到
+    // 注意 ⚠️ 将current model已播放的Animation名称，存储下来 页面初始化加载时，需要用到
     if (!model.userData.playAnimationList.includes(animationClip.name)) {
       model.userData.playAnimationList.push(animationClip.name);
     }
@@ -91,14 +91,14 @@ class animationModules {
     }
   }
   /**
-   * 动画帧请求
+   * Animation帧请求
    */
   private animationFrameFun() {
     this.animationFrame = requestAnimationFrame((timestamp) => {
       this.animationTimer.update(timestamp);
       const delta = this.animationTimer.getDelta();
 
-      // 更新所有模型的动画
+      // 更新所有Models的Animation
       this.animationMixers.forEach((mixer, modelId) => {
         const actions = this.currentActions.get(modelId) || [];
         actions.forEach((action) => {
@@ -110,9 +110,9 @@ class animationModules {
     });
   }
   /**
-   * 更新动画参数
-   * @param params 动画参数
-   * @param mapId 动画映射 ID
+   * update animation params
+   * @param params animation params
+   * @param mapId Animation映射 ID
    */
   updateAnimationParams(params: ActionParams, mapId: string) {
     const actionList = this.currentActions.get(mapId);
@@ -125,15 +125,15 @@ class animationModules {
     });
   }
   /**
-   * 更新动画暂停状态
-   * @param mapId 动画映射 ID
-   * @param uuid 动画UUID
+   * 更新Animation暂停状态
+   * @param mapId Animation映射 ID
+   * @param uuid AnimationUUID
    */
   updateActionAnimationMap(mapId: string, uuid: string) {
     const actionList = this.currentActions.get(mapId);
     if (!actionList) return;
 
-    // 查找要停止的动画名称
+    // 查找要停止的Animation名称
     let clipNameToRemove: string | undefined;
 
     const newActionList = actionList.filter((action) => {
@@ -146,7 +146,7 @@ class animationModules {
       return clip?.uuid !== uuid;
     });
 
-    // 从模型userData中移除动画名称
+    // 从ModelsuserData中移除Animation名称
     if (clipNameToRemove) {
       const mixer = this.animationMixers.get(mapId);
       if (mixer) {
@@ -168,11 +168,11 @@ class animationModules {
     this.currentActions.set(mapId, newActionList);
   }
   /**
-   * 清除动画
+   * 清除Animation
    */
   clear() {
     this.animationMixers.forEach((mixer) => {
-      // 清空模型userData中的动画列表
+      // 清空ModelsuserData中的Animation列表
       const root = mixer.getRoot();
       if (root && 'userData' in root && root.userData) {
         root.userData.playAnimationList = [];

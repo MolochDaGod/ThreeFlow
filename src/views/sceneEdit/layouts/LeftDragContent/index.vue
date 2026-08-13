@@ -15,7 +15,7 @@
           </div>
         </div>
         <div class="drag-tab-content">
-          <!-- 模型 -->
+          <!-- Models -->
           <el-scrollbar
             max-height="calc(100vh - 215px)"
             v-if="activeTabKey === DRAG_MODEL_TYPE.Model"
@@ -37,7 +37,7 @@
           </el-scrollbar>
         </div>
         <div class="drag-tab-content min-height">
-          <!-- 几何体 -->
+          <!-- Geometry -->
           <el-scrollbar
             max-height="calc(100vh - 215px)"
             v-if="activeTabKey === DRAG_MODEL_TYPE.Geometry"
@@ -56,7 +56,7 @@
               </div>
             </div>
           </el-scrollbar>
-          <!-- 灯光 -->
+          <!-- Lights -->
           <el-scrollbar
             max-height="calc(100vh - 215px)"
             v-if="activeTabKey === DRAG_MODEL_TYPE.Light"
@@ -78,9 +78,9 @@
           </el-scrollbar>
         </div>
       </div>
-      <!-- 导入模型 -->
+      <!-- Import model -->
       <div class="outside-file-content">
-        <div class="drag-title">导入模型</div>
+        <div class="drag-title">Import model</div>
         <div class="outside-file-box" @click="changeFile">
           <div class="file-icon">
             <span class="iconfont icon-shangchuan"></span>
@@ -98,14 +98,14 @@
           <div></div>
         </div>
       </div>
-      <!-- 底部占位，防止被商用版文案遮挡 -->
+      <!-- spacer so the commercial banner does not cover items -->
       <div class="bottom-spacer"></div>
     </el-scrollbar>
     <div class="commercial-version" @click="openCommercialVersion">
         <span class="iconfont icon-hot"></span>
-        <span>商用版：ThreeFlowX</span>
+        <span>Pro: ThreeFlowX</span>
     </div>
-    <!-- 开关 -->
+    <!-- toggle -->
     <div class="collapse-button" @click="toggleCollapse">
       <el-icon :size="20">
         <ArrowRight v-if="isCollapsed" />
@@ -130,29 +130,29 @@ const emit = defineEmits(['drag-model-start', 'choose-outside-file']);
 
 const activeTabKey = ref<DRAG_MODEL_TYPE>(DRAG_MODEL_TYPE.Model);
 
-// 折叠
+// collapse
 const isCollapsed = ref<boolean>(false);
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
 };
 
-// 拖拽模型开始
+// drag model start
 const onDragModelStart = (model: DragModelType) => {
   emit('drag-model-start', model);
 };
 
-// 选择外部模型
+// pick an external model
 const chooseOutsideFile = async (file: UploadFile) => {
   emit('choose-outside-file', file);
 };
 
-// 选择外部模型
+// pick an external model
 const uploadRef = ref<InstanceType<typeof ElUpload>>();
 const changeFile = () => {
   const input = uploadRef?.value?.$el.querySelector('input');
   if (input instanceof HTMLInputElement) input.click();
 };
-// 打开商用版
+// open commercial edition
 const openCommercialVersion = () => {
   window.open('http://threeflowx.cn/edit/', '_blank');
 };

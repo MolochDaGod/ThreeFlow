@@ -2,7 +2,7 @@
   <div class="material-content">
     <el-scrollbar max-height="calc(100vh - 420px)">
       <div class="material-item">
-        <div class="material-item-label">类型</div>
+        <div class="material-item-label">Type</div>
         <div class="material-item-value">
           <el-select
             v-model="meshMaterial.type"
@@ -18,7 +18,7 @@
           </el-select>
         </div>
       </div>
-      <!-- 添加材质属性循环 -->
+      <!-- material property loop -->
       <div
         v-for="item in editablePropertiesList"
         :key="item.key"
@@ -52,12 +52,12 @@
               v-if="item.key === 'side'"
               v-model="item.value"
               style="width: 180px"
-              placeholder="请选择"
+              placeholder="Select"
               @change="updateMeshMaterialProperty(item.key, $event)"
             >
-              <el-option label="正面" :value="THREE.FrontSide" />
-              <el-option label="背面" :value="THREE.BackSide" />
-              <el-option label="双面" :value="THREE.DoubleSide" />
+              <el-option label="Front" :value="THREE.FrontSide" />
+              <el-option label="Back" :value="THREE.BackSide" />
+              <el-option label="Double" :value="THREE.DoubleSide" />
             </el-select>
             <el-select
               v-else-if="item.key === 'blending'"
@@ -200,7 +200,7 @@ import { type UploadFile } from 'element-plus';
 import { cloneDeep } from 'lodash-es';
 
 const store = useSceneStore();
-// 获取当前材质
+// current material
 const { meshMaterial } = defineProps<{
   meshMaterial: MaterialData;
 }>();
@@ -211,10 +211,10 @@ onMounted(() => {
   getNewMaterialPropertyList();
 });
 
-// 可编辑的属性列表
+// editable properties
 const editablePropertiesList = ref<EditableProperty[]>([]);
 
-// 生成可编辑的属性列表
+// 生成editable properties
 const generateEditablePropertiesList = (material: MaterialData) => {
   if (!material) return [];
   const propertyKey = Object.entries(material);
@@ -224,7 +224,7 @@ const generateEditablePropertiesList = (material: MaterialData) => {
     .filter(([key]) => key in MATERIAL_DATA_ENUM)
     .map(([key, value]) => {
       let generateValue: EditableValue = value;
-      // 颜色和发光颜色需要转换为十六进制
+      // convert colors to hex
       if (verifyValueColor(key)) {
         if (value instanceof THREE.Color) {
            generateValue = value.getStyle();
@@ -235,7 +235,7 @@ const generateEditablePropertiesList = (material: MaterialData) => {
         }
       }
       let customMapData = {};
-      // 如果是贴图数据
+      // if map data
       if (verifyValueMap(key)) {
         const texture = generateValue as THREE.Texture | null;
         customMapData = {
@@ -254,11 +254,11 @@ const generateEditablePropertiesList = (material: MaterialData) => {
         customMapData,
       };
     });
-  // 添加隐式属性
+  // add implicit properties
   const additionalProperties = hidePropertyKey.map((key) => {
     return {
       label: MATERIAL_DATA_ENUM[key as keyof typeof MATERIAL_DATA_ENUM],
-      key: `_${key}`, // 添加下划线前缀以区分
+      key: `_${key}`, // underscore prefix
       value: (material[key] as number) || 0,
       valueType: 'number',
       customMapData: {},
@@ -268,7 +268,7 @@ const generateEditablePropertiesList = (material: MaterialData) => {
   return [...result, ...additionalProperties];
 };
 
-// 改变材质类型
+// change material type
 const handleChangeMaterialType = (type: string) => {
   const mesh = store.sceneApi?.updateMaterialType(type);
   if (mesh) {
@@ -279,7 +279,7 @@ const handleChangeMaterialType = (type: string) => {
   }
 };
 
-// 更新材质属性
+// update materialProperties
 const updateMeshMaterialProperty = <T,>(key: string, value: T) => {
   const { sceneApi } = store;
   const uuid = store.currentTransformMaterialUuid;
@@ -298,7 +298,7 @@ const updateMeshMaterialProperty = <T,>(key: string, value: T) => {
   }
 };
 
-// 更新贴图属性
+// update map properties
 const updateMeshMaterialMap = (key: string, value: EditableProperty) => {
   const { sceneApi } = store;
   const uuid = store.currentTransformMaterialUuid;
@@ -311,12 +311,12 @@ const updateMeshMaterialMap = (key: string, value: EditableProperty) => {
     (newMaterial as unknown as Record<string, THREE.Texture | null>)[key] =
       visible ? (texture ?? null) : null;
     mesh.material = newMaterial;
-    // 标记材质需要更新
+    // mark material dirty
     (mesh.material as THREE.Material).needsUpdate = true;
   }
 };
 
-// 上传贴图
+// upload map
 const uploadMaterialMapFile = async (
   item: EditableProperty,
   file: UploadFile
@@ -331,39 +331,39 @@ const uploadMaterialMapFile = async (
     ) as THREE.Mesh;
 
     if (mesh && mesh.material) {
-      // 获取贴图
+      // get map
       const textures = await updateMaterialMap(
         filePath,
         getFileType(file.name)
       );
 
-      // 如果贴图可见，则更新贴图
+      // update map if visible
       if (item.customMapData.visible) {
         const oldMaterial = mesh.material;
         const newMaterial = (oldMaterial as unknown as THREE.Material).clone();
-        // 更新贴图
+        // update map
         (newMaterial as unknown as Record<string, THREE.Texture>)[item.key] =
           textures;
-        // 更新材质
+        // update material
         mesh.material = newMaterial;
-        // 释放旧材质
+        // dispose old material
         disposeMaterial(oldMaterial);
       }
-      // 如果存在旧的贴图，释放它
+      // dispose previous map
       if (item.customMapData.texture) {
         item.customMapData.texture.dispose();
       }
-      // 更新贴图数据
+      // update map data
       item.customMapData.image = generateMaterialMaps(textures);
       item.customMapData.texture = textures;
     }
   } finally {
-    // 确保在任何情况下都释放 URL 对象
+    // always revoke URL
     URL.revokeObjectURL(filePath);
   }
 };
 
-// 获取新的材质属性列表
+// rebuild material property list
 const getNewMaterialPropertyList = () => {
   const mesh = store.sceneApi?.scene?.getObjectByProperty(
     'uuid',

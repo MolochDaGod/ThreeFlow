@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 /**
- * 场景贴图映射类型
+ * tone mapping types
  */
 export enum TEMPLATE_MAPPING_TYPE {
   NoToneMapping = THREE.NoToneMapping,
@@ -15,7 +15,7 @@ export enum TEMPLATE_MAPPING_TYPE {
 }
 
 /**
- * 变换控制器类型
+ * transform control types
  */
 export enum TRANSFORM_CONTROLS_TYPE {
   Translate = 'translate',
@@ -24,130 +24,130 @@ export enum TRANSFORM_CONTROLS_TYPE {
 }
 
 /**
- * 几何体参数枚举
+ * geometry parameter labels
  */
 export enum GEOMETRY_PARAMETERS {
-  width = '宽度',
-  height = '高度',
-  depth = '深度',
-  radius = '半径',
-  segments = '分段',
-  radiusSegments = '半径分段',
-  widthSegments = '宽度分段',
-  heightSegments = '高度分段',
-  depthSegments = '深度分段',
-  capSegments = '盖子分段',
-  radialSegments = '圆周分段',
-  thetaStart = '起始角度',
-  thetaLength = '中心角',
-  openEnded = '是否开放',
-  detail = '细节',
-  innerRadius = '内半径',
-  outerRadius = '外半径',
-  thetaSegments = '圆周分段',
-  phiSegments = '圆周分段',
-  phiStart = '起始角度',
-  phiLength = '中心角',
-  tubularSegments = '圆环分段',
-  arc = '弧度',
+  width = 'Width',
+  height = 'Height',
+  depth = 'Depth',
+  radius = 'Radius',
+  segments = 'Segments',
+  radiusSegments = 'Radius segments',
+  widthSegments = 'Width segments',
+  heightSegments = 'Height segments',
+  depthSegments = 'Depth segments',
+  capSegments = 'Cap segments',
+  radialSegments = 'Radial segments',
+  thetaStart = 'Start angle',
+  thetaLength = 'Sweep angle',
+  openEnded = 'Open ended',
+  detail = 'Detail',
+  innerRadius = 'Inner radius',
+  outerRadius = 'Outer radius',
+  thetaSegments = 'Radial segments',
+  phiSegments = 'Radial segments',
+  phiStart = 'Start angle',
+  phiLength = 'Sweep angle',
+  tubularSegments = 'Tube segments',
+  arc = 'Arc',
   p = 'P',
   q = 'q',
-  radiusBottom = '底部半径',
-  radiusTop = '顶部半径',
-  length = '长度',
-  tube = '管',
-  closed = '是否闭合',
-  path = '路径',
+  radiusBottom = 'Bottom radius',
+  radiusTop = 'Top radius',
+  length = 'Length',
+  tube = 'Tube',
+  closed = 'Closed',
+  path = 'Path',
 }
 
 export enum MATERIAL_DATA_ENUM {
-  // 基础属性
-  color = '材质颜色',
-  transparent = '透明',
-  // opacity = '不透明度',
-  side = '渲染面',
-  alphaTest = '透明度测试阈值',
-  // wireframeLinewidth = '线框宽度',
+  // base properties
+  color = 'Color',
+  transparent = 'Transparent',
+  // opacity = 'opacity',
+  side = 'Side',
+  alphaTest = 'Alpha test',
+  // wireframeLinewidth = 'wireframe width',
 
-  // 高光材质特有
-  specular = '高光颜色',
-  shininess = '高光强度',
+  // phong-only
+  specular = 'Specular',
+  shininess = 'Shininess',
 
-  // 精灵材质特有
-  rotation = '旋转角度',
+  // sprite-only
+  rotation = 'Rotation',
 
-  // 物理材质特有
-  sheen = '织物绒毛效果',
-  sheenRoughness = '织物绒毛粗糙度',
-  sheenColor = '织物绒毛颜色',
-  iridescence = '彩虹色',
-  iridescenceIOR = '彩虹色折射率',
-  // 深度材质特有
-  depthPacking = '深度打包模式',
-  // 法线材质特有
-  // normalScale = '法线贴图缩放',
+  // physical-only
+  sheen = 'Sheen',
+  sheenRoughness = 'Sheen roughness',
+  sheenColor = 'Sheen color',
+  iridescence = 'Iridescence',
+  iridescenceIOR = 'Iridescence IOR',
+  // depth-only
+  depthPacking = 'Depth packing',
+  // normal-only
+  // normalScale = 'Normal mapScale',
 
-  // 环境光和发光
-  emissive = '自发光颜色',
-  // emissiveIntensity = '自发光强度',
-  // aoMapIntensity = '环境遮挡强度',
+  // emissive
+  emissive = 'Emissive',
+  // emissiveIntensity = 'emissive intensity',
+  // aoMapIntensity = 'AO intensity',
 
-  // 反射和光泽
-  metalness = '金属度',
-  roughness = '粗糙度',
-  reflectivity = '反射率',
-  refractionRatio = '折射率',
-  transmission = '透光率',
-  ior = '折射率',
+  // reflection
+  metalness = 'Metalness',
+  roughness = 'Roughness',
+  reflectivity = 'Reflectivity',
+  refractionRatio = 'IOR',
+  transmission = 'Transmission',
+  ior = 'IOR',
 
-  // 贴图相关
-  map = '贴图',
-  normalMap = '法线贴图',
-  bumpMap = '凹凸贴图',
-  displacementMap = '置换贴图',
-  roughnessMap = '粗糙度贴图',
-  metalnessMap = '金属度贴图',
-  alphaMap = '透明度贴图',
-  aoMap = '环境遮挡贴图',
-  emissiveMap = '自发光贴图',
-  iridescenceMap = '彩虹色贴图',
-  lightMap = '光照贴图',
-  // envMap = '环境贴图',
+  // maps
+  map = 'Map',
+  normalMap = 'Normal map',
+  bumpMap = 'Bump map',
+  displacementMap = 'Displacement map',
+  roughnessMap = 'Roughness map',
+  metalnessMap = 'Metalness map',
+  alphaMap = 'Alpha map',
+  aoMap = 'AO map',
+  emissiveMap = 'Emissive map',
+  iridescenceMap = 'Iridescence map',
+  lightMap = 'Light map',
+  // envMap = 'EnvironmentMap',
 
-  // 线条材质特有
-  linewidth = '线宽',
-  dashSize = '虚线长度',
-  gapSize = '虚线间隔',
+  // line-only
+  linewidth = 'Line width',
+  dashSize = 'Dash size',
+  gapSize = 'Gap size',
 
-  // 点材质特有
-  size = '点大小',
-  sizeAttenuation = '尺寸衰减',
+  // points-only
+  size = 'Point size',
+  sizeAttenuation = 'Size attenuation',
 
-  // 特殊效果
-  wireframe = '线框模式',
-  combine = '混合模式',
+  // effects
+  wireframe = 'Wireframe',
+  combine = 'Blending',
 
-  // 标准材质特有
-  // envMapIntensity = '环境贴图强度',
-  clearcoat = '清漆层强度',
-  // _clearcoat = '清漆层强度',
-  clearcoatRoughness = '清漆层粗糙度',
+  // standard-only
+  // envMapIntensity = 'EnvironmentMapIntensity',
+  clearcoat = 'Clearcoat',
+  // _clearcoat = 'Clearcoat',
+  clearcoatRoughness = 'Clearcoat roughness',
 
-  // 深度和混合
-  depthTest = '深度测试',
-  depthWrite = '深度写入',
-  blending = '混合模式',
+  // depth and blending
+  depthTest = 'Depth test',
+  depthWrite = 'Depth write',
+  blending = 'Blending',
 
-  // 动画相关
-  morphTargets = '变形目标',
-  morphNormals = '法线变形',
+  // animation
+  morphTargets = 'Morph targets',
+  morphNormals = 'Morph normals',
 
-  // 光照计算
-  vertexColors = '顶点颜色',
+  // lighting
+  vertexColors = 'Vertex colors',
 }
 
 /**
- * 背景类型
+ * background types
  */
 export enum BACKGROUND_TYPE {
   NoBackground = 'not',
@@ -157,7 +157,7 @@ export enum BACKGROUND_TYPE {
 }
 
 /**
- * 环境类型
+ * environment types
  */
 export enum ENVIRONMENT_TYPE {
   NoEnvironment = 'not',
@@ -165,7 +165,7 @@ export enum ENVIRONMENT_TYPE {
 }
 
 /**
- * 拖拽模型类型
+ * drag model types
  */
 export enum DRAG_MODEL_TYPE {
   Model = 'model',
@@ -175,7 +175,7 @@ export enum DRAG_MODEL_TYPE {
 }
 
 /**
- * 灯光图标类型
+ * light icon types
  */
 export enum LIGHT_ICON_TYPE {
   DirectionalLight = 'icon-pinghangguang1',
@@ -185,7 +185,7 @@ export enum LIGHT_ICON_TYPE {
   AmbientLight = 'icon-huanjingguang1',
 }
 /**
- * 雾类型
+ * fog types
  */
 export enum FOG_TYPE {
   None = 'none',
@@ -194,7 +194,7 @@ export enum FOG_TYPE {
 }
 
 /**
- * 场景对象名称
+ * scene object names
  */
 export enum MITT_ON_KEY {
   PAGE_LOADING = 'pageLoading',
@@ -202,7 +202,7 @@ export enum MITT_ON_KEY {
 }
 
 /**
- * 导出类型
+ * export types
  */
 export enum EXPORT_TYPE {
   GLTF = 'gltf',
@@ -213,14 +213,14 @@ export enum EXPORT_TYPE {
 }
 
 /**
- * 场景对象名称
+ * scene object names
  */
 export enum SCENE_OBJECT_NAME {
   PerspectiveCamera = 'PerspectiveCamera',
 }
 
 /**
- * 天气类型
+ * weather types
  */
 export enum WEATHER_TYPE {
   None = 'none',
@@ -229,7 +229,7 @@ export enum WEATHER_TYPE {
 }
 
 /**
- * 特效类型
+ * effect types
  */
 export enum EFFECT_METHOD {
   CreateFireEffect = 'CreateFireEffect',
@@ -238,7 +238,7 @@ export enum EFFECT_METHOD {
 }
 
 /**
- * 特效参数类型
+ * effect param types
  */
 export enum EFFECT_PARAMS_TYPE {
   Color = 'color',
@@ -249,7 +249,7 @@ export enum EFFECT_PARAMS_TYPE {
 }
 
 /**
- * 灯光类型
+ * light types
  */
 export enum LIGHT_TYPE {
   DirectionalLight = 'DirectionalLight',
@@ -260,7 +260,7 @@ export enum LIGHT_TYPE {
 }
 
 /**
- * 模型类型
+ * model types
  */
 export enum MODEL_TYPE {
   GLTF = 'gltf',
@@ -271,7 +271,7 @@ export enum MODEL_TYPE {
 }
 
 /**
- * 文本canvas类型
+ * text canvas types
  */
 export enum CANVAS_METHOD {
   CreateFixedCanvas = 'CreateFixedCanvas',
@@ -286,7 +286,7 @@ export enum CANVAS_METHOD {
 }
 
 /**
- * 文本材质类型
+ * 文本material types
  */
 export enum TEXT_MATERIAL_TYPE {
   Sprite = 'Sprite',

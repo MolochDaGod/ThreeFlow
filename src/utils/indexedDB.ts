@@ -22,7 +22,7 @@ export default class IndexDBUtil {
       const request = indexedDB.open(this.dbName, this.version);
 
       request.onerror = () => {
-        reject(new Error('数据库打开失败'));
+        reject(new Error('Failed to open database'));
       };
 
       request.onsuccess = (event) => {
@@ -33,10 +33,10 @@ export default class IndexDBUtil {
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
 
-        // 创建对象仓库
+        // Create object store
         stores.forEach((store) => {
           if (!db.objectStoreNames.contains(store.name)) {
-             console.log('创建对象仓库', store.name, store.keyPath);
+             console.log('Create object store', store.name, store.keyPath);
             db.createObjectStore(store.name, { keyPath: store.keyPath });
           }
         });
@@ -53,7 +53,7 @@ export default class IndexDBUtil {
   async add<T>(storeName: string, data: T): Promise<T> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
-        reject(new Error('数据库未初始化'));
+        reject(new Error('Database is not initialized'));
         return;
       }
       const transaction = this.db.transaction([storeName], 'readwrite');
@@ -62,7 +62,7 @@ export default class IndexDBUtil {
 
       request.onsuccess = () => resolve(data);
       request.onerror = () => {
-        reject(new Error('添加数据失败'));
+        reject(new Error('Failed to add data'));
       };
     });
   }
@@ -76,7 +76,7 @@ export default class IndexDBUtil {
   async update<T>(storeName: string, data: T): Promise<T> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
-        reject(new Error('数据库未初始化'));
+        reject(new Error('Database is not initialized'));
         return;
       }
 
@@ -85,7 +85,7 @@ export default class IndexDBUtil {
       const request = store.put(data);
 
       request.onsuccess = () => resolve(data);
-      request.onerror = () => reject(new Error('更新数据失败'));
+      request.onerror = () => reject(new Error('Failed to update data'));
     });
   }
 
@@ -98,7 +98,7 @@ export default class IndexDBUtil {
   async delete(storeName: string, key: string | number): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
-        reject(new Error('数据库未初始化'));
+        reject(new Error('Database is not initialized'));
         return;
       }
 
@@ -107,7 +107,7 @@ export default class IndexDBUtil {
       const request = store.delete(key);
 
       request.onsuccess = () => resolve(true);
-      request.onerror = () => reject(new Error('删除数据失败'));
+      request.onerror = () => reject(new Error('Failed to delete data'));
     });
   }
 
@@ -120,7 +120,7 @@ export default class IndexDBUtil {
   async get<T>(storeName: string, key: string | number): Promise<T | null> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
-        reject(new Error('数据库未初始化'));
+        reject(new Error('Database is not initialized'));
         return;
       }
 
@@ -129,7 +129,7 @@ export default class IndexDBUtil {
       const request = store.get(key);
 
       request.onsuccess = () => resolve(request.result as T);
-      request.onerror = () => reject(new Error('查询数据失败'));
+      request.onerror = () => reject(new Error('Failed to query data'));
     });
   }
 
@@ -141,7 +141,7 @@ export default class IndexDBUtil {
   async getAll<T>(storeName: string): Promise<T[]> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
-        reject(new Error('数据库未初始化'));
+        reject(new Error('Database is not initialized'));
         return;
       }
 
@@ -162,7 +162,7 @@ export default class IndexDBUtil {
   async clear(storeName: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this.db) {
-        reject(new Error('数据库未初始化'));
+        reject(new Error('Database is not initialized'));
         return;
       }
 

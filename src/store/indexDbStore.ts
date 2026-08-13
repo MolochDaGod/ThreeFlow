@@ -21,7 +21,7 @@ export const useIndexDbStore = defineStore('indexDbStore', () => {
       ]);
       indexDbUtil.value = util;
     } catch (error) {
-      console.error('初始化数据库失败:', error);
+      console.error('Failed to initialize database:', error);
     }
   };
 
