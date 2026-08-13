@@ -1,9 +1,34 @@
 # ThreeFlow (English)
 
 Grudge fork: [MolochDaGod/ThreeFlow](https://github.com/MolochDaGod/ThreeFlow).  
+Live: [https://threeflow.vercel.app](https://threeflow.vercel.app).  
 UI, menus, toasts, and this README are English. Production `base` is `/` for Vercel (`VITE_APP_BASE_URL`).
 
 Upstream author: answer / zhangbo126. License: AGPL-3.0 (keep logo, name, and author notice).
+
+### Warlords / uMMORPG library
+
+The left **Warlords** tab is the existing Grudge CDN + ObjectStore catalog — not a new asset pack and not the original demo police / taxi GLBs.
+
+| Tab | What to drag | Source |
+|-----|----------------|--------|
+| **Captains** | Human, barbarian, elf, dwarf, orc, undead | Play kits `asset-packs/toon-rts-characters/glb/characters/{race}.glb` |
+| **Units** | Warrior / archer per race | `models/warlords/entities/*.glb` (`cdn_ready` uMMORPG extract) |
+| **Enemies** | Drake, ifrit, lava golem, reptile, monster pack, crab, skeletons | `models/creatures/land/*` + `models/skeletons/*` |
+| **Weapons** | Hand axe, greataxe, greatswords, bows + siege | Verified `models/weapons/**` GLBs + catapult / bolt thrower |
+| **Meshes** | Camps, houses, benches, walls, ships, mounts | ObjectStore `ummorpg-placeables-for-forge.json` (GLB only) |
+| **Islands** | Home island, pirate-islands lobby, Lyoko, Spiral, Hoth | `islandDeployments` / `map-registry` meshes |
+
+**Rules**
+
+- Host: `https://assets.grudge-studio.com` only. Catalog: `https://objectstore.grudge-studio.com/api/v1/ummorpg-placeables-for-forge.json`.
+- Skip `unity_prefab_only` and race-kit **FBX** rows (mage / paladin / merc still need unique GLB bakes).
+- Captains here are **look / layout** — Warlords play still loads via `loadRaceKit` (`js/grudge6-kit.js`).
+- SI: 1 unit = 1 m. Human ~1.8 m. Do not scale kits into 100× giants.
+- Player bag / roster / wallet stay on Railway. This editor does not invent a second character DB.
+- Island GLBs are whole maps. Drop one at a time. Isolate children when placing props — do not treat `example_home_island.glb` as one harvest entity in play.
+
+Code: `src/config/warlordsCatalog.ts` → left drag list. About copy is the **About** tab in the right panel.
 
 ### Project Name: ThreeFlow (3D Scene Editor)
 <a href='https://gitee.com/ZHANG_6666/three-flow/stargazers'><img src='https://gitee.com/ZHANG_6666/three-flow/badge/star.svg?theme=dark' alt='star'></img></a> 
@@ -125,7 +150,8 @@ Global components:
 Constant configuration and static data:
 
 - `constant.ts`: Constant definitions
-- `defaultDragList.ts`: Left-side drag resource data for models
+- `defaultDragList.ts`: Geometry / lights; re-exports the Warlords model list
+- `warlordsCatalog.ts`: Captains, units, enemies, weapons, meshes, island maps from CDN / ObjectStore
 - `propertyConfig.ts`: Static property configuration items
 
 ### 5. `/enums` Directory

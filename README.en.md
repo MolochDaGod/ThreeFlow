@@ -1,4 +1,7 @@
 ### Project Name: ThreeFlow (3D Scene Editor)
+
+Grudge live: [https://threeflow.vercel.app](https://threeflow.vercel.app).  
+Left library = Warlords / uMMORPG CDN (captains, units, enemies, weapons, camp meshes, island maps). See `README.md`.
 <a href='https://gitee.com/ZHANG_6666/three-flow/stargazers'><img src='https://gitee.com/ZHANG_6666/three-flow/badge/star.svg?theme=dark' alt='star'></img></a> 
 <a href='https://gitee.com/ZHANG_6666/three-flow/members'><img src='https://gitee.com/ZHANG_6666/three-flow/badge/fork.svg?theme=dark' alt='fork'></img></a>
 <a target="_black" href="https://github.com/zhangbo126/ThreeFlow">

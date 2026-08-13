@@ -6,7 +6,7 @@ export const DRAG_TAB_ITEMS: {
   key: DRAG_MODEL_TYPE;
 }[] = [
   {
-    name: 'Models',
+    name: 'Warlords',
     icon: 'icon-model-lib',
     key: DRAG_MODEL_TYPE.Model,
   },

@@ -15,20 +15,34 @@
           </div>
         </div>
         <div class="drag-tab-content">
-          <!-- Models -->
+          <!-- Warlords / uMMORPG CDN library -->
           <el-scrollbar
             max-height="calc(100vh - 215px)"
             v-if="activeTabKey === DRAG_MODEL_TYPE.Model"
           >
-            <div class="drag-list">
+            <div class="asset-filter">
+              <select v-model="activeAssetGroup" class="asset-filter-select">
+                <option value="all">All</option>
+                <option
+                  v-for="(label, key) in WARLORDS_GROUP_LABELS"
+                  :key="key"
+                  :value="key"
+                >
+                  {{ label }}
+                </option>
+              </select>
+            </div>
+            <div class="drag-list warlords-list">
               <div
                 class="drag-item"
-                v-for="item in defaultModelList"
+                v-for="item in visibleModels"
                 :key="item.id"
                 draggable="true"
+                :title="item.name"
                 @dragstart="() => onDragModelStart(item)"
               >
-                <img :src="item.icon" alt="" />
+                <img :src="item.icon" :alt="item.name" />
+                <div class="item-name">{{ item.name }}</div>
                 <div class="animation-icon" v-if="item.isAnimation">
                   <span class="iconfont icon-donghua"></span>
                 </div>
@@ -115,20 +129,33 @@
   </div>
 </template>
 <script setup lang="ts">
+import { defaultGeometryList, defaultLightList } from '@/config/defaultDragList';
 import {
   defaultModelList,
-  defaultGeometryList,
-  defaultLightList,
-} from '@/config/defaultDragList';
+  itemsInGroup,
+  loadWarlordsLibrary,
+  WARLORDS_GROUP_LABELS,
+  type WarlordsAssetGroup,
+  type WarlordsDragItem,
+} from '@/config/warlordsCatalog';
 import { type ElUpload, type UploadFile } from 'element-plus';
 import type { DragModelType } from '@/types/renderModelTypes';
 import { DRAG_TAB_ITEMS } from './config';
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { DRAG_MODEL_TYPE } from '@/enums/enum';
 
 const emit = defineEmits(['drag-model-start', 'choose-outside-file']);
 
 const activeTabKey = ref<DRAG_MODEL_TYPE>(DRAG_MODEL_TYPE.Model);
+const activeAssetGroup = ref<WarlordsAssetGroup | 'all'>('captains');
+const libraryItems = ref<WarlordsDragItem[]>([...defaultModelList]);
+const visibleModels = computed(() =>
+  itemsInGroup(libraryItems.value, activeAssetGroup.value)
+);
+
+onMounted(async () => {
+  libraryItems.value = await loadWarlordsLibrary();
+});
 
 // collapse
 const isCollapsed = ref<boolean>(false);

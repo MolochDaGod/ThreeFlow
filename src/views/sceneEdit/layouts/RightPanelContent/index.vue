@@ -38,7 +38,7 @@ const tabList = [
     component: ProjectConfig,
   },
   {
-    name: 'Help',
+    name: 'About',
     key: 'help',
     component: HelpDescribe,
   },

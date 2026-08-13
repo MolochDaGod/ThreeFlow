@@ -1,5 +1,45 @@
 <template>
   <div class="help-describe">
+    <div class="help-describe-title">About</div>
+    <div class="help-describe-content about-block">
+      <p>
+        Grudge fork of ThreeFlow for Warlords-era layout. Left library loads
+        <strong>game-ready CDN GLBs</strong> — not demo police / taxi packs.
+      </p>
+      <p>
+        <strong>Captains</strong> are Toon RTS play kits
+        (<code>asset-packs/toon-rts-characters/glb/characters/{race}.glb</code>).
+        Play code still uses <code>loadRaceKit</code>. This viewer only places
+        the mesh.
+      </p>
+      <p>
+        <strong>Units, buildings, mounts, ships, siege</strong> come from
+        ObjectStore
+        <code>ummorpg-placeables-for-forge.json</code> — <code>cdn_ready</code>
+        GLBs only. Mage / paladin / merc rows that still point at race FBX kits
+        are skipped.
+      </p>
+      <p>
+        <strong>Enemies / monsters</strong> are the migrated land creatures
+        (<code>drake</code>, <code>ifrit</code>, <code>lava_golem</code>,
+        reptile, monster pack, crab) plus skeleton residuals.
+      </p>
+      <p>
+        <strong>Weapons</strong> are verified CDN meshes (hand axe, greataxe,
+        greatswords, bows) plus uMMORPG siege (catapult, bolt thrower). Many
+        Fantasy Weapons keys are still FBX-only and are not listed.
+      </p>
+      <p>
+        <strong>Islands</strong>: home island concept mesh, pirate-islands lobby
+        (uMMORPG / Chicken Gun opening map), Lyoko, Spiral Mountain, Hoth boss
+        room. Island GLBs are large — drop one at a time.
+      </p>
+      <p>
+        Host: <code>assets.grudge-studio.com</code>. Player bag / roster stays
+        on Railway. SI: 1 unit = 1 m, human ~1.8 m. AGPL-3.0 — keep author
+        answer / zhangbo126, logo, and name.
+      </p>
+    </div>
     <div class="help-describe-title">Hotkeys</div>
     <div class="help-describe-content">
       <div class="help-content-item">

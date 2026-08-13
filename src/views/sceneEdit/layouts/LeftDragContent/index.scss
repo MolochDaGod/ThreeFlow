@@ -35,12 +35,43 @@
       }
     }
     .drag-tab-content {
+      .asset-filter {
+        padding: 6px 8px 0;
+        .asset-filter-select {
+          width: 100%;
+          height: 24px;
+          padding: 0 4px;
+          color: #c0caf5;
+          font-size: 11px;
+          background: #2a2f45;
+          border: 1px solid rgb(122 162 247 / 25%);
+          border-radius: 4px;
+        }
+      }
       .drag-list {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         justify-content: center;
         padding: 10px;
+        &.warlords-list .drag-item {
+          height: 72px;
+          .item-name {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            padding: 1px 3px;
+            overflow: hidden;
+            font-size: 9px;
+            line-height: 1.2;
+            color: #e8ecff;
+            text-align: center;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background: rgb(18 20 32 / 78%);
+          }
+        }
         .drag-item {
           position: relative;
           width: 85px;

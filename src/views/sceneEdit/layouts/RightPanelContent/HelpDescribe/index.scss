@@ -10,6 +10,19 @@
   }
   .help-describe-content {
     padding: 0 10px;
+    &.about-block {
+      p {
+        margin: 0 0 10px;
+        font-size: 12px;
+        line-height: 1.45;
+        color: #c0caf5;
+      }
+      code {
+        font-size: 11px;
+        color: #9ece6a;
+        word-break: break-all;
+      }
+    }
     .help-content-item {
       display: flex;
       margin-bottom: 10px;
