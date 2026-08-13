@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@9.15.9",
   "author": {
     "name": "answer"
   },
@@ -15,7 +16,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings=0 --fix",
     "lint:stylelint": "stylelint --cache --fix \"**/*.{less,postcss,css,scss}\" --cache --cache-location node_modules/.cache/stylelint/",
-    "prepare": "husky",
+    "prepare": "node -e \"if(!process.env.VERCEL){try{require('child_process').execSync('husky',{stdio:'inherit'})}catch(e){}}\"",
     "lint:lint-staged": "lint-staged",
     "commitlint": "commitlint --edit"
   },
