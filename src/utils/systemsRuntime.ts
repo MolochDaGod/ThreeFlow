@@ -60,9 +60,19 @@ export function stampCollider(
 
 export function stampBrain(obj: THREE.Object3D, brain: BrainKind) {
   obj.userData.aiBrain = brain;
-  obj.userData.behavior = brain;
+  obj.userData.behavior = brain === 'chase' ? 'pursue' : brain;
+  obj.userData.gamesAi = {
+    source: 'https://threejs-games.github.io/examples/70-ai/',
+    state: brain === 'chase' ? 'pursue' : brain,
+    sightDistance: 25,
+    followDistance: 1.5,
+    patrolDistance: 10,
+    attackDistance: 1.25,
+  };
   if (
     brain === 'chase' ||
+    brain === 'pursue' ||
+    brain === 'follow' ||
     brain === 'attack' ||
     brain === 'enemy-deathmatch'
   ) {
@@ -255,9 +265,12 @@ export async function previewBrain(
 ): Promise<string> {
   yukaHandle?.stop();
   yukaHandle = null;
-  if (brain === 'idle' || brain === 'spawnpoint' || brain === 'player-deathmatch') {
+  if (brain === 'spawnpoint' || brain === 'player-deathmatch') {
     return `stamped ${brain} — no preview tick`;
   }
+  const { previewGamesAi } = await import('./gamesAiRuntime');
+  const games = await previewGamesAi(scene, obj, brain);
+  if (games) return games;
   const yuka = await import('yuka');
   const vehicle = new yuka.Vehicle();
   const wp = new THREE.Vector3();

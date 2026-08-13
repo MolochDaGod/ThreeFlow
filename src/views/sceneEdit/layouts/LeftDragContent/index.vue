@@ -41,7 +41,12 @@
                 :title="item.name"
                 @dragstart="() => onDragModelStart(item)"
               >
-                <img :src="item.icon" :alt="item.name" />
+                <img
+                  :src="item.icon"
+                  :alt="item.name"
+                  referrerpolicy="no-referrer"
+                  loading="lazy"
+                />
                 <div class="item-name">{{ item.name }}</div>
                 <div class="animation-icon" v-if="item.isAnimation">
                   <span class="iconfont icon-donghua"></span>

@@ -55,8 +55,12 @@
 
       <div class="block-title">AI brains</div>
       <p class="hint">
-        Same Forge <code>behavior</code> ids. Preview uses Yuka on the root —
-        one mixer stays on the kit.
+        threejs-games
+        <a href="https://threejs-games.github.io/examples/70-ai/" target="_blank"
+          >70-ai</a
+        >
+        idle / wander / patrol / follow / pursue. Yuka steers the root — one
+        mixer on the kit.
       </p>
       <div class="row">
         <el-select v-model="brain" size="small" style="width: 200px">

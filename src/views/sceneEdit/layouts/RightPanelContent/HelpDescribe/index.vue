@@ -59,9 +59,15 @@
       </p>
       <p>
         <strong>Systems</strong> — Rapier, BVH, pathfinding, Yuka (root only).
-        MMO aggro 25/15/30/50 m, threat table, cast telegraphs
-        (<code>grudge-ai-brains</code>). Pop Forge / AI hub from the AI menu —
-        do not treat this SPA as a second Forge.
+        AI catalog from
+        <a href="https://threejs-games.github.io/examples/70-ai/" target="_blank"
+          >threejs-games 70-ai</a
+        >
+        (idle / wander / patrol / follow / pursue). MMO aggro 25/15/30/50 m,
+        threat table, cast telegraphs (<code>grudge-ai-brains</code>). Icons
+        load from <code>assets.grudge-studio.com</code> with
+        <code>referrerpolicy=no-referrer</code>. Pop Forge / AI hub from the
+        AI menu — not a second Forge.
       </p>
     </div>
     <div class="help-describe-title">Hotkeys</div>

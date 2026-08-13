@@ -1,17 +1,16 @@
 import { DRAG_MODEL_TYPE, MODEL_TYPE } from '@/enums/enum';
 import type { ModelType } from '@/types/renderModelTypes';
 import { slugPrefabId, type PrefabKind } from '@/utils/prefabStamp';
+import { ICON_PACK, PLACEABLES_API, PREFABS_API, iconUrl } from './assetApi';
 
 /** Canonical binaries — assets.grudge-studio.com (R2). Do not invent hosts. */
 export const WARLORDS_CDN = 'https://assets.grudge-studio.com';
 
 /** Live ObjectStore placeables (uMMORPG + Warlords entity extract). */
-export const UMMORPG_PLACEABLES_URL =
-  'https://objectstore.grudge-studio.com/api/v1/ummorpg-placeables-for-forge.json';
+export const UMMORPG_PLACEABLES_URL = PLACEABLES_API;
 
 /** Warlords entity prefab index — metadata. Unique GLB comes from placeables. */
-export const WARLORDS_PREFABS_URL =
-  'https://client.grudge-studio.com/api/v1/warlords-entity-prefabs.json';
+export const WARLORDS_PREFABS_URL = PREFABS_API;
 
 export type WarlordsAssetGroup =
   | 'captains'
@@ -63,7 +62,7 @@ export const WARLORDS_GROUP_LABELS: Record<WarlordsAssetGroup, string> = {
 };
 
 const ENT = `${WARLORDS_CDN}/models/warlords/entities`;
-const ICO = `${WARLORDS_CDN}/game-assets/icons/pack/entities`;
+const ICO = `${ICON_PACK}/entities`;
 const TOON = `${WARLORDS_CDN}/asset-packs/toon-rts-characters/glb/characters`;
 const WPN = `${WARLORDS_CDN}/models/weapons`;
 const WPN_ICO = `${WARLORDS_CDN}/game-assets/icons/pack/weapons`;
@@ -84,7 +83,7 @@ function item(
     id: key,
     filePath,
     fileType: MODEL_TYPE.GLB,
-    icon,
+    icon: iconUrl(icon),
     isAnimation,
     modelType: DRAG_MODEL_TYPE.Model,
     ...extra,

@@ -4,7 +4,10 @@
  * Load screen contract matches Open HelpersLoadScreen (catalog first, then GLB).
  */
 
-export const WARLORDS_CDN = 'https://assets.grudge-studio.com';
+import { ASSETS_CDN } from './assetApi';
+import { GAMES_AI_DISTANCES, GAMES_AI_SOURCE } from './gamesAi';
+
+export const WARLORDS_CDN = ASSETS_CDN;
 
 export type HdDeployKind = 'sector' | 'map';
 
@@ -124,6 +127,14 @@ export function buildHdDeployManifest(opts: {
         hideDangerRoomShell: false,
       },
       deploy: opts.target.playUrl,
+    },
+    ai: {
+      source: GAMES_AI_SOURCE,
+      states: ['idle', 'wander', 'patrol', 'follow', 'pursue'],
+      distances: { ...GAMES_AI_DISTANCES },
+      steering: 'yuka',
+      physics: 'rapier',
+      mixer: 'one-on-kit',
     },
     node: {
       id: `hd-terrain-${opts.target.id}`,

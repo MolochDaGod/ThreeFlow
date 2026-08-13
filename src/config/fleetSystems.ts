@@ -57,13 +57,40 @@ export const PHYS_SHAPES = [
 ] as const;
 export type PhysShape = (typeof PHYS_SHAPES)[number];
 
-/** Forge deathmatch + marker brains — same `behavior` field names. */
+/** Forge deathmatch + threejs-games 70-ai (idle/wander/patrol/follow/pursue). */
 export const AI_BRAINS = [
-  { id: 'idle', label: 'Idle', detail: 'Stand. No path write.' },
-  { id: 'patrol', label: 'Patrol', detail: 'Yuka wander on nav zone.' },
-  { id: 'chase', label: 'Chase', detail: 'Seek player tag / selected.' },
-  { id: 'attack', label: 'Attack', detail: 'Forge enemy-deathmatch ATTACK.' },
-  { id: 'flee', label: 'Flee', detail: 'Low-HP flee from Forge FSM.' },
+  {
+    id: 'idle',
+    label: 'Idle',
+    detail: 'threejs-games idle — turn in place. Follow if target walks off.',
+  },
+  {
+    id: 'wander',
+    label: 'Wander',
+    detail: 'threejs-games wander — walk + turnEvery. Spotted → pursue.',
+  },
+  {
+    id: 'patrol',
+    label: 'Patrol',
+    detail: 'threejs-games patrol — 10 m then turnSmooth. Spotted → pursue.',
+  },
+  {
+    id: 'follow',
+    label: 'Follow',
+    detail: 'threejs-games follow — walk to 1.5 m then idle.',
+  },
+  {
+    id: 'pursue',
+    label: 'Pursue',
+    detail: 'threejs-games pursue — run. Attack 1.25 m. Lost → baseState.',
+  },
+  {
+    id: 'chase',
+    label: 'Chase',
+    detail: 'Alias of pursue (fleet name).',
+  },
+  { id: 'attack', label: 'Attack', detail: 'In range — Forge ATTACK / games attackDistance.' },
+  { id: 'flee', label: 'Flee', detail: 'Low-HP. Running set in AI.js.' },
   { id: 'spawnpoint', label: 'Spawn point', detail: 'Marker. No tick.' },
   {
     id: 'player-deathmatch',
@@ -73,7 +100,7 @@ export const AI_BRAINS = [
   {
     id: 'enemy-deathmatch',
     label: 'Enemy (deathmatch)',
-    detail: 'PATROL → CHASE → ATTACK / INVESTIGATE / FLEE.',
+    detail: 'patrol → pursue → attack / investigate / flee.',
   },
 ] as const;
 export type BrainKind = (typeof AI_BRAINS)[number]['id'];

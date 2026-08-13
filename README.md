@@ -26,7 +26,7 @@ Vue 3 + Vite + Three.js `^0.185` editor. Left library loads **game-ready CDN GLB
 | Player SSOT | Railway (bag / roster / wallet). Not this editor |
 | Physics | One world: `@dimforge/rapier3d-compat` |
 | Nav (editor) | `three-pathfinding` from stamped terrain. Play bake stays Forge recast |
-| AI motion | Yuka `^0.7` on the **root**. One mixer on the kit |
+| AI motion | threejs-games **idle / wander / patrol / follow / pursue** on Yuka. One mixer on the kit |
 | SI | 1 unit = 1 m. Human ~1.8 m. Never squash islands/weapons to 1.2 m |
 
 ## Left library
