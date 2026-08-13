@@ -56,6 +56,12 @@
         Rapier (<code>@dimforge/rapier3d-compat</code>), terrain BVH
         (<code>three-mesh-bvh</code>), nav (<code>three-pathfinding</code>),
         AI preview (<code>yuka</code>). Layers and brains use Forge names.
+        <strong>MMO AI</strong> (Systems tab): aggro rings 25/15/30/50 m from
+        Warlords <code>AGGRO_CONFIG</code>, a real threat table (not nearest
+        player), enemy <code>castTimeSec</code>, and aoe/cone/incoming
+        telegraphs. Yuka 0.7 steers the root only. Skill
+        <code>grudge-ai-brains</code>. Unity uMMORPG C# is not on disk — the
+        contract is the Warlords port.
         Recast bake, .gfscene play scripts, and the 70-tool AI worker stay on
         <a href="https://forge.grudge-studio.com/editor" target="_blank"
           >forge.grudge-studio.com</a

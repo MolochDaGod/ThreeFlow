@@ -76,6 +76,29 @@
         <el-button size="small" @click="doBrainPreview">Preview 6s</el-button>
       </div>
 
+      <div class="block-title">MMO · aggro / threat / cast</div>
+      <p class="hint">
+        Rings from Warlords <code>AGGRO_CONFIG</code> (25 / 15 / 30 / 50 m).
+        Threat table + cast clock + telegraph (aoe / cone / incoming). Play
+        authority stays GrudgeBuilder.
+      </p>
+      <div class="row">
+        <span class="lbl">Warn</span>
+        <el-select v-model="telegraph" size="small" style="width: 140px">
+          <el-option label="cone" value="cone" />
+          <el-option label="aoe" value="aoe" />
+          <el-option label="incoming" value="incoming" />
+        </el-select>
+      </div>
+      <div class="row wrap">
+        <el-button size="small" type="primary" @click="doMmoStamp">
+          Stamp MMO combat
+        </el-button>
+        <el-button size="small" @click="doAggroRings">Aggro rings</el-button>
+        <el-button size="small" @click="doTelegraph">Cast telegraph</el-button>
+        <el-button size="small" @click="doThreat">Threat preview</el-button>
+      </div>
+
       <div class="block-title">Best practices</div>
       <div class="row">
         <el-select v-model="practiceCtx" size="small" style="width: 160px">
@@ -137,6 +160,17 @@ import {
 } from '@/utils/systemsRuntime';
 import { HD_SECTOR_TARGETS } from '@/config/hdTerrainDeploy';
 import { MODEL_TYPE } from '@/enums/enum';
+import {
+  CAST_DEFAULTS,
+  type TelegraphVariant,
+} from '@/config/mmoCombat';
+import {
+  previewCast,
+  previewThreat,
+  showAggroRings,
+  showTelegraph,
+  stampMmoCombat,
+} from '@/utils/mmoCombatRuntime';
 
 const store = useSceneStore();
 const indexDbStore = useIndexDbStore();
@@ -144,6 +178,7 @@ const layer = ref<PhysLayer>('Terrain');
 const body = ref<PhysBody>('fixed');
 const shape = ref<PhysShape>('trimesh');
 const brain = ref<BrainKind>('patrol');
+const telegraph = ref<TelegraphVariant>('cone');
 const practiceCtx = ref<PracticeContext>('physics');
 const log = ref('');
 const stats = ref({ terrains: 0, colliders: 0, brains: 0, bvh: 0 });
@@ -324,6 +359,56 @@ const doClear = () => {
   if (!scene) return;
   clearSystemHelpers(scene);
   log.value = 'helpers cleared';
+};
+
+const doMmoStamp = () => {
+  const picked = needSelected();
+  if (!picked) return;
+  const castTime =
+    telegraph.value === 'incoming'
+      ? CAST_DEFAULTS.spellCastSec
+      : CAST_DEFAULTS.meleeTelegraphSec;
+  stampMmoCombat(picked.obj, {
+    telegraph: telegraph.value,
+    telegraphSec: castTime,
+    castTimeSec: castTime,
+    range: telegraph.value === 'incoming' ? 14 : telegraph.value === 'aoe' ? 5 : 6,
+    skillId: telegraph.value === 'incoming' ? 'bolt' : 'basic_swing',
+  });
+  log.value = previewCast(picked.obj);
+  ElMessage.success('MMO combat stamped');
+};
+
+const doAggroRings = () => {
+  const picked = needSelected();
+  if (!picked) return;
+  stampMmoCombat(picked.obj, { telegraph: telegraph.value });
+  log.value = showAggroRings(picked.scene, picked.obj);
+  ElMessage.info(log.value);
+};
+
+const doTelegraph = () => {
+  const picked = needSelected();
+  if (!picked) return;
+  stampMmoCombat(picked.obj, { telegraph: telegraph.value });
+  const r = showTelegraph(picked.scene, picked.obj);
+  log.value = r.label;
+  ElMessage.info(r.label);
+};
+
+const doThreat = () => {
+  const picked = needSelected();
+  if (!picked) return;
+  stampMmoCombat(picked.obj, { telegraph: telegraph.value });
+  const others: THREE.Object3D[] = [];
+  picked.scene.traverse((o) => {
+    if (o !== picked.obj && (o.userData?.aiBrain || o.userData?.behavior)) {
+      others.push(o);
+    }
+  });
+  const r = previewThreat(picked.obj, others);
+  log.value = `top ${r.top} · ${r.rows.join(' | ') || 'seeded player 80'}`;
+  ElMessage.info(log.value);
 };
 
 refresh();

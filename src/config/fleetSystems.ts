@@ -20,7 +20,11 @@ export const FLEET_DEPS = [
   { name: '@dimforge/rapier3d-compat', pin: '^0.19', role: 'World physics + colliders' },
   { name: 'three-mesh-bvh', pin: '^0.9', role: 'Terrain ray / mesh queries' },
   { name: 'three-pathfinding', pin: '^1.3', role: 'Navmesh path (editor bake)' },
-  { name: 'yuka', pin: '^0.7', role: 'AI vehicle / wander / seek preview' },
+  {
+    name: 'yuka',
+    pin: '^0.7',
+    role: 'Root steering · Think/Vision/Memory — not combat math',
+  },
 ] as const;
 
 /** Forge layer matrix — do not invent extra groups. */
@@ -243,9 +247,19 @@ export const BEST_PRACTICES: Record<PracticeContext, Practice[]> = {
   ],
   ai: [
     {
-      title: 'Brains are Forge behavior ids',
+      title: 'Brains are Forge behavior ids + mmoCombat stamps',
       detail:
-        'Stamp userData.behavior = idle | patrol | chase | enemy-deathmatch | spawnpoint. Play FSM lives in Forge deathmatchBehaviors.',
+        'behavior = idle | patrol | chase | enemy-deathmatch | spawnpoint. Aggro/threat/cast live on userData.mmoCombat (lore.ts rings). Skill: grudge-ai-brains.',
+    },
+    {
+      title: 'Threat table, not nearest-player',
+      detail:
+        'Damage/heal/taunt write a table. Target = max threat inside leash. Tank mul 1.5, decay 4/s, taunt lock 3s.',
+    },
+    {
+      title: 'Every enemy hit has a telegraph',
+      detail:
+        'Melee ≥0.35s, spell default 1.6s. Variants aoe / cone / incoming from AttackWarningSystem. Incoming may lead velocity; planted AoE/cone do not.',
     },
     {
       title: 'AI tools are undoable turns',

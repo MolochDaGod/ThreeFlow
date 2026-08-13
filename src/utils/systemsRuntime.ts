@@ -61,6 +61,17 @@ export function stampCollider(
 export function stampBrain(obj: THREE.Object3D, brain: BrainKind) {
   obj.userData.aiBrain = brain;
   obj.userData.behavior = brain;
+  if (
+    brain === 'chase' ||
+    brain === 'attack' ||
+    brain === 'enemy-deathmatch'
+  ) {
+    obj.userData.mmoCombat = obj.userData.mmoCombat || {
+      aggroRadius: 15,
+      leashRadius: 50,
+      detectionRadius: 25,
+    };
+  }
 }
 
 export function listStamped(
