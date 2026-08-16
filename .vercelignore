@@ -1,0 +1,12 @@
+deploys
+public/threeFile
+public/draco
+public/basis
+public/hdr
+public/models
+public/anims
+public/image/demo-1.png
+public/image/demo-2.png
+node_modules
+dist
+*.tsbuildinfo
