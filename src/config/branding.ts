@@ -6,9 +6,14 @@ export const STUDIO_FOUNDRY =
   'https://character.grudge-studio.com/foundry?era=warlords&mode=create';
 export const STUDIO_WCS = 'https://wcs.grudge-studio.com/';
 export const STUDIO_ASSETS = 'https://assets.grudge-studio.com';
-export const STUDIO_OBJECTSTORE = 'https://objectstore.grudge-studio.com/api/v1';
+export const STUDIO_OBJECTSTORE =
+  'https://objectstore.grudge-studio.com/api/v1';
+export const STUDIO_INFO = 'https://info.grudge-studio.com';
+export const STUDIO_INFO_API = `${STUDIO_INFO}/api/v1`;
 export const STUDIO_FORGE = 'https://forge.grudge-studio.com';
 export const STUDIO_FORGE_EDITOR = 'https://forge.grudge-studio.com/editor';
+/** This SPA — Warlords scene editor. Dev Tool Elite opens ?asset=&from=grudge-dev-tool */
+export const STUDIO_THREETFLOW = 'https://threeflow.vercel.app';
 export const STUDIO_AI = 'https://ai.grudge-studio.com';
 export const STUDIO_AI_HEALTH = 'https://ai.grudge-studio.com/health';
 export const STUDIO_ID = 'https://id.grudge-studio.com';
