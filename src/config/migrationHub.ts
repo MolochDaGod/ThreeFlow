@@ -15,7 +15,14 @@ import {
   STUDIO_WATER,
 } from './branding';
 import { PREFABS_API, PLACEABLES_API } from './assetApi';
-import { INFO_JSON } from './objectStoreSsot';
+
+const INFO_API = `${STUDIO_INFO}/api/v1`;
+const INFO_JSON = {
+  mapRegistry: `${INFO_API}/map-registry.json`,
+  homeIsland: `${INFO_API}/home-island-contract.json`,
+  weapons: `${INFO_API}/weapons.json`,
+  nature: `${INFO_API}/organized-nature-manifest.json`,
+} as const;
 
 export const HUB_EDITOR = '/editor';
 
