@@ -9,7 +9,7 @@ import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 import { ObjectLoader } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
-import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { ElMessage, ElNotification } from 'element-plus';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { ViewportGizmo } from 'three-viewport-gizmo';
@@ -239,18 +239,19 @@ class renderScene {
    */
   async initScene(): Promise<void> {
     this.scene = new THREE.Scene();
-    const hdrLoader = new HDRLoader();
-    const texture = await hdrLoader.loadAsync('hdr/view-hdr-11.hdr');
-    texture.mapping = THREE.EquirectangularReflectionMapping;
-
     this.scene.background = new THREE.Color(FOG_COLOR_VALUE);
-
-    this.scene.environment = texture;
-    texture.dispose();
-    // 调整Environment光Intensity;
     this.scene.backgroundIntensity = 1;
     this.scene.fog = new THREE.FogExp2(FOG_COLOR_VALUE, 0.001);
-
+    // RoomEnvironment — do not fetch /hdr/*.hdr. public/hdr is vercelignored,
+    // so live SPA fallback HTML made HDRLoader throw "bad initial token".
+    if (this.renderer) {
+      const pmrem = new THREE.PMREMGenerator(this.renderer);
+      this.scene.environment = pmrem.fromScene(
+        new RoomEnvironment(),
+        0.04
+      ).texture;
+      pmrem.dispose();
+    }
     return Promise.resolve();
   }
   /**

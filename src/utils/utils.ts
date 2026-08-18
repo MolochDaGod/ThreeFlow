@@ -506,10 +506,15 @@ export const generateMaterialMaps = (
  * @returns Map
  */
 export const updateMaterialMap = async (fileUrl: string, fileType: string) => {
-  const loader =
-    fileType === 'hdr' ? new HDRLoader() : new THREE.TextureLoader();
-  const textures = await loader.loadAsync(fileUrl);
-  return textures;
+  if (fileType === 'hdr') {
+    try {
+      return await new HDRLoader().loadAsync(fileUrl);
+    } catch (err) {
+      const why = err instanceof Error ? err.message : String(err);
+      throw new Error(`HDR env map is not RGBE (${fileUrl}): ${why}`);
+    }
+  }
+  return new THREE.TextureLoader().loadAsync(fileUrl);
 };
 
 /**

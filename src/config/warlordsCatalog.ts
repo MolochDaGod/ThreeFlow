@@ -144,7 +144,7 @@ export const WARLORDS_ENEMIES: WarlordsDragItem[] = [
     'ifrit',
     'Ifrit',
     `${WARLORDS_CDN}/models/creatures/land/ifrit.glb`,
-    `${ICO}/totem_2.png`,
+    `${ICO}/totem1.png`,
     true
   ),
   item(
@@ -152,7 +152,7 @@ export const WARLORDS_ENEMIES: WarlordsDragItem[] = [
     'lava-golem',
     'Lava golem',
     `${WARLORDS_CDN}/models/creatures/land/lava_golem.glb`,
-    `${ICO}/totem_3.png`,
+    `${ICO}/totem1.png`,
     true
   ),
   item(
@@ -268,21 +268,21 @@ export const WARLORDS_ISLANDS: WarlordsDragItem[] = [
     'spiral-mountain',
     'Spiral mountain',
     `${WARLORDS_CDN}/models/biomes/event/spiral_mountain_reimagined.glb`,
-    `${ICO}/totem_4.png`
+    `${ICO}/totem1.png`
   ),
   item(
     'islands',
     'hoth-boss',
     'Hoth boss room',
     `${WARLORDS_CDN}/models/biomes/frozen/hoth_boss_room_low_poly.glb`,
-    `${ICO}/undead_crypt.png`
+    `${ICO}/undead_warrior.png`
   ),
   item(
     'islands',
     'iceland',
     'Iceland scene',
     `${WARLORDS_CDN}/models/biomes/cold/iceland_scene_for_canimatic.glb`,
-    `${ICO}/undead_crypt.png`
+    `${ICO}/undead_warrior.png`
   ),
 ];
 
@@ -302,7 +302,7 @@ export const WARLORDS_HD_ZONES: WarlordsDragItem[] = [
     'hd-crags',
     'HD crags',
     'hardroad://ds2-terrain?preset=crags',
-    `${ICO}/totem_4.png`,
+    `${ICO}/totem1.png`,
     false,
     { terrainPreset: 'crags' }
   ),
@@ -339,10 +339,10 @@ function sectorPreset(id: string): 'mountains' | 'crags' | 'zone' {
 
 function sectorIcon(id: string): string {
   if (id.includes('haven')) return `${ICO}/House_Icon.png`;
-  if (id.includes('ember') || id.includes('ashen')) return `${ICO}/totem_3.png`;
-  if (id.includes('frost') || id.includes('storm')) return `${ICO}/undead_crypt.png`;
+  if (id.includes('ember') || id.includes('ashen')) return `${ICO}/totem1.png`;
+  if (id.includes('frost') || id.includes('storm')) return `${ICO}/undead_warrior.png`;
   if (id.includes('ethereal') || id.includes('convergence')) return `${ICO}/Flag_Icon.png`;
-  return `${ICO}/totem_4.png`;
+  return `${ICO}/totem1.png`;
 }
 
 /** 9 Warlords era MMO sectors — HD terrain stamped with sectorId for ground snap. */
@@ -403,7 +403,7 @@ export const WARLORDS_SCENES: WarlordsDragItem[] = [
     'dojo-hoth',
     'Dojo · Hoth boss room',
     `${WARLORDS_CDN}/models/biomes/frozen/hoth_boss_room_low_poly.glb`,
-    `${ICO}/undead_crypt.png`,
+    `${ICO}/undead_warrior.png`,
     false,
     {
       sectorId: 'dojo',
@@ -494,7 +494,7 @@ export const WARLORDS_ANIMS: WarlordsDragItem[] = [
     'anim-magic',
     'magic pack',
     `${WARLORDS_CDN}/anims/baked/magic/idle.glb`,
-    `${ICO}/totem_2.png`,
+    `${ICO}/totem1.png`,
     true,
     { tab: 'r2' }
   ),
