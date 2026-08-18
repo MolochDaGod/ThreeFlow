@@ -21,6 +21,8 @@ export const STUDIO_CODER = 'https://coder.grudge-studio.com';
 export const STUDIO_WATER = 'https://water.grudge-studio.com';
 export const STUDIO_CASTING = 'https://casting-abilities-threejs.vercel.app';
 export const STUDIO_OPEN = 'https://open.grudge-studio.com';
+export const STUDIO_VFX = 'https://vfx.grudge.studio';
+export const STUDIO_VFX_EDIT = 'https://threeflow.vercel.app/editor?scene=vfx';
 export const STUDIO_GRUDOX = 'https://grudox.grudge-studio.com';
 export const STUDIO_CHARACTER = 'https://character.grudge-studio.com';
 

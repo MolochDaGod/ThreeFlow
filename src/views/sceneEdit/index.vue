@@ -61,6 +61,16 @@ onMounted(async () => {
     loading: true,
   });
   await renderSceneApi.init();
+  try {
+    const { isVfxLabQuery } = await import('@/config/vfxLab');
+    if (isVfxLabQuery()) {
+      loadingInfo.text = 'VFX lab · HDR + loadRaceKit…';
+      const { bootVfxLabScene } = await import('@/utils/vfxLabBoot');
+      await bootVfxLabScene(renderSceneApi);
+    }
+  } catch (err) {
+    console.warn('[vfx-lab] boot skipped', err);
+  }
   Object.assign(loadingInfo, {
     pageLoading: false,
     loading: false,

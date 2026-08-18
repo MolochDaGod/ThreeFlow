@@ -12,6 +12,7 @@ import {
   STUDIO_INFO,
   STUDIO_OPEN,
   STUDIO_PLAY,
+  STUDIO_VFX,
   STUDIO_WATER,
 } from './branding';
 import { PREFABS_API, PLACEABLES_API } from './assetApi';
@@ -76,6 +77,13 @@ export const HUB_SURFACES: HubSurface[] = [
     role: 'T0 weapons · skills',
     href: STUDIO_CASTING,
     owns: 'Weapon catalog + play stack',
+  },
+  {
+    id: 'vfx',
+    name: 'VFX lab',
+    role: 'ThreeFlow scene · edits',
+    href: `${HUB_EDITOR}?scene=vfx`,
+    owns: 'HDR + Draco + loadRaceKit. Catalog JSON stays on vfx.grudge.studio.',
   },
   {
     id: 'open',
@@ -159,6 +167,13 @@ export const MIGRATION_LANES: MigrationLane[] = [
     rule: 'Water lab only. Do not iframe into land zones.',
   },
   {
+    id: 'vfx',
+    from: 'vfx.grudge.studio dark stage + fused *_Characters.glb',
+    to: 'ThreeFlow /editor?scene=vfx',
+    system: 'HDR IBL · Draco GLTF · loadRaceKit Toon RTS',
+    rule: 'Edit VFX in this scene. Do not use Mixamo FBX or WK_Characters.glb.',
+  },
+  {
     id: 'maps',
     from: 'Stamped ThreeFlow scene',
     to: 'Forge .gfscene + Warlords play',
@@ -210,6 +225,12 @@ export const HUB_CATALOGS = [
     label: 'Nature manifest',
     url: INFO_JSON.nature,
     note: 'Isolate multipack meshName.',
+  },
+  {
+    id: 'vfx-catalog',
+    label: 'VFX studio catalog',
+    url: `${STUDIO_VFX}/assets/catalog.json`,
+    note: 'Edit in /editor?scene=vfx — not the dark standalone stage.',
   },
 ] as const;
 

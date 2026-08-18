@@ -152,8 +152,13 @@ import { DRAG_MODEL_TYPE } from '@/enums/enum';
 
 const emit = defineEmits(['drag-model-start', 'choose-outside-file']);
 
-const activeTabKey = ref<DRAG_MODEL_TYPE>(DRAG_MODEL_TYPE.Model);
-const activeAssetGroup = ref<WarlordsAssetGroup | 'all'>('sectors');
+const _vfxLab = new URLSearchParams(window.location.search).get('scene') === 'vfx';
+const activeTabKey = ref<DRAG_MODEL_TYPE>(
+  _vfxLab ? DRAG_MODEL_TYPE.Vfx : DRAG_MODEL_TYPE.Model
+);
+const activeAssetGroup = ref<WarlordsAssetGroup | 'all'>(
+  _vfxLab ? 'vfx' : 'sectors'
+);
 const libraryItems = ref<WarlordsDragItem[]>([...defaultModelList]);
 const isAssetLibraryTab = computed(() =>
   [

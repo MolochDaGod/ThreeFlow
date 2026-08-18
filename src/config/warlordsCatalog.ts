@@ -67,7 +67,7 @@ const TOON = `${WARLORDS_CDN}/asset-packs/toon-rts-characters/glb/characters`;
 const WPN = `${WARLORDS_CDN}/models/weapons`;
 const WPN_ICO = `${WARLORDS_CDN}/game-assets/icons/pack/weapons`;
 
-function item(
+export function item(
   group: WarlordsAssetGroup,
   key: string,
   name: string,
@@ -638,6 +638,13 @@ export async function loadWarlordsLibrary(): Promise<WarlordsDragItem[]> {
     if (prefabRes.ok) {
       const data = (await prefabRes.json()) as { prefabs?: PrefabRow[] };
       attachPrefabMeta(merged, data.prefabs ?? []);
+    }
+    try {
+      const { loadVfxStudioCatalog } = await import('./vfxLab');
+      const studio = await loadVfxStudioCatalog();
+      merged = mergeByKey(merged, studio);
+    } catch {
+      /* studio catalog optional */
     }
     return merged;
   } catch {
