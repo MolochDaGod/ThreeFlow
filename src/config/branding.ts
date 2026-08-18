@@ -18,6 +18,11 @@ export const STUDIO_AI = 'https://ai.grudge-studio.com';
 export const STUDIO_AI_HEALTH = 'https://ai.grudge-studio.com/health';
 export const STUDIO_ID = 'https://id.grudge-studio.com';
 export const STUDIO_CODER = 'https://coder.grudge-studio.com';
+export const STUDIO_WATER = 'https://water.grudge-studio.com';
+export const STUDIO_CASTING = 'https://casting-abilities-threejs.vercel.app';
+export const STUDIO_OPEN = 'https://open.grudge-studio.com';
+export const STUDIO_GRUDOX = 'https://grudox.grudge-studio.com';
+export const STUDIO_CHARACTER = 'https://character.grudge-studio.com';
 
 /** Pop the live Forge / AI worker — do not fork those products into this SPA. */
 export function popoutFleet(url: string, name: string) {

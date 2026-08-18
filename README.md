@@ -4,13 +4,13 @@ Grudge fork of [zhangbo126/ThreeFlow](https://github.com/zhangbo126/ThreeFlow) f
 
 | | |
 |--|--|
-| **Live** | https://threeflow-grudgenexus.vercel.app/ |
+| **Live** | https://threeflow.vercel.app/ |
 | **Repo** | https://github.com/MolochDaGod/ThreeFlow |
 | **Play** | https://grudgewarlords.com |
 | **Forge (product editor)** | https://forge.grudge-studio.com/editor |
 | **AI worker** | https://ai.grudge-studio.com |
 
-This SPA is a **Warlords layout / library / systems host**. It is **not** a second Forge, not a player DB, and not ThreeFlowX.
+`/` is the **migrations landing + organizer**. `/editor` is the scene editor. Elite handoff `?asset=` / `?mesh=` still opens `/editor`. This SPA is **not** a second Forge, not a player DB, and not ThreeFlowX.
 
 Upstream author: **answer / zhangbo126**. License: **AGPL-3.0** — keep logo, project name, and author notice.
 

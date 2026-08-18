@@ -4,12 +4,21 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
+    name: 'hub',
+    component: () => import('@/views/hub/MigrationHub.vue'),
+  },
+  {
+    path: '/migrations',
+    redirect: '/',
+  },
+  {
+    path: '/editor',
     name: 'RenderView',
     component: () => import('@/layouts/RenderView.vue'),
     children: [
       {
-        path: '/',
-        name: 'renderView',
+        path: '',
+        name: 'editor',
         component: () => import('@/views/sceneEdit/index.vue'),
       },
     ],
