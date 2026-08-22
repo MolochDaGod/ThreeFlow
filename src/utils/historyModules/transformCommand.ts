@@ -30,7 +30,7 @@ export class TransformCommand extends Command {
     this.newRotation = newRotation.clone();
     this.newScale = newScale.clone();
 
-    // 如果是定向光或Spot light，保存初始目标位置
+    // if directional or spot light, store initial target
     if (
       object instanceof THREE.DirectionalLight ||
       object instanceof THREE.SpotLight
@@ -40,16 +40,16 @@ export class TransformCommand extends Command {
       this.originalTargetPosition = null;
     }
   }
-/**
- * 执行变换操作
- */
+  /**
+   * apply transform
+   */
   execute() {
     this.object.position.copy(this.newPosition);
     this.object.rotation.copy(this.newRotation);
     this.object.scale.copy(this.newScale);
     this.object.updateMatrix();
 
-    // 如果是光源，保持目标位置不变
+    // if a light, keep the target in place
     if (
       (this.object instanceof THREE.DirectionalLight ||
         this.object instanceof THREE.SpotLight) &&
@@ -62,7 +62,7 @@ export class TransformCommand extends Command {
   }
 
   /**
-   * Undo变换操作
+   * Undotransform
    */
   undo() {
     this.object.position.copy(this.oldPosition);
@@ -70,7 +70,7 @@ export class TransformCommand extends Command {
     this.object.scale.copy(this.oldScale);
     this.object.updateMatrix();
 
-    // 如果是光源，保持目标位置不变
+    // if a light, keep the target in place
     if (
       (this.object instanceof THREE.DirectionalLight ||
         this.object instanceof THREE.SpotLight) &&
@@ -81,7 +81,6 @@ export class TransformCommand extends Command {
       store.sceneApi?.lightModules.updateHelper(this.object.uuid);
     }
   }
-
 
   update(command: TransformCommand) {
     this.newPosition.copy(command.newPosition);

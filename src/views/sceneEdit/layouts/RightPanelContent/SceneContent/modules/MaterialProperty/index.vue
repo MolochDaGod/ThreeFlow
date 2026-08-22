@@ -1,6 +1,23 @@
 <template>
   <div class="material-content">
     <el-scrollbar max-height="calc(100vh - 420px)">
+      <div class="material-item" v-if="meshChoices.length > 1">
+        <div class="material-item-label">Mesh</div>
+        <div class="material-item-value">
+          <el-select
+            v-model="editMeshUuid"
+            style="width: 180px"
+            @change="onPickMesh"
+          >
+            <el-option
+              v-for="m in meshChoices"
+              :key="m.uuid"
+              :label="m.name || m.type || m.uuid.slice(0, 8)"
+              :value="m.uuid"
+            />
+          </el-select>
+        </div>
+      </div>
       <div class="material-item">
         <div class="material-item-label">Type</div>
         <div class="material-item-value">
@@ -185,7 +202,11 @@
 import { onMounted, ref } from 'vue';
 import { materialTypeList, PREDEFINE_COLORS } from '@/config/propertyConfig';
 import { MATERIAL_DATA_ENUM } from '@/enums/enum';
-import type { EditableProperty, MaterialData, EditableValue } from '@/types/rightPanelTypes';
+import type {
+  EditableProperty,
+  MaterialData,
+  EditableValue,
+} from '@/types/rightPanelTypes';
 import { useSceneStore } from '@/store/sceneEditStore';
 import * as THREE from 'three';
 import {
@@ -194,7 +215,10 @@ import {
   generateMaterialMaps,
   getFileType,
   updateMaterialMap,
-  disposeMaterial,
+  collectEditableMeshes,
+  firstEditableMesh,
+  materialOf,
+  prepareEditorTexture,
 } from '@/utils/utils';
 import { type UploadFile } from 'element-plus';
 import { cloneDeep } from 'lodash-es';
@@ -207,18 +231,59 @@ const { meshMaterial } = defineProps<{
 
 const emit = defineEmits(['updateMeshMaterial']);
 
+const meshChoices = ref<{ uuid: string; name: string; type: string }[]>([]);
+const editMeshUuid = ref<string>('');
+
+const resolveRoot = () => {
+  const uuid = store.currentTransformMaterialUuid;
+  if (!uuid) return null;
+  return (store.sceneApi?.scene?.getObjectByProperty('uuid', uuid) ||
+    null) as THREE.Object3D | null;
+};
+
+const resolveEditMesh = (): THREE.Mesh | null => {
+  const root = resolveRoot();
+  if (editMeshUuid.value) {
+    const hit = root
+      ? (root.getObjectByProperty('uuid', editMeshUuid.value) as THREE.Mesh)
+      : (store.sceneApi?.scene?.getObjectByProperty(
+          'uuid',
+          editMeshUuid.value
+        ) as THREE.Mesh);
+    if (hit?.isMesh) return hit;
+  }
+  return firstEditableMesh(root);
+};
+
+const refreshMeshChoices = () => {
+  const meshes = collectEditableMeshes(resolveRoot());
+  meshChoices.value = meshes.map((m) => ({
+    uuid: m.uuid,
+    name: m.name || 'mesh',
+    type: materialOf(m)?.type || '',
+  }));
+  if (!editMeshUuid.value || !meshes.some((m) => m.uuid === editMeshUuid.value)) {
+    editMeshUuid.value = meshes[0]?.uuid || '';
+  }
+};
+
 onMounted(() => {
+  refreshMeshChoices();
   getNewMaterialPropertyList();
 });
 
 // editable properties
 const editablePropertiesList = ref<EditableProperty[]>([]);
 
-// 生成editable properties
+// buildeditable properties
 const generateEditablePropertiesList = (material: MaterialData) => {
   if (!material) return [];
   const propertyKey = Object.entries(material);
-  const hidePropertyKey: (keyof MaterialData)[] = ['clearcoat', 'iridescence', 'sheen'];
+  const hidePropertyKey: (keyof MaterialData)[] = [
+    'clearcoat',
+    'iridescence',
+    'sheen',
+  ];
 
   const result = propertyKey
     .filter(([key]) => key in MATERIAL_DATA_ENUM)
@@ -227,11 +292,11 @@ const generateEditablePropertiesList = (material: MaterialData) => {
       // convert colors to hex
       if (verifyValueColor(key)) {
         if (value instanceof THREE.Color) {
-           generateValue = value.getStyle();
+          generateValue = value.getStyle();
         } else if (typeof value === 'number') {
-           generateValue = new THREE.Color(value).getStyle();
+          generateValue = new THREE.Color(value).getStyle();
         } else if (typeof value === 'string') {
-           generateValue = value;
+          generateValue = value;
         }
       }
       let customMapData = {};
@@ -241,9 +306,7 @@ const generateEditablePropertiesList = (material: MaterialData) => {
         customMapData = {
           visible: !!texture,
           texture: texture,
-          image: texture ? cloneDeep(
-            generateMaterialMaps(texture)
-          ) : null,
+          image: texture ? cloneDeep(generateMaterialMaps(texture)) : null,
         };
       }
       return {
@@ -268,52 +331,46 @@ const generateEditablePropertiesList = (material: MaterialData) => {
   return [...result, ...additionalProperties];
 };
 
+const onPickMesh = () => {
+  getNewMaterialPropertyList();
+  const mesh = resolveEditMesh();
+  if (mesh) emit('updateMeshMaterial', mesh);
+};
+
 // change material type
 const handleChangeMaterialType = (type: string) => {
-  const mesh = store.sceneApi?.updateMaterialType(type);
+  const mesh = store.sceneApi?.updateMaterialType(type, editMeshUuid.value);
   if (mesh) {
     emit('updateMeshMaterial', mesh);
     editablePropertiesList.value = generateEditablePropertiesList(
-      mesh.material as MaterialData
+      materialOf(mesh) as MaterialData
     );
   }
 };
 
 // update materialProperties
 const updateMeshMaterialProperty = <T,>(key: string, value: T) => {
-  const { sceneApi } = store;
-  const uuid = store.currentTransformMaterialUuid;
-  const mesh = sceneApi?.scene?.getObjectByProperty('uuid', uuid) as THREE.Mesh;
-
-  if (mesh && mesh.material) {
-    if (verifyValueColor(key)) {
-      const generateValue = new THREE.Color(
-        String(value) || 0xffffff
-      ) as unknown as T;
-
-      (mesh.material as unknown as Record<string, T>)[key] = generateValue;
-    } else {
-      (mesh.material as unknown as Record<string, T>)[key] = value;
-    }
+  const mesh = resolveEditMesh();
+  const mat = materialOf(mesh);
+  if (!mat) return;
+  const rec = mat as unknown as Record<string, unknown>;
+  if (verifyValueColor(key)) {
+    rec[key] = new THREE.Color(String(value) || 0xffffff);
+  } else {
+    rec[key] = value;
   }
+  mat.needsUpdate = true;
 };
 
 // update map properties
 const updateMeshMaterialMap = (key: string, value: EditableProperty) => {
-  const { sceneApi } = store;
-  const uuid = store.currentTransformMaterialUuid;
-  const mesh = sceneApi?.scene?.getObjectByProperty('uuid', uuid) as THREE.Mesh;
-  if (mesh && mesh.material) {
-    const { visible, texture } = value.customMapData;
-    const oldMaterial = mesh.material;
-    const newMaterial = (oldMaterial as THREE.Material).clone();
-
-    (newMaterial as unknown as Record<string, THREE.Texture | null>)[key] =
-      visible ? (texture ?? null) : null;
-    mesh.material = newMaterial;
-    // mark material dirty
-    (mesh.material as THREE.Material).needsUpdate = true;
-  }
+  const mesh = resolveEditMesh();
+  const mat = materialOf(mesh);
+  if (!mesh || !mat) return;
+  const { visible, texture } = value.customMapData;
+  const rec = mat as unknown as Record<string, THREE.Texture | null>;
+  rec[key] = visible && texture ? prepareEditorTexture(texture, key) : null;
+  mat.needsUpdate = true;
 };
 
 // upload map
@@ -324,55 +381,37 @@ const uploadMaterialMapFile = async (
   const filePath = URL.createObjectURL(file?.raw as Blob);
 
   try {
-    const uuid = store.currentTransformMaterialUuid;
-    const mesh = store.sceneApi?.scene?.getObjectByProperty(
-      'uuid',
-      uuid
-    ) as THREE.Mesh;
-
-    if (mesh && mesh.material) {
-      // get map
-      const textures = await updateMaterialMap(
-        filePath,
-        getFileType(file.name)
-      );
-
-      // update map if visible
-      if (item.customMapData.visible) {
-        const oldMaterial = mesh.material;
-        const newMaterial = (oldMaterial as unknown as THREE.Material).clone();
-        // update map
-        (newMaterial as unknown as Record<string, THREE.Texture>)[item.key] =
-          textures;
-        // update material
-        mesh.material = newMaterial;
-        // dispose old material
-        disposeMaterial(oldMaterial);
-      }
-      // dispose previous map
-      if (item.customMapData.texture) {
-        item.customMapData.texture.dispose();
-      }
-      // update map data
-      item.customMapData.image = generateMaterialMaps(textures);
-      item.customMapData.texture = textures;
+    const mesh = resolveEditMesh();
+    const mat = materialOf(mesh);
+    if (!mesh || !mat) return;
+    const textures = await updateMaterialMap(
+      filePath,
+      getFileType(file.name),
+      item.key
+    );
+    if (item.customMapData.visible) {
+      const rec = mat as unknown as Record<string, THREE.Texture>;
+      rec[item.key] = textures;
+      mat.needsUpdate = true;
     }
+    if (item.customMapData.texture && item.customMapData.texture !== textures) {
+      item.customMapData.texture.dispose();
+    }
+    item.customMapData.image = generateMaterialMaps(textures);
+    item.customMapData.texture = textures;
   } finally {
-    // always revoke URL
     URL.revokeObjectURL(filePath);
   }
 };
 
 // rebuild material property list
 const getNewMaterialPropertyList = () => {
-  const mesh = store.sceneApi?.scene?.getObjectByProperty(
-    'uuid',
-    store.currentTransformMaterialUuid
-  ) as THREE.Mesh;
-
-  if (!mesh) return;
+  refreshMeshChoices();
+  const mesh = resolveEditMesh();
+  const mat = materialOf(mesh);
+  if (!mat) return;
   editablePropertiesList.value = generateEditablePropertiesList(
-    mesh.material as unknown as MaterialData
+    mat as unknown as MaterialData
   );
 };
 defineExpose({

@@ -16,14 +16,94 @@ import {
 } from './branding';
 
 export const FLEET_DEPS = [
-  { name: 'three', pin: '^0.185', role: 'Renderer / scene' },
-  { name: '@dimforge/rapier3d-compat', pin: '^0.19', role: 'World physics + colliders' },
+  {
+    name: 'three',
+    pin: '^0.185',
+    role: 'Renderer / scene / one AnimationMixer',
+  },
+  {
+    name: '@dimforge/rapier3d-compat',
+    pin: '^0.19',
+    role: 'World physics + colliders',
+  },
   { name: 'three-mesh-bvh', pin: '^0.9', role: 'Terrain ray / mesh queries' },
-  { name: 'three-pathfinding', pin: '^1.3', role: 'Navmesh path (editor bake)' },
+  {
+    name: 'three-pathfinding',
+    pin: '^1.3',
+    role: 'Navmesh path (editor bake)',
+  },
   {
     name: 'yuka',
     pin: '^0.7',
     role: 'Root steering · Think/Vision/Memory — not combat math',
+  },
+  {
+    name: '@tweenjs/tween.js',
+    pin: '^18.5',
+    role: 'Editor fly-by / focus tweens',
+  },
+  { name: 'vite', pin: '^6', role: 'SPA production bundle' },
+  {
+    name: 'vite-plugin-wasm',
+    pin: '^3.6',
+    role: 'Rapier WASM — lazy, not first paint',
+  },
+  { name: 'postprocessing', pin: '^6.39', role: 'Play-mode bloom / SMAA' },
+  {
+    name: '@grudge-studio/core',
+    pin: '0.3.0 file',
+    role: 'Fleet URLs + auth keys (vendored)',
+  },
+  {
+    name: '@grudge-studio/asset-resolver',
+    pin: '0.3.0 file',
+    role: 'CDN asset URL join (vendored)',
+  },
+  {
+    name: '@grudge-studio/assets',
+    pin: '0.3.0 file',
+    role: 'grudge6 / nature / baked path helpers',
+  },
+  {
+    name: '@grudge-studio/animator',
+    pin: '0.3.0 file',
+    role: 'LocomotionCore / skill blends',
+  },
+  {
+    name: '@grudge-studio/engine',
+    pin: '0.3.0 file',
+    role: 'Boot / terrain / physics defaults',
+  },
+] as const;
+
+/**
+ * Choices, not bans. Owner can override. R3F stays on Forge (Vue already has
+ * the scene). Cannon still fights Rapier on one body. TLA plugin still crashes
+ * this Vite. @grudge-studio/* is vendored under vendor/ (npm registry unpublished).
+ */
+export const FLEET_SKIP = [
+  {
+    name: '@react-three/fiber',
+    reason:
+      'Forge already owns R3F. This app is Vue + three — a second React canvas would split the scene.',
+  },
+  {
+    name: '@react-three/rapier',
+    reason:
+      'Same Rapier world already via rapier3d-compat. Wrapper is for R3F JSX.',
+  },
+  {
+    name: 'cannon-es',
+    reason: 'Two physics engines on one body. Keep Rapier only.',
+  },
+  {
+    name: 'vite-plugin-top-level-await',
+    reason:
+      'Crashes Vite 6.4 SWC here. Rapier already boots via wasm plugin + dynamic import.',
+  },
+  {
+    name: 'colyseus.js',
+    reason: 'No ThreeFlow room. Add when a room server exists.',
   },
 ] as const;
 
@@ -42,11 +122,332 @@ export const PHYS_LAYERS = [
 ] as const;
 export type PhysLayer = (typeof PHYS_LAYERS)[number];
 
-export const PHYS_BODIES = [
-  'fixed',
-  'kinematicPosition',
-  'dynamic',
+/** Forge Recast / surface tags — Walk · Climb · Swim · Jump · Dig · None */
+export const SURFACE_KINDS = [
+  'Walk',
+  'Climb',
+  'Swim',
+  'Jump',
+  'Dig',
+  'None',
 ] as const;
+export type SurfaceKind = (typeof SURFACE_KINDS)[number];
+
+/**
+ * Open-world vertical stack (SI metres). Same 3×3 as warlords-zones.
+ * Seafloor = the 9 sector DS2 meshes, tiled and Y-fit to this band.
+ * Islands weld their shelf here so slope meets the floor; water surface is 0
+ * so each island owns its entrance band (weld → water).
+ *
+ * Visual + collider law: THREE_LAYER_TERRAIN (stylized-components).
+ */
+export const WORLD_STACK = {
+  seafloorY: -100,
+  islandWeldY: -10,
+  waterY: 0,
+  /** warlords-zones.json sizeMeters — DS2 mesh is scaled to this cell. */
+  sectorTileM: 10000,
+  /** Author DS2 bake width before XZ scale-to-cell. */
+  sectorMeshM: 420,
+  grid: 3,
+  worldSeed: 'grudge-world-1',
+  worldName: 'Aethermoor',
+  lodCulledM: 100,
+  lodHorizonM: 50,
+  lodPhysicsM: 30,
+} as const;
+
+/**
+ * Play GPU / tick budget — threejs-production-best-practices + WebGL Insights.
+ * Cap fill-rate, reuse queries, keep the shadow frustum on the player.
+ */
+export const PLAY_PERF = {
+  pixelRatioMax: 1.5,
+  shadowMap: 1024,
+  shadowHalfM: 42,
+  shadowFarM: 180,
+  cameraNear: 0.12,
+  cameraFarPlay: 6000,
+  cameraFarEdit: 20000,
+  queryRebuildFrames: 30,
+} as const;
+
+/** One wind for grass, water flow, and open-sea sail. SI m/s. */
+export const WORLD_WIND = {
+  dirX: 0.92,
+  dirZ: 0.39,
+  speedMs: 5.5,
+} as const;
+
+/**
+ * Terrain three-system — look + nav + collider. Not harvestables.
+ * https://github.com/MolochDaGod/stylized-components (GrassField: rewire existing mesh).
+ * Three looks: seafloor · mountain · tropical. Harvest nodes stay on island prefabs.
+ */
+export const TERRAIN_LOOKS = ['seafloor', 'mountain', 'tropical'] as const;
+export type TerrainLookId = (typeof TERRAIN_LOOKS)[number];
+
+/** Cortiz GrassField season deltas — applied onto the existing field uniforms. */
+export const GRASS_SEASONS = ['spring', 'autumn'] as const;
+export type GrassSeasonId = (typeof GRASS_SEASONS)[number];
+
+export const THREE_LAYER_TERRAIN = {
+  source: 'https://github.com/MolochDaGod/stylized-components',
+  author: 'Christian Ortiz (Cortiz) — MIT, keep attribution',
+  systems: ['look', 'nav', 'collider'] as const,
+  looks: {
+    seafloor: {
+      id: 'seafloor' as const,
+      contentLayer: 'seafloor' as const,
+      y: WORLD_STACK.seafloorY,
+      phys: 'Terrain' as PhysLayer,
+      shape: 'heightfield' as const,
+      surface: 'Walk' as SurfaceKind,
+      ds2: 'zone' as const,
+      tint: 0x3a5a62,
+      roughness: 0.92,
+      bind: 'DS2 seafloor tiles — look + heightfield + nav',
+    },
+    mountain: {
+      id: 'mountain' as const,
+      contentLayer: 'terrain' as const,
+      y: WORLD_STACK.islandWeldY,
+      phys: 'Terrain' as PhysLayer,
+      shape: 'heightfield' as const,
+      surface: 'Walk' as SurfaceKind,
+      ds2: 'mountains' as const,
+      tint: 0x7a7268,
+      roughness: 0.94,
+      bind: 'Mountain / crag DS2 — look + heightfield + nav',
+    },
+    tropical: {
+      id: 'tropical' as const,
+      contentLayer: 'terrain' as const,
+      y: WORLD_STACK.islandWeldY,
+      phys: 'Terrain' as PhysLayer,
+      shape: 'heightfield' as const,
+      surface: 'Walk' as SurfaceKind,
+      ds2: 'zone' as const,
+      tint: 0x5e8a4a,
+      roughness: 0.88,
+      bind: 'Tropical / haven DS2 — look + heightfield + nav',
+    },
+  },
+} as const;
+
+/** WaterFloor stack — atmosphere only. Not a terrain look. Not harvest. */
+export const WATER_FLOOR_STACK = {
+  source: 'https://github.com/MolochDaGod/stylized-components',
+  layers: {
+    seabed: {
+      id: 'seabed' as const,
+      contentLayer: 'seafloor' as const,
+      y: WORLD_STACK.seafloorY,
+      phys: 'Terrain' as PhysLayer,
+      shape: 'heightfield' as const,
+      surface: 'Walk' as SurfaceKind,
+      sensor: false,
+    },
+    water: {
+      id: 'water' as const,
+      contentLayer: 'water' as const,
+      y: WORLD_STACK.waterY,
+      phys: 'Water' as PhysLayer,
+      shape: 'cuboid' as const,
+      surface: 'Swim' as SurfaceKind,
+      sensor: true,
+    },
+    intersection: {
+      id: 'intersection' as const,
+      contentLayer: 'weather' as const,
+      y: WORLD_STACK.islandWeldY,
+      phys: 'IgnoreRaycast' as PhysLayer,
+      shape: 'cuboid' as const,
+      surface: 'None' as SurfaceKind,
+      sensor: true,
+    },
+  },
+} as const;
+
+export type WaterFloorLayer = keyof typeof WATER_FLOOR_STACK.layers;
+export type StylizedTerrainLayer = TerrainLookId;
+
+export function isTerrainLook(id: string | undefined): id is TerrainLookId {
+  return Boolean(id && (TERRAIN_LOOKS as readonly string[]).includes(id));
+}
+
+export const CONTENT_LAYERS = [
+  {
+    id: 'terrain',
+    label: 'Terrain',
+    phys: 'Terrain' as PhysLayer,
+    surface: 'Walk' as SurfaceKind,
+    siHeightM: 400,
+    detail: 'Mountain / tropical look · heightfield · nav. Not harvest.',
+  },
+  {
+    id: 'seafloor',
+    label: 'Seafloor',
+    phys: 'Terrain' as PhysLayer,
+    surface: 'Walk' as SurfaceKind,
+    siHeightM: WORLD_STACK.islandWeldY - WORLD_STACK.seafloorY,
+    detail: 'Seafloor look · heightfield · nav. Not harvest.',
+  },
+  {
+    id: 'water',
+    label: 'Water',
+    phys: 'Water' as PhysLayer,
+    surface: 'Swim' as SurfaceKind,
+    siHeightM: WORLD_STACK.waterY - WORLD_STACK.islandWeldY,
+    detail: 'L1 WaterFloor — Voronoi surface at y=0 · cuboid sensor Swim',
+  },
+  {
+    id: 'void',
+    label: 'Void',
+    phys: 'Trigger' as PhysLayer,
+    surface: 'None' as SurfaceKind,
+    siHeightM: 2000,
+    detail: 'Map-wide hole · not walkable · fall forever',
+  },
+  {
+    id: 'lava',
+    label: 'Lava',
+    phys: 'Terrain' as PhysLayer,
+    surface: 'Walk' as SurfaceKind,
+    siHeightM: 2000,
+    detail: 'Map-wide hazard floor · same brick mesh, heat tint',
+  },
+  {
+    id: 'quicksand',
+    label: 'Quicksand',
+    phys: 'Terrain' as PhysLayer,
+    surface: 'Dig' as SurfaceKind,
+    siHeightM: 2000,
+    detail: 'Map-wide sink floor · Dig surface',
+  },
+  {
+    id: 'harvestable',
+    label: 'Harvestable',
+    phys: 'Item' as PhysLayer,
+    surface: 'Walk' as SurfaceKind,
+    siHeightM: 2,
+    detail: 'Wood / ore / scrap / herb / hide / fish nodes',
+  },
+  {
+    id: 'npc',
+    label: 'NPC',
+    phys: 'NPC' as PhysLayer,
+    surface: 'Walk' as SurfaceKind,
+    siHeightM: 1.8,
+    detail: 'Workers / allies / captains that are not player',
+  },
+  {
+    id: 'monster',
+    label: 'Monster',
+    phys: 'NPC' as PhysLayer,
+    surface: 'Walk' as SurfaceKind,
+    siHeightM: 2.4,
+    detail: 'Hostile — same NPC phys as wildlife',
+  },
+  {
+    id: 'animal',
+    label: 'Animal',
+    phys: 'NPC' as PhysLayer,
+    surface: 'Walk' as SurfaceKind,
+    siHeightM: 1.2,
+    detail: 'Wildlife — NPC phys',
+  },
+  {
+    id: 'projectile',
+    label: 'Projectile',
+    phys: 'Projectile' as PhysLayer,
+    surface: 'None' as SurfaceKind,
+    siHeightM: 0.4,
+    detail: 'Arrows / bolts / slash residuals',
+  },
+  {
+    id: 'weather',
+    label: 'Weather',
+    phys: 'IgnoreRaycast' as PhysLayer,
+    surface: 'None' as SurfaceKind,
+    siHeightM: 1,
+    detail: 'Rain / snow / fog / storm FX',
+  },
+  {
+    id: 'player',
+    label: 'Player',
+    phys: 'Player' as PhysLayer,
+    surface: 'Walk' as SurfaceKind,
+    siHeightM: 1.8,
+    detail: 'Play-as roster — pick one character to possess',
+  },
+  {
+    id: 'item',
+    label: 'Item',
+    phys: 'Item' as PhysLayer,
+    surface: 'Walk' as SurfaceKind,
+    siHeightM: 0.5,
+    detail: 'Loot / placed gear',
+  },
+  {
+    id: 'trigger',
+    label: 'Trigger',
+    phys: 'Trigger' as PhysLayer,
+    surface: 'None' as SurfaceKind,
+    siHeightM: 2,
+    detail: 'Sensor volumes',
+  },
+] as const;
+
+export type ContentLayerId = (typeof CONTENT_LAYERS)[number]['id'];
+
+/** Harvest / NPC / items — not terrain looks. */
+export const ENTITY_CONTENT_LAYERS = CONTENT_LAYERS.filter(
+  (l) =>
+    l.id !== 'terrain' &&
+    l.id !== 'seafloor' &&
+    l.id !== 'water' &&
+    l.id !== 'void' &&
+    l.id !== 'lava' &&
+    l.id !== 'quicksand'
+);
+
+/** Studio brick plane roles — same 2000 m mesh, many stacked in one scene. */
+export const MAP_SURFACE_LAYERS = [
+  'terrain',
+  'seafloor',
+  'water',
+  'void',
+  'lava',
+  'quicksand',
+] as const;
+export type MapSurfaceLayerId = (typeof MAP_SURFACE_LAYERS)[number];
+
+export function isMapSurfaceLayer(
+  id: string | undefined
+): id is MapSurfaceLayerId {
+  return Boolean(id && (MAP_SURFACE_LAYERS as readonly string[]).includes(id));
+}
+
+/** Feet / snap may stand on these. Void + water are not walk floors. */
+export function mapSurfaceWalkable(id: string | undefined): boolean {
+  return (
+    id === 'terrain' || id === 'seafloor' || id === 'lava' || id === 'quicksand'
+  );
+}
+
+export function mapSurfaceDefaultY(id: string | undefined): number {
+  if (id === 'seafloor') return WORLD_STACK.seafloorY;
+  if (id === 'void') return WORLD_STACK.seafloorY - 20;
+  if (id === 'lava') return WORLD_STACK.waterY - 0.35;
+  return WORLD_STACK.waterY;
+}
+
+export function contentLayerDef(id: string | undefined) {
+  return CONTENT_LAYERS.find((l) => l.id === id) || CONTENT_LAYERS[0];
+}
+
+export const PHYS_BODIES = ['fixed', 'kinematicPosition', 'dynamic'] as const;
 export type PhysBody = (typeof PHYS_BODIES)[number];
 
 export const PHYS_SHAPES = [
@@ -89,7 +490,11 @@ export const AI_BRAINS = [
     label: 'Chase',
     detail: 'Alias of pursue (fleet name).',
   },
-  { id: 'attack', label: 'Attack', detail: 'In range — Forge ATTACK / games attackDistance.' },
+  {
+    id: 'attack',
+    label: 'Attack',
+    detail: 'In range — Forge ATTACK / games attackDistance.',
+  },
   { id: 'flee', label: 'Flee', detail: 'Low-HP. Running set in AI.js.' },
   { id: 'spawnpoint', label: 'Spawn point', detail: 'Marker. No tick.' },
   {
@@ -101,6 +506,12 @@ export const AI_BRAINS = [
     id: 'enemy-deathmatch',
     label: 'Enemy (deathmatch)',
     detail: 'patrol → pursue → attack / investigate / flee.',
+  },
+  {
+    id: 'auto_harvest',
+    label: 'Auto harvest',
+    detail:
+      'NPC gather to 10 then return to camp. Carry bag (ore/stone) or lumber only on the walk back.',
   },
 ] as const;
 export type BrainKind = (typeof AI_BRAINS)[number]['id'];
@@ -170,7 +581,9 @@ export type PracticeContext =
   | 'terrain'
   | 'pathfinding'
   | 'ai'
-  | 'script';
+  | 'script'
+  | 'defs'
+  | 'build';
 
 export type Practice = { title: string; detail: string };
 
@@ -207,6 +620,11 @@ export const BEST_PRACTICES: Record<PracticeContext, Practice[]> = {
       title: 'Canonical mesh is meshopt GLB on CDN',
       detail:
         'Drop FBX here for preview; production kits go through grudge-asset-convert → R2.',
+    },
+    {
+      title: 'One production GLTF loader',
+      detail:
+        'getProductionGltfLoader: Draco + Meshopt; KTX2 bound after renderer. Never bare new GLTFLoader() for race kits.',
     },
   ],
   deploy: [
@@ -299,11 +717,38 @@ export const BEST_PRACTICES: Record<PracticeContext, Practice[]> = {
         'Yuka steers the root. Animation stays on the existing mixer. Never a second mixer.',
     },
   ],
+  defs: [
+    {
+      title: 'info.grudge-studio.com is definition SSOT',
+      detail:
+        'ObjectStore JSON: professions, weapons, maps, home-island-contract. Do not invent a second catalog in this SPA.',
+    },
+    {
+      title: 'Home island is 1024 m · 2 m character ref',
+      detail:
+        'Driftwood Bay / Ironfang Spire only. Concept GLB is a shell — tag trees/rocks/water here. Railway home_islands is player seed, not D1.',
+    },
+    {
+      title: 'Do not mix map families',
+      detail:
+        '9 Warlords sectors ≠ home-block 3×3 ≠ pirate lobby. assertMapIdForFamily before load.',
+    },
+    {
+      title: '5 craft · 6 harvest — no extra professions',
+      detail:
+        'Miner Forester Mystic Chef Engineer. Mining Logging Skinning Fishing Herbalism Scavenging. scrap→engineer herb→mystic hide→forester.',
+    },
+    {
+      title: 'Mats account · XP character',
+      detail:
+        'Railway /api/account/resources vs /api/characters/:id/progress. Never a second bag DB.',
+    },
+  ],
   script: [
     {
       title: 'three.js editor script surface',
       detail:
-        'Function body sees THREE, scene, camera, renderer, selected. No require/import. Persistent play scripts live on Forge.',
+        'Function body sees THREE, scene, camera, renderer, selected. No require/import. Use ObjectStore presets — do not pop Coder/Forge.',
     },
     {
       title: 'Prefer Forge design tools for lighting',
@@ -311,9 +756,49 @@ export const BEST_PRACTICES: Record<PracticeContext, Practice[]> = {
         'Do not spam raw entities from a script when Forge ai/tools/design already places lights/cameras.',
     },
   ],
+  build: [
+    {
+      title: 'Vite 6 + Rapier WASM plugins',
+      detail:
+        'vite-plugin-wasm. TLA is native es2022. Rapier stays dynamic import. Unused npm/demo GLBs/icon dumps get deleted. Node >= 20. pnpm doctor.',
+    },
+    {
+      title: 'Compress meshes offline — Vercel compresses HTTP',
+      detail:
+        'grudge-convert glb2glb (Meshopt/Draco + WebP). Do not add a second gzip plugin; Vercel already brotli/gzip.',
+    },
+    {
+      title: 'Decoders come from three r185',
+      detail:
+        'DRACOLoader import.meta.url hashes WASM into /assets. Do not also ship public/draco. KTX2/Basis is lazy.',
+    },
+    {
+      title: 'One play camera writer',
+      detail:
+        'Orbit is editor-only. Play-as TPS owns camera.position. Same Controller across map rebinds.',
+    },
+  ],
 };
 
 export const SCRIPT_PRESETS: { name: string; source: string }[] = [
+  {
+    name: 'Home island contract (info)',
+    source: `const rows = [];
+scene.traverse((o) => {
+ if (!o.userData) return;
+ if (o.userData.homeIslandContract || /home.?island|example_home/i.test(o.name + (o.userData.r2Key||''))) {
+ rows.push({
+ name: o.name,
+ contract: o.userData.homeIslandContract || 'unstamped',
+ worldSizeM: o.userData.worldSizeM || 1024,
+ characterHeightM: o.userData.characterHeightM || 2,
+ r2: o.userData.r2Key,
+ ssot: 'info.grudge-studio.com/api/v1/home-island-contract.json',
+ });
+ }
+});
+return rows;`,
+  },
   {
     name: 'List terrain stamps',
     source: `const roots = [];
@@ -331,9 +816,9 @@ return selected.userData;`,
     name: 'List Warlords prefabs',
     source: `const rows = [];
 scene.traverse((o) => {
-  if (o.userData && o.userData.prefabId) {
-    rows.push({ name: o.name, prefabId: o.userData.prefabId, kind: o.userData.prefabKind });
-  }
+ if (o.userData && o.userData.prefabId) {
+ rows.push({ name: o.name, prefabId: o.userData.prefabId, kind: o.userData.prefabKind });
+ }
 });
 console.log(rows);
 return rows;`,
@@ -344,6 +829,31 @@ return rows;`,
 selected.rotation.y += Math.PI / 2;
 selected.updateMatrixWorld(true);
 return selected.rotation.y;`,
+  },
+  {
+    name: 'Stamp selected harvest wood',
+    source: `if (!selected) return 'nothing selected';
+selected.userData.harvestKind = 'wood';
+selected.userData.contentLayer = 'harvestable';
+selected.userData.siHeightM = selected.userData.siHeightM || 6;
+return { name: selected.name, harvestKind: 'wood' };`,
+  },
+  {
+    name: 'List harvest + prefabs',
+    source: `const rows = [];
+scene.traverse((o) => {
+ if (!o.userData) return;
+ if (o.userData.harvestKind || o.userData.prefabId || o.userData.playScript) {
+ rows.push({
+ name: o.name,
+ harvest: o.userData.harvestKind || null,
+ prefabId: o.userData.prefabId || null,
+ script: Boolean(o.userData.playScript),
+ si: o.userData.siHeightM || null,
+ });
+ }
+});
+return rows;`,
   },
 ];
 

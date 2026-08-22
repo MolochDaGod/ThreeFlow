@@ -5,16 +5,16 @@ import { LIGHT_TYPE } from '@/enums/enum';
 const store = useSceneStore();
 
 /**
- * @description 光源模块
+ * @description light module
  */
 class LightModules {
-  // 光源映射
+  // light map
   lightMap: Map<string, THREE.Light>;
   constructor() {
     this.lightMap = new Map();
   }
   /**
-   * @description 初始化光源
+   * @description init lights
    */
   initLight() {
     if (!store.sceneApi?.scene) return;
@@ -30,7 +30,7 @@ class LightModules {
         }
         let helper: THREE.Object3D | null = null;
 
-        // 根据light types创建对应的辅助线
+        // fromlight typescreate the matching helper
         if (child instanceof THREE.DirectionalLight) {
           helper = new THREE.DirectionalLightHelper(child, 0.5);
         } else if (child instanceof THREE.SpotLight) {
@@ -41,7 +41,9 @@ class LightModules {
           helper = new THREE.HemisphereLightHelper(child, 0.5);
         }
         if (helper) {
-          helper.visible = child.userData?.helperVisible as boolean;
+          helper.visible = child.userData?.helperVisible === true;
+          helper.userData.isHelper = true;
+          helper.userData.lightHelper = true;
           store.sceneApi?.scene?.add(helper);
           child.userData.helperUuid = helper.uuid;
         }
@@ -49,9 +51,9 @@ class LightModules {
     });
   }
   /**
-   * @description 创建光源
-   * @param type - 光源类型
-   * @param position - 光源位置
+   * @description create light
+   * @param type - light type
+   * @param position - light position
    */
   createLight(type: LIGHT_TYPE, position: THREE.Vector3): THREE.Light | null {
     if (!store.sceneApi?.scene) return null;
@@ -65,23 +67,37 @@ class LightModules {
       case LIGHT_TYPE.DirectionalLight:
         light = new THREE.DirectionalLight(0xffffff, 1);
         light.position.copy(position);
-        // 设置光源目标位置为光源正下方
+        // aim the light target straight down
         light.target.position.copy(targetPosition);
         store.sceneApi.scene.add(light.target);
+        light.castShadow = true;
+        light.shadow.mapSize.set(1024, 1024);
+        light.shadow.bias = -0.0004;
+        light.shadow.normalBias = 0.04;
+        {
+          const sc = light.shadow.camera as THREE.OrthographicCamera;
+          sc.left = -42;
+          sc.right = 42;
+          sc.top = 42;
+          sc.bottom = -42;
+          sc.near = 1;
+          sc.far = 180;
+          sc.updateProjectionMatrix();
+        }
         helper = new THREE.DirectionalLightHelper(light, 0.5);
         break;
 
       case LIGHT_TYPE.SpotLight:
         light = new THREE.SpotLight(0xffffff, 900);
         light.decay = 2;
-        light.shadow.mapSize.width = 1920;
+        light.shadow.mapSize.width = 1024;
         light.shadow.mapSize.height = 1024;
         light.shadow.camera.near = 1;
         light.shadow.camera.far = 10;
         light.angle = 0.5;
         light.distance = 12;
         light.position.copy(position);
-        // 设置光源目标位置为光源正下方
+        // aim the light target straight down
         light.target.position.copy(targetPosition);
         store.sceneApi.scene.add(light.target);
         helper = new THREE.SpotLightHelper(light);
@@ -101,7 +117,7 @@ class LightModules {
       case LIGHT_TYPE.HemisphereLight:
         light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
         light.position.copy(position);
-        // Hemisphere light朝向正下方
+        // Hemisphere lightpoint straight down
         light.lookAt(targetPosition);
         helper = new THREE.HemisphereLightHelper(light, 0.5);
         break;
@@ -113,26 +129,28 @@ class LightModules {
     light.name = type;
     light.userData = {
       helperUuid: helper?.uuid,
-      helperVisible: true,
+      helperVisible: false,
       isTransformControls: true,
     };
 
-    // 添加到Scene
+    // add toScene
     store.sceneApi.scene.add(light);
     store.setCurrentTransformMaterialUuid(light.uuid);
 
     if (helper) {
       helper.userData = {
         lightHelper: true,
+        isHelper: true,
       };
+      helper.visible = false;
       store.sceneApi.scene.add(helper);
       this.updateHelper();
     }
 
-    // 存储光源和辅助线
+    // keep light + helper
     this.lightMap.set(light.uuid, light);
 
-    // 设置变换控制器
+    // attach transform controls
     if (store.sceneApi?.transformControlsModules.transformControls) {
       store.sceneApi.transformControlsModules.transformControls.attach(light);
     }
@@ -140,8 +158,8 @@ class LightModules {
     return light;
   }
   /**
-   * @description 更新辅助线
-   * @param uuid - 光源UUID
+   * @description update helper
+   * @param uuid - lightUUID
    */
   updateHelper(uuid?: string) {
     const light = this.lightMap.get(
@@ -152,7 +170,7 @@ class LightModules {
       light?.userData.helperUuid
     );
     if (!light || !helper) return;
-    // 更新辅助线
+    // update helper
     if (
       helper instanceof THREE.DirectionalLightHelper ||
       helper instanceof THREE.SpotLightHelper ||

@@ -8,6 +8,11 @@ import piniaStore from '@/store/pinia';
 import globalComponent from '@/utils/globalComponent';
 import globalProperties from '@/utils/globalProperties';
 import directive from '@/utils/directive';
+import { consumeFleetAuthReturn } from '@/config/fleetAuth';
+import { bootStudioPackages } from '@/utils/studioBoot';
+
+bootStudioPackages();
+consumeFleetAuthReturn();
 type AppInstance = AppType<Element>;
 
 const app: AppInstance = createApp(App);

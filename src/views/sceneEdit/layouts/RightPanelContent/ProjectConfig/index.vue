@@ -260,23 +260,33 @@ import {
   backgroundOptions,
   environmentOptions,
   normalizeShadowType,
-} from "@/config/propertyConfig";
-import { FOG_NEAR_VALUE, FOG_FAR_VALUE, FOG_DENSITY_VALUE, FOG_COLOR_VALUE } from "@/config/constant";
-import { onMounted, onUnmounted, reactive, getCurrentInstance } from "vue";
-import * as THREE from "three";
-import type { UploadFile } from "element-plus";
+} from '@/config/propertyConfig';
+import {
+  FOG_NEAR_VALUE,
+  FOG_FAR_VALUE,
+  FOG_DENSITY_VALUE,
+  FOG_COLOR_VALUE,
+  STUDIO_BG_COLOR,
+} from '@/config/constant';
+import { onMounted, onUnmounted, reactive, getCurrentInstance } from 'vue';
+import * as THREE from 'three';
+import type { UploadFile } from 'element-plus';
 import {
   BACKGROUND_TYPE,
   ENVIRONMENT_TYPE,
   FOG_TYPE,
   MITT_ON_KEY,
-} from "@/enums/enum";
-import { PREDEFINE_COLORS, fogOptions } from "@/config/propertyConfig";
-import type { ProjectConfigData } from "@/types/rightPanelTypes";
-import { useSceneStore } from "@/store/sceneEditStore";
-import { generateMaterialMaps, getFileType, updateMaterialMap } from "@/utils/utils";
-import { getSceneConfig, updateSceneFog } from "@/utils/sceneModules";
-import type { WeatherOptions } from "@/types/renderModelTypes";
+} from '@/enums/enum';
+import { PREDEFINE_COLORS, fogOptions } from '@/config/propertyConfig';
+import type { ProjectConfigData } from '@/types/rightPanelTypes';
+import { useSceneStore } from '@/store/sceneEditStore';
+import {
+  generateMaterialMaps,
+  getFileType,
+  updateMaterialMap,
+} from '@/utils/utils';
+import { getSceneConfig, updateSceneFog } from '@/utils/sceneModules';
+import type { WeatherOptions } from '@/types/renderModelTypes';
 const colorPickerOptions = PREDEFINE_COLORS;
 
 const { $eventBus } = getCurrentInstance()?.proxy || {};
@@ -302,7 +312,6 @@ const configData = reactive<ProjectConfigData>({
   fogDensity: FOG_DENSITY_VALUE,
 });
 
-
 onMounted(() => {
   initConfigData();
   $eventBus?.on(MITT_ON_KEY.SCENE_LOADING, () => {
@@ -326,14 +335,14 @@ const initConfigData = () => {
       sceneConfig?.backgroundColor as string
     ).getStyle(),
     backgroundMap: generateMaterialMaps(
-      (sceneConfig?.backgroundMap as unknown) as THREE.Texture
+      sceneConfig?.backgroundMap as unknown as THREE.Texture
     ),
     backgroundTexture: sceneConfig?.backgroundTexture,
     backgroundBlurriness: sceneConfig?.backgroundBlurriness,
     backgroundIntensity: sceneConfig?.backgroundIntensity,
     environment: sceneConfig?.environment,
     environmentMap: generateMaterialMaps(
-      (sceneConfig?.environmentMap as unknown) as THREE.Texture
+      sceneConfig?.environmentMap as unknown as THREE.Texture
     ),
     fog: sceneConfig?.fog,
     fogColor: sceneConfig?.fogColor,
@@ -347,16 +356,20 @@ const initConfigData = () => {
 const updateRenderConfig = () => {
   sceneApi!.renderer!.toneMapping = configData.toneMapping;
   sceneApi!.renderer!.toneMappingExposure = configData.toneMappingExposure;
-  sceneApi!.renderer!.shadowMap.type = normalizeShadowType(configData.shadowType);
+  sceneApi!.renderer!.shadowMap.type = normalizeShadowType(
+    configData.shadowType
+  );
 };
 // update scene background
 const updateSceneBackground = () => {
   if (configData.background === BACKGROUND_TYPE.Color) {
-    sceneApi!.scene!.background = new THREE.Color(configData.backgroundColor as string);
+    sceneApi!.scene!.background = new THREE.Color(
+      configData.backgroundColor as string
+    );
   } else if (configData.background === BACKGROUND_TYPE.Texture) {
     sceneApi!.scene!.background = configData.backgroundTexture || null;
   } else if (configData.background === BACKGROUND_TYPE.NoBackground) {
-    sceneApi!.scene!.background = new THREE.Color(0xa0a0a0);
+    sceneApi!.scene!.background = new THREE.Color(STUDIO_BG_COLOR);
   }
 };
 // update scene environment
@@ -369,7 +382,9 @@ const updateSceneEnvironment = () => {
 };
 // update background color
 const updateSceneBackgroundColor = () => {
-  sceneApi!.scene!.background = new THREE.Color(configData.backgroundColor as string);
+  sceneApi!.scene!.background = new THREE.Color(
+    configData.backgroundColor as string
+  );
 };
 // update background blur
 const updateSceneBlurrinessAndIntensity = () => {
@@ -384,13 +399,13 @@ const uploadBackgroundMapFile = async (valueKey: string, file: UploadFile) => {
     const textures = await updateMaterialMap(filePath, getFileType(file.name));
     textures.mapping = THREE.EquirectangularReflectionMapping;
 
-    if (valueKey === "backgroundMap") {
+    if (valueKey === 'backgroundMap') {
       configData.backgroundTexture = textures;
       configData.backgroundMap = generateMaterialMaps(textures);
       sceneApi!.scene!.background = configData.backgroundTexture;
       textures.dispose();
     }
-    if (valueKey === "environmentMap") {
+    if (valueKey === 'environmentMap') {
       configData.environmentTexture = textures;
       configData.environmentMap = generateMaterialMaps(textures);
 

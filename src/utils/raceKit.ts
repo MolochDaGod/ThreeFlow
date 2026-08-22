@@ -4,20 +4,15 @@
  * Hover armour → pick metal|cloth|leather (one) → pick one weapon for skills.
  */
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
-import { placeAssetSi } from './siPlace';
+import { centerRootBetweenFeet, placeAssetSi } from './siPlace';
+import { bindCharacterDebug } from './characterIntegrity';
+import { getProductionGltfLoader } from './gltfProdLoader';
 
 export type ArmorMaterial = 'metal' | 'cloth' | 'leather';
 export type ArmorSlot = 'body' | 'arms' | 'legs' | 'head' | 'shoulders';
 export type WeaponSkillPack =
-  | 'sword_shield'
-  | '2h_melee'
-  | 'longbow'
-  | 'magic'
-  | 'spear_melee'
-  | 'unarmed';
+  'sword_shield' | '2h_melee' | 'longbow' | 'magic' | 'spear_melee' | 'unarmed';
 
 export interface KitWeaponChoice {
   id: string;
@@ -110,7 +105,7 @@ export const WARLORDS_FOUNDRY =
   'https://character.grudge-studio.com/foundry?era=warlords&mode=create';
 export const WARLORDS_PLAY = 'https://grudgewarlords.com';
 
-function meshKey(name: string): string {
+export function meshKey(name: string): string {
   return String(name || '')
     .toLowerCase()
     .replace(/^wk_|^brb_|^orc_|^elf_|^ud_|^dwf_/, '')
@@ -142,13 +137,82 @@ function isEquippable(mesh: THREE.Object3D): boolean {
   return slotOf(mesh.name) != null;
 }
 
-export function findRaceKitRoot(obj: THREE.Object3D | null): THREE.Object3D | null {
+/**
+ * RTS worker carry — Xtra_bag / Xtra_wood / lumber (grudge6-modular-characters).
+ * Never visible unless setCarryVisuals (NPC auto-harvest return).
+ */
+export function isCarryMesh(name: string): boolean {
+  const k = meshKey(name);
+  if (!k || k.includes('quiver')) return false;
+  if (k === 'bag' || k === 'wood' || k === 'lumber') return true;
+  if (k.includes('lumber') || k.includes('carrybag') || k.includes('carrywood'))
+    return true;
+  if (k.includes('orebag') || k.includes('stonebag') || k.includes('bonebag'))
+    return true;
+  if (k.includes('bonewood')) return true;
+  return false;
+}
+
+export function hideCarryVisuals(root: THREE.Object3D) {
+  setCarryVisuals(root, { bag: false, wood: false });
+}
+
+/** First visible Xtra_bag / Xtra_wood mesh on a worker. */
+export function findVisibleCarryMesh(root: THREE.Object3D): THREE.Mesh | null {
+  let found: THREE.Mesh | null = null;
+  root.traverse((o) => {
+    if (found) return;
+    const m = o as THREE.Mesh;
+    if (m.isMesh && isCarryMesh(m.name) && m.visible) found = m;
+  });
+  return found;
+}
+
+export function setCarryVisuals(
+  root: THREE.Object3D,
+  opts: { bag?: boolean; wood?: boolean } = {}
+) {
+  const bag = !!opts.bag;
+  const wood = !!opts.wood;
+  root.userData.carryMode = bag || wood;
+  root.userData.carryBag = bag;
+  root.userData.carryWood = wood;
+  root.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh || !isCarryMesh(m.name)) return;
+    const k = meshKey(m.name);
+    const isWood = k === 'wood' || k.includes('wood') || k.includes('lumber');
+    const isBag =
+      k === 'bag' ||
+      k.includes('bag') ||
+      k.includes('ore') ||
+      k.includes('stone');
+    if (isWood) m.visible = wood;
+    else if (isBag) m.visible = bag;
+    else m.visible = false;
+  });
+}
+
+export function findRaceKitRoot(
+  obj: THREE.Object3D | null
+): THREE.Object3D | null {
   let p: THREE.Object3D | null = obj;
   while (p) {
-    if (p.userData?.raceKit) return p;
+    if (p.userData?.raceKit || p.userData?.warlordsPlayContract) return p;
     p = p.parent;
   }
   return null;
+}
+
+/** Play-as only on a stamped Toon RTS kit — not a cone, Meshy, or raw drop. */
+export function isPlayBody(obj: THREE.Object3D | null): boolean {
+  const root = findRaceKitRoot(obj);
+  if (!root) return false;
+  const c = root.userData?.warlordsPlayContract as
+    | { loader?: string; playMesh?: string }
+    | undefined;
+  if (c?.loader === 'loadRaceKit' || c?.playMesh === 'toon-rts') return true;
+  return Boolean(root.userData?.raceKit);
 }
 
 export function listArmorMeshes(
@@ -236,14 +300,8 @@ function clearCdnWeapon(root: THREE.Object3D) {
   }
 }
 
-let _gltf: GLTFLoader | null = null;
 function gltfLoader() {
-  if (_gltf) return _gltf;
-  const draco = new DRACOLoader();
-  draco.setDecoderPath('/draco/');
-  _gltf = new GLTFLoader();
-  _gltf.setDRACOLoader(draco);
-  return _gltf;
+  return getProductionGltfLoader();
 }
 
 function handBone(root: THREE.Object3D): THREE.Object3D | null {
@@ -291,6 +349,35 @@ export function applyRaceKit(root: THREE.Object3D, state: RaceKitState) {
   root.userData.raceKit = { ...state };
   root.userData.weaponId = state.weaponId;
   root.userData.animPack = state.animPack;
+  root.userData.warlordsPlayContract = {
+    loader: 'loadRaceKit',
+    playMesh: 'toon-rts',
+    raceId: state.raceId,
+    animPack: state.animPack,
+  };
+  setCarryVisuals(root, {
+    bag: !!root.userData.carryBag,
+    wood: !!root.userData.carryWood,
+  });
+}
+
+export function bootstrapWorkerKit(
+  root: THREE.Object3D,
+  raceId: string
+): RaceKitState {
+  const state: RaceKitState = {
+    raceId,
+    armor: { body: 'a', arms: 'a', legs: 'a', head: 'a', shoulders: null },
+    material: 'leather',
+    weaponId: null,
+    animPack: 'unarmed',
+    hoverMesh: null,
+    selectedArmor: null,
+  };
+  root.userData.worker = true;
+  applyRaceKit(root, state);
+  hideCarryVisuals(root);
+  return state;
 }
 
 export function bootstrapRaceKit(
@@ -307,6 +394,9 @@ export function bootstrapRaceKit(
     selectedArmor: null,
   };
   applyRaceKit(root, state);
+  hideCarryVisuals(root);
+  centerRootBetweenFeet(root);
+  bindCharacterDebug(root);
   return state;
 }
 
@@ -314,7 +404,8 @@ export function setKitMaterial(
   root: THREE.Object3D,
   kind: ArmorMaterial
 ): RaceKitState {
-  const prev = (root.userData.raceKit || bootstrapRaceKit(root, 'human')) as RaceKitState;
+  const prev = (root.userData.raceKit ||
+    bootstrapRaceKit(root, 'human')) as RaceKitState;
   const next = { ...prev, material: kind };
   applyRaceKit(root, next);
   return next;
@@ -324,7 +415,8 @@ export function setKitWeapon(
   root: THREE.Object3D,
   weaponId: string
 ): RaceKitState {
-  const prev = (root.userData.raceKit || bootstrapRaceKit(root, 'human')) as RaceKitState;
+  const prev = (root.userData.raceKit ||
+    bootstrapRaceKit(root, 'human')) as RaceKitState;
   const w = ALL_KIT_WEAPONS.find((x) => x.id === weaponId);
   const next: RaceKitState = {
     ...prev,
@@ -340,7 +432,8 @@ export function setKitArmor(
   slot: ArmorSlot,
   variant: string
 ): RaceKitState {
-  const prev = (root.userData.raceKit || bootstrapRaceKit(root, 'human')) as RaceKitState;
+  const prev = (root.userData.raceKit ||
+    bootstrapRaceKit(root, 'human')) as RaceKitState;
   const next: RaceKitState = {
     ...prev,
     armor: { ...prev.armor, [slot]: variant },

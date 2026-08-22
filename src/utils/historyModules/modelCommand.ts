@@ -23,7 +23,7 @@ export class ModelCommand extends Command {
   }
 
   private removeFromScene(): void {
-    // 1. 处理light helper
+    // 1. handle light helper
     if (this.object instanceof THREE.Light && this.helperUuid) {
       const helper = store.sceneApi?.scene?.getObjectByProperty(
         'uuid',
@@ -35,11 +35,11 @@ export class ModelCommand extends Command {
       }
     }
 
-    // 2. 处理Material释放
+    // 2. dispose material
     if (this.object instanceof THREE.Mesh) {
       disposeMaterial(this.object);
     } else {
-      // 如果是组，遍历处理所有子网格的Material
+      // if a group, walk childMaterial
       this.object.traverse((child: THREE.Object3D) => {
         if (child instanceof THREE.Mesh) {
           disposeMaterial(child);
@@ -47,12 +47,12 @@ export class ModelCommand extends Command {
       });
     }
 
-    // 3. 从Scene中移除对象
+    // 3. remove object from scene
     if (this.object.parent) {
       this.object.parent.remove(this.object);
     }
 
-    // 4. 清理变换控制器和包围盒
+    // 4. clear transform controls and box helper
     store.sceneApi?.transformControlsModules?.clearCurrentSelection();
     if (store.sceneApi?.boxHelper) {
       store.sceneApi.boxHelper.visible = false;
@@ -63,7 +63,7 @@ export class ModelCommand extends Command {
     if (!this.object.parent && store.sceneApi?.scene) {
       store.sceneApi.scene.add(this.object);
       this.object.position.copy(this.originalPosition);
-      // 如果是Lights，重新创建辅助线
+      // if a light, recreate its helper
       if (this.object instanceof THREE.Light && this.helperUuid) {
         store.sceneApi.lightModules.updateHelper();
       }

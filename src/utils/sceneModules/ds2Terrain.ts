@@ -27,7 +27,10 @@ export interface Ds2Params {
 export const DS2_SOURCE = 'https://hardroad.xyz/demos/ds2-terrain.html';
 
 /** Editor = viewport-safe. Deploy = denser mesh for Node/Draco sector bake. */
-export function paramsForQuality(base: Ds2Params, quality: Ds2Quality): Ds2Params {
+export function paramsForQuality(
+  base: Ds2Params,
+  quality: Ds2Quality
+): Ds2Params {
   if (quality === 'edit') return { ...base };
   return {
     ...base,
@@ -161,7 +164,14 @@ class Simplex {
   }
 }
 
-function fbm(nz: Simplex, x: number, y: number, oct: number, lac = 2, gain = 0.5) {
+function fbm(
+  nz: Simplex,
+  x: number,
+  y: number,
+  oct: number,
+  lac = 2,
+  gain = 0.5
+) {
   let a = 1;
   let f = 1;
   let sum = 0;
@@ -174,7 +184,8 @@ function fbm(nz: Simplex, x: number, y: number, oct: number, lac = 2, gain = 0.5
   }
   return sum / norm;
 }
-const fbm01 = (nz: Simplex, x: number, y: number, o: number) => fbm(nz, x, y, o) * 0.5 + 0.5;
+const fbm01 = (nz: Simplex, x: number, y: number, o: number) =>
+  fbm(nz, x, y, o) * 0.5 + 0.5;
 
 function ridged(nz: Simplex, x: number, y: number, oct: number) {
   let a = 0.55;
@@ -228,7 +239,13 @@ function pathCX(v: number, pa: number, pb: number) {
   return 0.5 + 0.17 * Math.sin(v * 6 + pa) + 0.06 * Math.sin(v * 13 + pb);
 }
 
-function valleyMask(u: number, v: number, washW: number, pa: number, pb: number) {
+function valleyMask(
+  u: number,
+  v: number,
+  washW: number,
+  pa: number,
+  pb: number
+) {
   return smooth(0.34 * washW, 0.06 * washW, Math.abs(u - pathCX(v, pa, pb)));
 }
 
@@ -253,18 +270,31 @@ function sculpt(
       let mount = smooth(0.09, 0.34, d);
       mount *= 0.5 + 0.5 * fbm01(nz, pu * 2.2 + 40, pv * 2.2 + 7, 3);
       let h = Math.pow(fbm01(nz, pu * 4, pv * 4, 5), 1.5) * 30;
-      let mh = Math.pow(ridged(nz, pu * 3.2 + 11, pv * 3.2 + 3, 5), 1.35) * P.mountainH * mount;
-      const cl = clamp((fbm01(nz, pu * 1.6 + 80, pv * 1.6 + 2, 3) - 0.45) * 2.2, 0, 1);
+      let mh =
+        Math.pow(ridged(nz, pu * 3.2 + 11, pv * 3.2 + 3, 5), 1.35) *
+        P.mountainH *
+        mount;
+      const cl = clamp(
+        (fbm01(nz, pu * 1.6 + 80, pv * 1.6 + 2, 3) - 0.45) * 2.2,
+        0,
+        1
+      );
       if (cl > 0.01 && mh > 1) {
         const step = 14;
         const f = mh / step;
-        const shelf = (Math.floor(f) + smooth(0.3, 0.7, f - Math.floor(f))) * step;
+        const shelf =
+          (Math.floor(f) + smooth(0.3, 0.7, f - Math.floor(f))) * step;
         mh = lerp(mh, shelf, cl * 0.75 * mount);
       }
       h += mh;
-      const pathH = 6 + 5 * (Math.sin(v * 3.1) + 1) + 0.25 * Math.sin(v * 7.7 + u * 2);
+      const pathH =
+        6 + 5 * (Math.sin(v * 3.1) + 1) + 0.25 * Math.sin(v * 7.7 + u * 2);
       h = lerp(h, pathH, Math.pow(valley, 1.6));
-      h += 1.6 * fbm(nz, pu * 14, pv * 14, 3) * (1 - valley * 0.9) * (0.2 + 0.8 * mount);
+      h +=
+        1.6 *
+        fbm(nz, pu * 14, pv * 14, 3) *
+        (1 - valley * 0.9) *
+        (0.2 + 0.8 * mount);
       map[j * n + i] = h;
     }
   }
@@ -325,10 +355,16 @@ async function streamPower(
     }
     counts.fill(0);
     for (let i = 0; i < N2; i++)
-      counts[clamp((((maxH - map[i]) / hr) * (BUCKETS - 1)) | 0, 0, BUCKETS - 1) + 1]++;
+      counts[
+        clamp((((maxH - map[i]) / hr) * (BUCKETS - 1)) | 0, 0, BUCKETS - 1) + 1
+      ]++;
     for (let b = 0; b < BUCKETS; b++) counts[b + 1] += counts[b];
     for (let i = 0; i < N2; i++)
-      order[counts[clamp((((maxH - map[i]) / hr) * (BUCKETS - 1)) | 0, 0, BUCKETS - 1)]++] = i;
+      order[
+        counts[
+          clamp((((maxH - map[i]) / hr) * (BUCKETS - 1)) | 0, 0, BUCKETS - 1)
+        ]++
+      ] = i;
     A.fill(1);
     for (let o = 0; o < N2; o++) {
       const c = order[o];
@@ -347,7 +383,13 @@ async function streamPower(
   }
 }
 
-function thermal(map: Float32Array, n: number, iterations: number, talus: number, rate: number) {
+function thermal(
+  map: Float32Array,
+  n: number,
+  iterations: number,
+  talus: number,
+  rate: number
+) {
   const nb = [-1, 1, -n, n];
   for (let it = 0; it < iterations; it++) {
     for (let j = 1; j < n - 1; j++) {
@@ -386,7 +428,11 @@ function sampleHG(map: Float32Array, n: number, x: number, y: number) {
   return {
     gx: (h10 - h00) * (1 - fy) + (h11 - h01) * fy,
     gy: (h01 - h00) * (1 - fx) + (h11 - h10) * fx,
-    h: h00 * (1 - fx) * (1 - fy) + h10 * fx * (1 - fy) + h01 * (1 - fx) * fy + h11 * fx * fy,
+    h:
+      h00 * (1 - fx) * (1 - fy) +
+      h10 * fx * (1 - fy) +
+      h01 * (1 - fx) * fy +
+      h11 * fx * fy,
   };
 }
 
@@ -473,7 +519,13 @@ function erodeDroplet(
   }
 }
 
-function imposeWash(map: Float32Array, n: number, washW: number, pa: number, pb: number) {
+function imposeWash(
+  map: Float32Array,
+  n: number,
+  washW: number,
+  pa: number,
+  pb: number
+) {
   for (let j = 0; j < n; j++) {
     const v = j / (n - 1);
     const pH = 6 + 5 * (Math.sin(v * 3.1) + 1);
@@ -481,7 +533,11 @@ function imposeWash(map: Float32Array, n: number, washW: number, pa: number, pb:
       const u = i / (n - 1);
       const w = Math.pow(valleyMask(u, v, washW, pa, pb), 1.6) * 0.8;
       if (w > 0.01)
-        map[j * n + i] = lerp(map[j * n + i], pH + 0.25 * Math.sin(v * 7.7 + u * 2), w);
+        map[j * n + i] = lerp(
+          map[j * n + i],
+          pH + 0.25 * Math.sin(v * 7.7 + u * 2),
+          w
+        );
     }
   }
 }
@@ -489,9 +545,13 @@ function imposeWash(map: Float32Array, n: number, washW: number, pa: number, pb:
 export async function generateDs2Terrain(
   preset: Ds2PresetId,
   onProgress?: (pct: number, msg: string) => void,
-  quality: Ds2Quality = 'edit'
+  quality: Ds2Quality = 'edit',
+  seedOverride?: number
 ): Promise<THREE.Group> {
   const P = paramsForQuality(DS2_PRESETS[preset], quality);
+  if (seedOverride != null && Number.isFinite(seedOverride)) {
+    P.seed = seedOverride >>> 0;
+  }
   const report = async (pct: number, msg: string) => {
     onProgress?.(pct, msg);
     await tick();
@@ -524,7 +584,10 @@ export async function generateDs2Terrain(
     for (let k = 0; k < n; k++)
       erodeDroplet(simMap, P.sim, P.world, P.inertia, P.capacity, brush, rand);
     done += n;
-    await report(38 + 22 * (done / P.droplets), `hydraulic ${Math.round((100 * done) / P.droplets)}%`);
+    await report(
+      38 + 22 * (done / P.droplets),
+      `hydraulic ${Math.round((100 * done) / P.droplets)}%`
+    );
   }
 
   await report(62, 'thermal settling');
@@ -563,7 +626,9 @@ export async function generateDs2Terrain(
     let gz = 0;
     if (x > 0 && x < P.mesh - 1 && z > 0 && z < P.mesh - 1) {
       gx = (hiMap[z * P.mesh + x + 1] - hiMap[z * P.mesh + x - 1]) / (2 * cell);
-      gz = (hiMap[(z + 1) * P.mesh + x] - hiMap[(z - 1) * P.mesh + x]) / (2 * cell);
+      gz =
+        (hiMap[(z + 1) * P.mesh + x] - hiMap[(z - 1) * P.mesh + x]) /
+        (2 * cell);
     }
     const slope = Math.sqrt(gx * gx + gz * gz);
     const u = x / (P.mesh - 1);
@@ -598,6 +663,7 @@ export async function generateDs2Terrain(
     hardroad: DS2_SOURCE,
     ds2Preset: preset,
     ds2Quality: quality,
+    ds2Seed: P.seed,
     worldMeters: P.world,
     sim: P.sim,
     mesh: P.mesh,

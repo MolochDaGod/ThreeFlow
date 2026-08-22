@@ -3,12 +3,23 @@
     <div class="help-describe-title">About</div>
     <div class="help-describe-content about-block">
       <p>
+        <strong>Edit</strong> — W move · E rotate · R scale · F frame selected
+        in camera (keeps look direction) · G ground.
+        <strong>Scene</strong> menu: Clear · Open · Save · Push assets.
+        Left rails: World · Assets · Place · HUD · Game · Deploy. HUD frames
+        and managers live in the Scene tree as parent/child. Hierarchy
+        <strong>RMB</strong>: save mesh GLB / push / delete. Drag nodes to
+        reparent.
+        <strong>Shift+Ctrl+LMB drag</strong> a span that should be
+        <strong>2 m</strong>, release — uniform scale so that length is 2 metres
+        (1 unit = 1 m). RMB drag empty viewport pans. HUD stays 1920×1080.
+      </p>
+      <p>
         <strong>Grudge Studio · Warlords Engine</strong> — fork of ThreeFlow for
         era layout. Live
-        <a href="https://threeflow-grudgenexus.vercel.app/" target="_blank"
-          >threeflow-grudgenexus.vercel.app</a
-        >.
-        Not a second Forge, not ThreeFlowX, not a player database.
+        <a href="https://threeflow.vercel.app/" target="_blank"
+          >threeflow.vercel.app</a
+        >. Not a second Forge, not ThreeFlowX, not a player database.
       </p>
       <p>
         <strong>Captains</strong> — Toon RTS
@@ -40,13 +51,62 @@
         thrower. Fantasy Weapons still FBX-only stay out of the list.
       </p>
       <p>
-        <strong>Islands / scenes</strong> — home island, pirate lobby (Chicken
-        Gun), Fruzer, Lyoko, Spiral, Hoth dojo stand-in. Drop one large GLB at
-        a time.
+        <strong>Terrain three-system</strong> —
+        <a
+          href="https://github.com/MolochDaGod/stylized-components"
+          target="_blank"
+          >stylized-components</a
+        >
+        (Cortiz, MIT). Look + nav + collider on seafloor / mountain / tropical.
+        Tropical and mountain bind
+        <a
+          href="https://github.com/MolochDaGod/stylized-components/tree/main/src/components/grassField"
+          target="_blank"
+          >GrassField</a
+        >
+        on the real mesh (area-weighted blades, shared dirt, procedural
+        flowers). The left <strong>Sectors · DS2</strong> folder is the 9
+        Warlords 10 km cells (ethereal_falls … ember_depths) — Hard Road DS2
+        bakes, not islands. Islands sit on those cells. Live DS2 generates a new
+        mesh. Seafloor 3×3 tiles all nine. Seafloor has no grass. Harvest stays
+        nodes. WaterFloor atmosphere adds Voronoi water, sparkles, walk ripples,
+        and a sky dome. Spring / Autumn recolor the same field.
       </p>
       <p>
-        <strong>9 sectors + HD zones</strong> — Hard Road DS2
-        (<a href="https://hardroad.xyz/demos/ds2-terrain.html" target="_blank"
+        <strong>Islands / scenes</strong> — home island, pirate lobby (Chicken
+        Gun), Fruzer, Lyoko, Spiral, Hoth dojo stand-in. Drop one large GLB at a
+        time.
+      </p>
+      <p>
+        <strong>COTW animals</strong> — Call of the Wild land/air from
+        <code>D:\Games\Models\*cotw*</code> baked to
+        <code>models/creatures/cotw/</code>. Prey (raccoon, deer, beaver, mink,
+        mallard, buffalo) drop leather/meat/bone. Predators (lynx, lioness,
+        alligator) are monsters; LMB kill then LMB again to skin. Uniform scale
+        only.
+      </p>
+      <p>
+        <strong>Sector kits</strong> — one pattern for all 9 cells. Biome from
+        world islands → isolated nature GLBs (palm / pine / oak / snow /
+        gnarled) + DS2 terrain key. Left tab All sectors / pick a cell. Seafloor
+        spawn dresses main islands with that kit, not cones.
+      </p>
+      <p>
+        <strong>Library / prefabs</strong> — live
+        <code>organized-nature-manifest</code> trees/rocks + Railway-ready
+        harvest SI. Systems → Save as prefab writes an editor recipe (this SPA).
+        Script → Attach to selected runs on Play. Not a second player DB.
+      </p>
+      <p>
+        <strong>Map-wide floors</strong> — the y=0 brick plane is a scene layer.
+        Inspector Layer: terrain / water / seafloor / lava / quicksand / void.
+        Systems → Map-wide mesh layers stacks more of the same mesh. Void = fall
+        forever. Water = swim, not feet.
+      </p>
+      <p>
+        <strong>9 sectors + HD zones</strong> — Hard Road DS2 (<a
+          href="https://hardroad.xyz/demos/ds2-terrain.html"
+          target="_blank"
           >hardroad.xyz</a
         >). <strong>Scene → HD terrain deploy pack</strong> then
         <code>pnpm bake:hd-terrain</code>. Load screen stays up until CDN HEAD
@@ -54,20 +114,27 @@
       </p>
       <p>
         Host <code>assets.grudge-studio.com</code>. Railway owns bag / roster.
-        SI: 1 unit = 1 m, human ~1.8 m. AGPL-3.0 — keep author answer /
+        SI: 1 unit = 1 m. Left-tab drops use the character as the yardstick
+        (human 1.8 m · orc / barbarian 2.0 m). Scale is one number on the whole
+        asset until height matches — no per-axis stretch. Props keep catalog
+        metres (tree 4–8 m, rock ~1.4 m). AGPL-3.0 — keep author answer /
         zhangbo126, logo, and name.
       </p>
       <p>
         <strong>Systems</strong> — Rapier, BVH, pathfinding, Yuka (root only).
         AI catalog from
-        <a href="https://threejs-games.github.io/examples/70-ai/" target="_blank"
+        <a
+          href="https://threejs-games.github.io/examples/70-ai/"
+          target="_blank"
           >threejs-games 70-ai</a
         >
         (idle / wander / patrol / follow / pursue). MMO aggro 25/15/30/50 m,
         threat table, cast telegraphs (<code>grudge-ai-brains</code>). Icons
         load from <code>assets.grudge-studio.com</code> with
-        <code>referrerpolicy=no-referrer</code>. Pop Forge / AI hub from the
-        AI menu — not a second Forge.
+        <code>referrerpolicy=no-referrer</code>. Header <strong>Play</strong>
+        is the only TPS enter (Orbit off, no leftover tweens). Systems
+        <strong>Play as</strong> only stamps the body. Vue + Rapier — not R3F /
+        Cannon. Pop Forge / AI hub from the AI menu — not a second Forge.
       </p>
     </div>
     <div class="help-describe-title">Hotkeys</div>
@@ -114,11 +181,27 @@
       </div>
       <div class="help-content-item">
         <span class="help-content-label">Focus</span>
-        <span class="help-content-value">F / double-click mesh</span>
+        <span class="help-content-value">F / double-click mesh (frame in view)</span>
+      </div>
+      <div class="help-content-item">
+        <span class="help-content-label">Place on terrain</span>
+        <span class="help-content-value">G / Ctrl+Shift (on transform)</span>
+      </div>
+      <div class="help-content-item">
+        <span class="help-content-label">Place in camera view</span>
+        <span class="help-content-value">Ctrl+Alt+LMB on hierarchy</span>
+      </div>
+      <div class="help-content-item">
+        <span class="help-content-label">Orbit</span>
+        <span class="help-content-value">LMB drag empty viewport</span>
       </div>
       <div class="help-content-item">
         <span class="help-content-label">Pan camera</span>
-        <span class="help-content-value">Hold RMB and drag</span>
+        <span class="help-content-value">RMB drag empty viewport (not HUD)</span>
+      </div>
+      <div class="help-content-item">
+        <span class="help-content-label">Edit HUD</span>
+        <span class="help-content-value">RMB on 2D/UI · LMB drag move · corner resize</span>
       </div>
     </div>
     <div class="help-describe-title">
@@ -140,6 +223,16 @@
       <div class="help-content-item">
         <span class="help-content-label">Right</span>
         <span class="help-content-value">D</span>
+      </div>
+      <div class="help-content-item">
+        <span class="help-content-label">Jump</span>
+        <span class="help-content-value">Space after ~2 m move</span>
+      </div>
+      <div class="help-content-item">
+        <span class="help-content-label">Climb / grab</span>
+        <span class="help-content-value"
+          >Space grab · W/S up/down · A/D sidle · Space at lip = mantle</span
+        >
       </div>
     </div>
   </div>

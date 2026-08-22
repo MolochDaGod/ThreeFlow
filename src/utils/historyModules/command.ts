@@ -11,6 +11,6 @@ export abstract class Command {
   abstract execute(): void;
   abstract undo(): void;
 
-  // 可选：用于合并快速连续的相同操作
+  // optional: merge rapid identical ops
   update?(command: Command): void;
 }

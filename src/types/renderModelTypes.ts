@@ -1,4 +1,10 @@
-import type { CANVAS_METHOD, EFFECT_METHOD, LIGHT_TYPE, MODEL_TYPE, TEXT_MATERIAL_TYPE } from '@/enums/enum';
+import type {
+  CANVAS_METHOD,
+  EFFECT_METHOD,
+  LIGHT_TYPE,
+  MODEL_TYPE,
+  TEXT_MATERIAL_TYPE,
+} from '@/enums/enum';
 import * as THREE from 'three';
 import { type GLTF } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -101,12 +107,7 @@ export type EffectType = {
 };
 
 export type DragModelType =
-  | GeometryType
-  | ModelType
-  | EffectType
-  | LightType
-  | EchartsType
-  | null;
+  GeometryType | ModelType | EffectType | LightType | EchartsType | null;
 
 export interface MaterialData {
   uuid: string;
@@ -118,7 +119,7 @@ export interface MaterialData {
 export interface ModelData {
   uuid: string;
   name: string;
-  children?: MaterialData[]; // 使用可选Properties
+  children?: MaterialData[]; // optionalProperties
 }
 
 export interface EffectData {
@@ -150,14 +151,14 @@ export interface EffectParamsOptions {
 
 export interface WeatherOptions {
   weather?: WeatherType; // weather types
-  count?: number; // 粒子数量
-  speed?: number; // 下落速度
-  size?: number; // 粒子大小
-  opacity?: number; // Transparent度
+  count?: number; // particle count
+  speed?: number; // fall speed
+  size?: number; // particle size
+  opacity?: number; // opacity
   color?: string; // color
-  area?: number; // 覆盖区域范围
-  height?: number; // 下落Height
-  planeGeometry?: string | null; // 地面Material
+  area?: number; // coverage area
+  height?: number; // fallHeight
+  planeGeometry?: string | null; // groundMaterial
 }
 export type WeatherType = 'rain' | 'snow' | 'none';
 
@@ -172,9 +173,7 @@ export type MaterialType = {
 };
 
 export type SelectLightType =
-  | THREE.DirectionalLightHelper
-  | THREE.PointLightHelper
-  | THREE.SpotLightHelper;
+  THREE.DirectionalLightHelper | THREE.PointLightHelper | THREE.SpotLightHelper;
 
 export interface TubeGeometryType {
   type: 'TubeGeometry';

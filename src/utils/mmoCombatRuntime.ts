@@ -27,12 +27,20 @@ export class ThreatTable {
   tankMul: number;
   decayPerSec: number;
 
-  constructor(tankMul: number = THREAT_CONFIG.tankMul, decayPerSec: number = THREAT_CONFIG.decayPerSec) {
+  constructor(
+    tankMul: number = THREAT_CONFIG.tankMul,
+    decayPerSec: number = THREAT_CONFIG.decayPerSec
+  ) {
     this.tankMul = tankMul;
     this.decayPerSec = decayPerSec;
   }
 
-  addDamage(id: string, damage: number, isTank: boolean, now = performance.now()) {
+  addDamage(
+    id: string,
+    damage: number,
+    isTank: boolean,
+    now = performance.now()
+  ) {
     const mul = THREAT_CONFIG.damageMul * (isTank ? this.tankMul : 1);
     this.add(id, damage * mul, now);
   }
@@ -98,7 +106,10 @@ export function senseAggro(
   return 'none';
 }
 
-export function stampMmoCombat(obj: THREE.Object3D, partial?: Partial<MmoCombatStamp>) {
+export function stampMmoCombat(
+  obj: THREE.Object3D,
+  partial?: Partial<MmoCombatStamp>
+) {
   const stamp: MmoCombatStamp = { ...DEFAULT_MMO_STAMP, ...partial };
   obj.userData.mmoCombat = stamp;
   obj.userData.aggroRadius = stamp.aggroRadius;
@@ -111,7 +122,10 @@ export function readMmoStamp(obj: THREE.Object3D): MmoCombatStamp {
   return { ...DEFAULT_MMO_STAMP, ...raw };
 }
 
-export function showAggroRings(scene: THREE.Scene, obj: THREE.Object3D): string {
+export function showAggroRings(
+  scene: THREE.Scene,
+  obj: THREE.Object3D
+): string {
   clearNamed(scene, HELPER);
   const stamp = readMmoStamp(obj);
   const origin = new THREE.Vector3();
@@ -235,7 +249,8 @@ function makeTelegraphMesh(
   } else {
     geo = new THREE.CircleGeometry(range, 48);
   }
-  const color = variant === 'incoming' ? 0xff9c6e : variant === 'aoe' ? 0xff4d4f : 0xffc53d;
+  const color =
+    variant === 'incoming' ? 0xff9c6e : variant === 'aoe' ? 0xff4d4f : 0xffc53d;
   const mat = new THREE.MeshBasicMaterial({
     color,
     transparent: true,

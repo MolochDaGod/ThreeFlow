@@ -51,7 +51,12 @@ export async function exportHdTerrainPack(
         else reject(new Error('Expected binary GLB'));
       },
       (err) => reject(err),
-      { binary: true, trs: true, embedImages: true, includeCustomExtensions: true }
+      {
+        binary: true,
+        trs: true,
+        embedImages: true,
+        includeCustomExtensions: true,
+      }
     );
   });
 

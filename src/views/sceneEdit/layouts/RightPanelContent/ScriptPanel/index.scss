@@ -10,6 +10,20 @@
     text-align: center;
     background-color: rgb(64 78 105);
   }
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 10px 8px;
+    strong {
+      color: #e0e6ff;
+    }
+    span {
+      font-size: 11px;
+      line-height: 1.35;
+      color: #8b93b7;
+    }
+  }
   .hint {
     padding: 0 10px;
     margin: 0 0 8px;

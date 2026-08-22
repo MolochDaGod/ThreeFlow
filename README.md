@@ -10,13 +10,29 @@ Grudge fork of [zhangbo126/ThreeFlow](https://github.com/zhangbo126/ThreeFlow) f
 | **Forge (product editor)** | https://forge.grudge-studio.com/editor |
 | **AI worker** | https://ai.grudge-studio.com |
 
-`/` is the **migrations landing + organizer**. `/editor` is the scene editor. Elite handoff `?asset=` / `?mesh=` still opens `/editor`. This SPA is **not** a second Forge, not a player DB, and not ThreeFlowX.
+`/` is the **migrations landing + organizer**. `/editor` is the scene editor. `/view` is the **ThreePipe** model viewer (isolated from Vue `three ^0.185` — threepipe pins a 0.163 fork).
+
+Drop a GLB on `/view` → classify `r2_key` + usage via `target.grudge.studio` → D1 index. Binary put is wrangler or Target `POST /api/v1/upload` (admin). This is **not** a fourth editor.
+
+**Dev Tool Local Files** opens this editor for 3D (not Elite chrome):
+
+| Handoff | Example |
+|---------|---------|
+| CDN scene | `?asset=https://assets.grudge-studio.com/…glb&from=grudge-dev-tool` → `/editor` |
+| CDN view | `https://threeflow.vercel.app/view?asset=…` (ThreePipe inspect) |
+| Disk | `?asset=http://127.0.0.1:17380/v1/local-file/mesh.glb?path=…` (Dev Tool plugin host) |
+
+**Edit:** W move · E rotate · R scale · **F frame selected** (keeps look direction, FOV/aspect fit) · G ground. Scene → Material for type / color / PBR / maps. Multi-mesh GLBs: pick the child mesh.
+
+**Viewport / 2D UI:** HUD is 1920×1080, scaled to the 3D stage (not the full window). LMB drag empty = orbit · RMB drag empty = pan · **RMB on a HUD frame** = inspect look + what it does · LMB drag frame = move (stays in design rect).
+
+This SPA is **not** a second Forge, not a player DB, and not ThreeFlowX.
 
 Upstream author: **answer / zhangbo126**. License: **AGPL-3.0** — keep logo, project name, and author notice.
 
 ## What it is
 
-Vue 3 + Vite + Three.js `^0.185` editor. Left library loads **game-ready CDN GLBs**. Right tabs: Scene · Systems · Script · AI · Project · About.
+Vue 3 + Vite + Three.js `^0.185` editor. Left six rails load **game-ready CDN GLBs** + HUD + managers. Right tabs: Scene · Systems · Script · AI · Project · About.
 
 | Column | Rule |
 |--------|------|
@@ -29,20 +45,18 @@ Vue 3 + Vite + Three.js `^0.185` editor. Left library loads **game-ready CDN GLB
 | AI motion | threejs-games **idle / wander / patrol / follow / pursue** on Yuka. One mixer on the kit |
 | SI | 1 unit = 1 m. Human ~1.8 m. Never squash islands/weapons to 1.2 m |
 
-## Left library
+## Left rails (6)
 
-| Filter | What you drop |
-|--------|----------------|
-| **9 sectors** | Warlords map-registry ids as stamped HD terrain |
-| **Captains** | Toon RTS `{race}.glb` — look/layout; play still uses `loadRaceKit` |
-| **Units** | Unique `models/warlords/entities/{id}.glb` (archer/warrior per race) |
-| **Prefabs** | Same GLBs + `prefabId` / kind / SI / default scripts from the prefab index |
-| **Enemies** | Land creatures + skeleton residuals |
-| **Weapons** | Verified weapon GLBs + catapult / bolt thrower |
-| **Meshes** | Camps, houses, ships, mounts — unique entity GLB |
-| **Islands / Scenes** | Home island, pirate lobby, Fruzer, Hoth dojo stand-in |
-| **HD zones** | Hard Road DS2 — generate, then Scene → HD terrain deploy pack |
-| **D1 / R2 / VFX** | Catalog / binaries / VFX GLBs |
+| Tab | What it is |
+|-----|------------|
+| **World** | Sectors · islands · DS2 · scenes |
+| **Assets** | Captains (race portraits) · units · enemies · weapons · harvest · meshes · anims |
+| **Place** | Prefabs · lights · **primitives as a section** (not a tab) |
+| **HUD** | 2D frames; dropped frames become **scene children under `HUD`** |
+| **Game** | `GameManager` + `NetworkManager` (scripts / inspect / deploy userData) |
+| **Deploy** | Forge · Warlords play · Foundry · push/save selected mesh |
+
+Scene tree (right **Scene**): parent/child for 3D, HUD frames, and managers. Drag to reparent. Delete / Ctrl+D duplicate. Locked roots: GameManager, NetworkManager, HUD.
 
 **Skipped on purpose:** `unity_prefab_only`, `.fbx`, `icon_only` (no mesh), `kit_linked` fused `*_characters.glb`, whole `free_survival_asset_kit.glb`. Mage / paladin / merc still need unique GLB bakes.
 

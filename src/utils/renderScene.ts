@@ -1,15 +1,18 @@
 import * as THREE from 'three';
+import { toRaw } from 'vue';
 import * as TWEEN from '@tweenjs/tween.js';
-import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js';
+import { type GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { USDLoader } from 'three/addons/loaders/USDLoader.js';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { bindProductionKtx2, getProductionGltfLoader } from './gltfProdLoader';
+import { assetUrl, isRasterImage } from '@/config/assetApi';
+import { loadCdnImage, meshFromImage } from './imageLoader';
 import { ObjectLoader } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
-import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { ElMessage, ElNotification } from 'element-plus';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { ViewportGizmo } from 'three-viewport-gizmo';
@@ -18,6 +21,8 @@ import AnimationModules from './sceneModules/animationModules';
 import TransformControlsModules from './sceneModules/transformControlsModules';
 import LightModules from './sceneModules/lightModules';
 import HistoryModules from './historyModules';
+import { TransformCommand } from './historyModules/transformCommand';
+import { bindMeasureScale } from './measureScale';
 import type { Command } from './historyModules/command';
 import type {
   CurrentDragModelData,
@@ -34,10 +39,16 @@ import type {
 import { useSceneStore } from '@/store/sceneEditStore';
 import { useIndexDbStore } from '@/store/indexDbStore';
 import { IndexDbStoreName, IndexDbStoreKeyPath } from '@/enums/indexDb';
-import { createMaterial, disposeMaterial, disposeScene } from './utils';
+import {
+  createMaterial,
+  disposeMaterial,
+  disposeScene,
+  firstEditableMesh,
+  materialOf,
+} from './utils';
 import type { IndexDbSceneData } from '@/types/indexDbTypes';
 import type { ActionParams } from '@/types/rightPanelTypes';
-import { FOG_COLOR_VALUE } from '@/config/constant';
+import { STUDIO_BG_COLOR } from '@/config/constant';
 import type { LIGHT_TYPE, MODEL_TYPE } from '@/enums/enum';
 import {
   createModelFromResult,
@@ -45,88 +56,195 @@ import {
   setModelPositionSize,
 } from './sceneModules';
 import { kindFromGroup, type PlaceKind } from './siPlace';
+import { isolateNamedMesh } from './isolateMesh';
 import {
   bootstrapRaceKit,
   findRaceKitRoot,
+  hideCarryVisuals,
+  isPlayBody,
   raceIdFromName,
   setHoverMesh,
 } from './raceKit';
-import { snapObjectToTerrain, tagTerrain } from './terrainGround';
-import { stampWarlordsPrefab, type PrefabKind } from './prefabStamp';
+import { bindKitAnims, getKitAnimBind, playKitRole } from './kitAnim';
 import {
+  isAutoHarvestNpc,
+  stampAutoHarvest,
+  tickNpcHarvest,
+} from './npcHarvest';
+import {
+  spawnEnemyCamp as spawnEnemyCampPrefab,
+  tickLookouts,
+} from './enemyCampPrefab';
+import { tickLootFall } from './lootChest';
+import {
+  parentToNearestIsland,
+  snapObjectToTerrain,
+  tagTerrain,
+  weldIslandToSeafloor,
+} from './terrainGround';
+import { applyTerrainLook, lookFromHdPreset } from './terrainLook';
+import { stampWarlordsPrefab, type PrefabKind } from './prefabStamp';
+import { seedForTarget } from '@/config/hdTerrainDeploy';
+import { mountWorldAtmosphere, tickWorldAtmosphere } from './worldAtmosphere';
+import { dedupeSceneLights } from './dedupeLights';
+import { isLayerPrefab, spawnLayerPrefab } from './layerPrefabs';
+import { SEAFLOOR_ROOT, spawnSeafloorGrid } from './sceneModules/seafloorGrid';
+import {
+  spawnWorldIslands,
+  tickWorldIslands,
+} from './sceneModules/worldIslandsSpawn';
+import { PLAY_PERF, WORLD_STACK } from '@/config/fleetSystems';
+import { startFlyBy, stopFlyBy } from './flyBy';
+import { clearSystemHelpers } from './systemsRuntime';
+import { stopGamesAiPreview } from './gamesAiRuntime';
+import {
+  applyPlayGpuLaw,
+  enterPlayBake,
+  exitPlayBake,
+  tickPlayBake,
+} from './playBake';
+import {
+  disposePlayComposer,
+  mountPlayComposer,
+  renderPlayComposer,
+  resizePlayComposer,
+} from './playComposer';
+import { tickGrassField } from './grassField';
+import {
+  DS2_PRESETS,
   generateDs2Terrain,
   type Ds2PresetId,
   type Ds2Quality,
 } from './sceneModules/ds2Terrain';
+import {
+  applyLayerRender,
+  getPlayAs,
+  getPlayAsCached,
+  hydrateContentLayers,
+  inferContentLayer,
+  loadLayerRender,
+  setPlayAs,
+  stampContentLayer,
+} from './contentLayers';
+import {
+  isMapSurfaceLayer,
+  type ContentLayerId,
+  type MapSurfaceLayerId,
+} from '@/config/fleetSystems';
+import {
+  createMapSurfaceMesh,
+  hydrateMapSurfaces,
+  listMapSurfaces,
+  spawnMapSurface,
+  STUDIO_PLANE_NAME,
+} from './mapSurface';
+import {
+  applyLook,
+  createPlayCombat,
+  cycleTarget,
+  tryTraverse,
+  disposePlayCombat,
+  inferWeaponCat,
+  nudgeCamDist,
+  setAiming,
+  tickPlayCombat,
+  toggleFirstPerson,
+  tryAttack,
+  type PlayCombat,
+} from './playCombat';
 
 const store = useSceneStore();
 
 class renderScene {
-  // 相机实例
+  // camera
   camera: THREE.PerspectiveCamera | null;
-  // Renderer实例
+  // Renderer
   renderer: THREE.WebGLRenderer | null;
-  // Scene实例
+  // Scene
   scene: THREE.Scene | null;
-  // 控制器实例
+  // controls
   controls: OrbitControls | null;
-  // 指针锁定控制器实例
+  // pointer-lock controls
   pointerLockControls: PointerLockControls | null;
+  playCombat: PlayCombat | null;
+  playReticle: HTMLDivElement | null;
   moveSpeed: number;
   keys: { [key: string]: boolean };
-  // 容器DOM元素
+  // containerDOMelement
   container: HTMLElement | null;
-  // 文件加载器映射表
+  // file loader map
   fileLoaderMap: Record<string, THREE.Loader>;
-  // Models加载进度回调函数
+  // Modelsload-progress callback
   modelProgressCallback: ((loaded: number, total: number) => void) | null;
-  // 窗口大小变化监听器
+  // resize listener
   onWindowResizesListener: (() => void) | null;
-  // 键盘按下事件监听器
+  // keydown listener
   onKeyDownListener: (event: KeyboardEvent) => void;
-  // 键盘松开事件监听器
+  // keyup listener
   onKeyUpListener: (event: KeyboardEvent) => void;
-  // 鼠标点击事件监听器
+  // click listener
   onPointerUnLockListener: () => void;
-  // Animation帧请求ID
+  // AnimationrafID
   renderAnimation: number | null;
   // Modelsloading state
   loadingStatus: boolean;
+  harvestLast: number;
   boxHelper: THREE.BoxHelper | null;
-  // Animation模块实例
+  // Animationmodule
   animationModules: {
-    playAnimation: (animation: THREE.AnimationClip, model: THREE.Group) => void;
+    playAnimation: (
+      animation: THREE.AnimationClip,
+      model: THREE.Object3D
+    ) => void;
+    playExclusive: (
+      animation: THREE.AnimationClip,
+      model: THREE.Object3D,
+      opts?: { loopOnce?: boolean }
+    ) => void;
+    crossFadeGait: (
+      clip: THREE.AnimationClip,
+      model: THREE.Object3D,
+      fade?: number
+    ) => void;
+    playOverlay: (
+      clip: THREE.AnimationClip,
+      model: THREE.Object3D,
+      opts?: { fade?: number }
+    ) => void;
     updateAnimationParams: (action: ActionParams, uuid: string) => void;
     updateActionAnimationMap: (mapId: string, uuid: string) => void;
     currentActions: Map<string, THREE.AnimationAction[]>;
+    animationMixers: Map<string, THREE.AnimationMixer>;
     clear: () => void;
     initializeAnimations: () => void;
   };
-  // 光源模块实例
+  // light module
   lightModules: {
     createLight: (type: LIGHT_TYPE, position: THREE.Vector3) => void;
     updateHelper: (uuid?: string) => void;
     initLight: () => void;
   };
-  // 变换控制器模块实例
+  // transform-controls module
   transformControlsModules: {
     init: () => void;
     transformControls: TransformControls | null;
     transformControlsHelper: THREE.Object3D | null;
     focusOnObject: (object: THREE.Object3D) => void;
+    frameSelection: () => void;
     destroy: () => void;
     createTransformControls: () => void;
     clearCurrentSelection: () => void;
   };
-  // 历史记录模块实例
+  // history module
   historyModules: {
     undo: () => void;
     redo: () => void;
     clear: () => void;
     execute: (command: Command) => void;
   };
-  // 视图辅助器实例
+  // view helper
   viewHelper: ViewportGizmo | null;
+  measureUnbind: (() => void) | null;
   constructor(selector: string) {
     this.container = document.querySelector(selector);
     this.camera = null;
@@ -134,17 +252,21 @@ class renderScene {
     this.scene = null;
     this.controls = null;
     this.pointerLockControls = null;
+    this.playCombat = null;
+    this.playReticle = null;
     this.moveSpeed = 1;
     this.keys = {
       w: false,
       a: false,
       s: false,
       d: false,
+      shift: false,
+      ' ': false,
     };
     this.fileLoaderMap = {
-      glb: new GLTFLoader(),
+      glb: getProductionGltfLoader(),
       fbx: new FBXLoader(),
-      gltf: new GLTFLoader(),
+      gltf: getProductionGltfLoader(),
       obj: new OBJLoader(),
       stl: new STLLoader(),
       usdz: new USDLoader(),
@@ -156,15 +278,17 @@ class renderScene {
     this.onPointerUnLockListener = () => {};
     this.renderAnimation = null;
     this.loadingStatus = true;
+    this.harvestLast = performance.now();
     this.boxHelper = null;
     this.animationModules = new AnimationModules();
     this.lightModules = new LightModules();
     this.transformControlsModules = new TransformControlsModules();
     this.historyModules = new HistoryModules();
     this.viewHelper = null;
+    this.measureUnbind = null;
   }
   /**
-   * 初始化Scene
+   * initScene
    * @returns Promise<boolean>
    */
   init(): Promise<boolean> {
@@ -178,7 +302,7 @@ class renderScene {
       await this.initScene();
       await this.initControls();
       this.transformControlsModules.init();
-      // 获取indexDbScene数据
+      // load IndexedDB scene
       const indexDbStore = useIndexDbStore();
       let loadSceneData: IndexDbSceneData | null = null;
       if (indexDbStore.indexDbUtil) {
@@ -196,32 +320,39 @@ class renderScene {
       this.sceneAnimation();
       this.addEvenListMouseListener();
       this.onWindowResizes();
+      this.measureUnbind = bindMeasureScale(this);
       resolve(true);
     });
   }
   /**
-   * 初始化Renderer
+   * initRenderer
    */
   initRender(): void {
     if (!this.container) return;
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true, // 开启硬件抗锯齿
-      alpha: true,
+      antialias: true,
+      alpha: false,
       preserveDrawingBuffer: true,
-      powerPreference: 'high-performance', // 优先使用高性能GPU
+      powerPreference: 'high-performance',
+      stencil: false,
     });
-    this.renderer.setClearColor(0xcccccc);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 限制最大像素比为2
+    this.renderer.setClearColor(new THREE.Color(STUDIO_BG_COLOR));
+    this.renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio || 1, PLAY_PERF.pixelRatioMax)
+    );
     const { offsetWidth, offsetHeight } = this.container;
     this.renderer.setSize(offsetWidth, offsetHeight);
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMappingExposure = 1.2;
     this.renderer.toneMapping = THREE.NeutralToneMapping;
     this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.autoClear = false;
     this.container.appendChild(this.renderer.domElement);
+    void bindProductionKtx2(this.renderer);
   }
   /**
-   * 初始化相机
+   * init camera
    */
   initCamera(): void {
     if (!this.container) return;
@@ -235,93 +366,90 @@ class renderScene {
     this.camera.updateProjectionMatrix();
   }
   /**
-   * 初始化Scene
+   * initScene
    */
   async initScene(): Promise<void> {
     this.scene = new THREE.Scene();
-    const hdrLoader = new HDRLoader();
-    const texture = await hdrLoader.loadAsync('hdr/view-hdr-11.hdr');
-    texture.mapping = THREE.EquirectangularReflectionMapping;
-
-    this.scene.background = new THREE.Color(FOG_COLOR_VALUE);
-
-    this.scene.environment = texture;
-    texture.dispose();
-    // 调整Environment光Intensity;
+    this.scene.background = new THREE.Color(STUDIO_BG_COLOR);
     this.scene.backgroundIntensity = 1;
-    this.scene.fog = new THREE.FogExp2(FOG_COLOR_VALUE, 0.001);
-
+    this.scene.fog = null;
+    this.scene.userData.fogEnabled = false;
+    this.ensureCameraInScene();
+    const { ensureSceneManagers } = await import('./sceneManagers');
+    const { ensureHudRoot, syncHudToScene } = await import('./hudScene');
+    const { loadHud } = await import('@/config/hudKits');
+    ensureSceneManagers(this.scene);
+    ensureHudRoot(this.scene);
+    syncHudToScene(this.scene, loadHud().frames);
+    dedupeSceneLights(this.scene);
+    if (this.renderer) {
+      const pmrem = new THREE.PMREMGenerator(this.renderer);
+      this.scene.environment = pmrem.fromScene(
+        new RoomEnvironment(),
+        0.04
+      ).texture;
+      pmrem.dispose();
+    }
     return Promise.resolve();
   }
+  /** Camera stays a scene child. Tree reads this graph — never detach on refresh. */
+  ensureCameraInScene(): void {
+    if (!this.scene || !this.camera) return;
+    if (this.camera.parent !== this.scene) this.scene.add(this.camera);
+  }
   /**
-   * 初始化地面
+   * init ground
    */
   async initPlaneGround(loadSceneData?: IndexDbSceneData) {
     try {
       let planeGeometryType: string;
-      // 获取地面类型
+      // ground type
       planeGeometryType = loadSceneData?.weather?.planeGeometry || 'brick';
       if (planeGeometryType === 'none') return;
       if (!this.scene) return;
+      if (
+        this.scene.getObjectByName(STUDIO_PLANE_NAME) ||
+        listMapSurfaces(this.scene).length
+      ) {
+        hydrateMapSurfaces(this.scene);
+        applyLayerRender(this.scene, loadLayerRender());
+        return;
+      }
 
-      const map = await new THREE.TextureLoader().loadAsync(
-        new URL(`../assets/textures/textures-5.png`, import.meta.url).href
-      );
-
-      map.repeat.set(1000, 1000);
-      map.wrapS = THREE.RepeatWrapping;
-      map.wrapT = THREE.RepeatWrapping;
-      map.anisotropy = 16;
-      map.colorSpace = THREE.SRGBColorSpace;
-      // 可选：加载Normal map
-      const normalMap = await new THREE.TextureLoader().loadAsync(
-        new URL(`../assets/textures/textures-normal-5.png`, import.meta.url)
-          .href
-      );
-      const gg = new THREE.PlaneGeometry(2000, 2000);
-      const gm = new THREE.MeshPhysicalMaterial({
-        color: new THREE.Color('#ffffff'),
-        map,
-        normalMap,
-        roughness: 0.8,
-        metalness: 0.2,
-        side: THREE.DoubleSide,
-      });
-      map.dispose();
-      normalMap.dispose();
-      const ground = new THREE.Mesh(gg, gm);
-      ground.rotation.x = -Math.PI / 2;
-      ground.receiveShadow = true;
-      ground.name = 'customPlane';
-      ground.userData.planeGeometry = 'brick';
-      this.scene?.add(ground);
+      const ground = await createMapSurfaceMesh('terrain');
+      ground.name = STUDIO_PLANE_NAME;
+      this.scene.add(ground);
+      applyLayerRender(this.scene, loadLayerRender());
     } finally {
       Promise.resolve();
     }
   }
   /**
-   * 初始化控制器
+   * init orbit controls
    */
   async initControls(): Promise<void> {
     if (!this.camera || !this.renderer || !this.scene) return;
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    // 启用平移
+    // enable pan
     this.controls.screenSpacePanning = false;
-    // 启用平滑Scale
+    // enable smoothScale
     this.controls.enableZoom = true;
-    this.controls.zoomSpeed = 1.0; // 增大Scale速度
-    this.controls.panSpeed = 2.0; // 增大平移速度
-    // 禁用右键拖动
+    this.controls.zoomSpeed = 1.0; // increaseScalespeed
+    this.controls.panSpeed = 2.0; // faster pan
+    // disable RMB orbit
     this.controls.mouseButtons = {
       LEFT: THREE.MOUSE.ROTATE,
       MIDDLE: THREE.MOUSE.DOLLY,
       RIGHT: THREE.MOUSE.PAN,
     };
-    // 设置初始观察点
+    this.renderer.domElement.addEventListener('contextmenu', (ev) => {
+      ev.preventDefault();
+    });
+    // initial look-at
     this.controls.target.set(0, 0.5, 0);
     this.controls.update();
 
-    // 创建 ViewHelper
+    // create ViewHelper
     this.viewHelper = new ViewportGizmo(this.camera, this.renderer, {
       size: 90,
       placement: 'bottom-right',
@@ -336,130 +464,383 @@ class renderScene {
     return Promise.resolve();
   }
   /**
-   * 初始化第一人称控制器
+   * init first-person controls
    */
-  createPointerLockControls() {
-    if (!this.camera || !this.renderer || !this.container) return;
-
-    this.pointerLockControls = new PointerLockControls(
-      this.camera,
-      this.container
-    );
-    this.scene?.add(this.pointerLockControls.object);
-
-    // 计算合适的相机Height
-    const currentPosition = this.camera.position.clone();
-    const idealHeight = 2; // 理想的人眼Height（单位）
-
-    // 保持当前的 x 和 z 坐标，但调整 y 坐标到合适的Height
-    if (currentPosition.y < idealHeight) {
-      // 如果当前Height太低，提升到理想Height
-      currentPosition.y = idealHeight;
-    } else if (currentPosition.y > idealHeight * 3) {
-      // 如果当前Height太高，降低到理想Height的3倍以内
-      currentPosition.y = idealHeight * 3;
-    }
-
-    this.camera.position.copy(currentPosition);
-
-    // 添加事件监听器
-    this.onKeyDownListener = this.keyboardDownControls.bind(this);
-    window.addEventListener('keydown', this.onKeyDownListener);
-
-    this.onKeyUpListener = this.keyboardUpControls.bind(this);
-    window.addEventListener('keyup', this.onKeyUpListener);
-
-    this.onPointerUnLockListener = this.pointerUnLockControls.bind(this);
-    this.pointerLockControls.addEventListener(
+  /** Guest WASD fly only. Does not touch play-as TPS or Orbit flags. */
+  stopGuestFly() {
+    if (!this.pointerLockControls) return;
+    this.pointerLockControls.removeEventListener(
       'unlock',
       this.onPointerUnLockListener
     );
-    this.pointerLockControls.lock();
-
-    ElNotification({
-      title: 'Notice',
-      message: 'View: first person,按ESC键退出。W,S,A,D键控制相机Move',
-      type: 'success',
-      position: 'top-left',
-    });
-  }
-  /**
-   * 销毁第一人称控制器
-   */
-  destroyPointerLockControls() {
-    if (this.pointerLockControls) {
-      this.pointerLockControls.removeEventListener(
-        'unlock',
-        this.onPointerUnLockListener
-      );
-      this.scene?.remove(this.pointerLockControls.object);
-      this.pointerLockControls.dispose();
-      this.pointerLockControls = null;
-    }
+    this.scene?.remove(this.pointerLockControls.object);
+    this.pointerLockControls.dispose();
+    this.pointerLockControls = null;
     window.removeEventListener('keydown', this.onKeyDownListener);
     window.removeEventListener('keyup', this.onKeyUpListener);
     Object.keys(this.keys).forEach((key) => {
       this.keys[key] = false;
     });
   }
+
+  createPointerLockControls() {
+    if (!this.camera || !this.renderer || !this.container || !this.scene)
+      return;
+    const body = getPlayAs(this.scene);
+    if (body) {
+      if (!isPlayBody(body)) {
+        ElMessage.warning(
+          'Play as a Toon RTS captain (loadRaceKit). Foundry creates the play body.'
+        );
+        return;
+      }
+      this.startPlayCombat(body);
+      return;
+    }
+
+    this.stopGuestFly();
+    this.pointerLockControls = new PointerLockControls(
+      this.camera,
+      this.container
+    );
+    this.scene.add(this.pointerLockControls.object);
+
+    const currentPosition = this.camera.position.clone();
+    const idealHeight = 2;
+    if (currentPosition.y < idealHeight) currentPosition.y = idealHeight;
+    else if (currentPosition.y > idealHeight * 3)
+      currentPosition.y = idealHeight * 3;
+    this.camera.position.copy(currentPosition);
+
+    this.onKeyDownListener = this.keyboardDownControls.bind(this);
+    window.addEventListener('keydown', this.onKeyDownListener);
+    this.onKeyUpListener = this.keyboardUpControls.bind(this);
+    window.addEventListener('keyup', this.onKeyUpListener);
+    this.onPointerUnLockListener = this.pointerUnLockControls.bind(this);
+    this.pointerLockControls.addEventListener(
+      'unlock',
+      this.onPointerUnLockListener
+    );
+    this.pointerLockControls.lock();
+    ElNotification({
+      title: 'Notice',
+      message:
+        'No Player-layer character. Stamp Player / Play as first. WASD moves camera.',
+      type: 'warning',
+      position: 'top-left',
+    });
+  }
+
+  startPlayCombat(body: THREE.Object3D) {
+    if (!this.camera || !this.renderer || !this.scene || !this.container)
+      return;
+    if (this.playCombat?.playing) return;
+    if (!isPlayBody(body)) {
+      ElMessage.warning(
+        'Play as a Toon RTS captain (loadRaceKit). Foundry creates the play body.'
+      );
+      return;
+    }
+    this.stopGuestFly();
+    TWEEN.removeAll();
+    stopFlyBy(this.controls);
+    stopGamesAiPreview(this.scene);
+    clearSystemHelpers(this.scene);
+    if (this.viewHelper) this.viewHelper.enabled = false;
+    if (this.controls) this.controls.enabled = false;
+    store.setPlayMode(true);
+    if (this.boxHelper) this.boxHelper.visible = false;
+    this.transformControlsModules.transformControls?.detach();
+    if (this.transformControlsModules.transformControlsHelper) {
+      this.transformControlsModules.transformControlsHelper.visible = false;
+    }
+    applyPlayGpuLaw(this.scene, this.camera, this.renderer);
+    void enterPlayBake(this.scene, this.animationModules);
+    if (this.renderer && this.camera) {
+      mountPlayComposer(this.renderer, this.scene, this.camera);
+    }
+    this.playCombat = createPlayCombat();
+    this.playCombat.playing = true;
+    void import('@/config/harvestBag').then((m) => m.hydrateHarvestBag());
+    const kit = findRaceKitRoot(body) || body;
+    const pack = (kit.userData?.animPack || kit.userData?.raceKit?.animPack) as
+      | 'sword_shield'
+      | '2h_melee'
+      | 'longbow'
+      | 'magic'
+      | 'spear_melee'
+      | 'unarmed'
+      | undefined;
+    if (pack && !getKitAnimBind(kit)) {
+      void bindKitAnims(kit, pack).then((bind) => {
+        if (bind.roles.idle) {
+          this.animationModules.playExclusive(bind.roles.idle, kit);
+          kit.userData.kitGait = 'idle';
+        }
+      });
+    } else if (getKitAnimBind(kit)?.roles.idle) {
+      playKitRole(kit, 'idle', this.animationModules);
+    }
+    if (this.controls) this.controls.enabled = false;
+    if (this.viewHelper) this.viewHelper.enabled = false;
+    this.onKeyDownListener = this.playKeyDown.bind(this);
+    this.onKeyUpListener = this.keyboardUpControls.bind(this);
+    window.addEventListener('keydown', this.onKeyDownListener);
+    window.addEventListener('keyup', this.onKeyUpListener);
+    this.renderer.domElement.addEventListener('mousemove', this.playMouseMove);
+    this.renderer.domElement.addEventListener('mousedown', this.playMouseDown);
+    this.renderer.domElement.addEventListener('mouseup', this.playMouseUp);
+    this.renderer.domElement.addEventListener('wheel', this.playWheel, {
+      passive: false,
+    });
+    this.renderer.domElement.addEventListener('contextmenu', this.playContext);
+    document.addEventListener('pointerlockchange', this.playLockChange);
+    try {
+      const p = this.renderer.domElement.requestPointerLock?.() as unknown;
+      (p as Promise<void> | undefined)?.catch?.(() => {});
+    } catch {
+      /* click to lock */
+    }
+    this.showPlayReticle(true);
+    requestAnimationFrame(() => this.onWindowResizes());
+  }
+
+  playMouseMove = (e: MouseEvent) => {
+    if (!this.playCombat?.playing) return;
+    if (document.pointerLockElement !== this.renderer?.domElement) return;
+    applyLook(this.playCombat, e.movementX, e.movementY);
+  };
+
+  playMouseDown = (e: MouseEvent) => {
+    if (!this.playCombat?.playing || !this.scene || !this.camera) return;
+    const canvas = this.renderer?.domElement;
+    if (document.pointerLockElement !== canvas) {
+      try {
+        const p = canvas?.requestPointerLock?.() as unknown;
+        (p as Promise<void> | undefined)?.catch?.(() => {});
+      } catch {
+        /* */
+      }
+      return;
+    }
+    const body = getPlayAs(this.scene);
+    if (!body) return;
+    if (e.button === 0)
+      tryAttack(this.scene, this.camera, body, this.playCombat);
+    else if (e.button === 2) setAiming(this.playCombat, true);
+  };
+
+  playMouseUp = (e: MouseEvent) => {
+    if (!this.playCombat?.playing) return;
+    if (e.button === 2) setAiming(this.playCombat, false);
+  };
+
+  playWheel = (e: WheelEvent) => {
+    if (!this.playCombat?.playing) return;
+    e.preventDefault();
+    nudgeCamDist(this.playCombat, e.deltaY > 0 ? 0.45 : -0.45);
+  };
+
+  playContext = (e: Event) => e.preventDefault();
+
+  playLockChange = () => {
+    /* Stay in play if the pointer unlocks. Esc exits. Click canvas to re-lock. */
+  };
+
+  playKeyDown(event: KeyboardEvent) {
+    const k = event.key.toLowerCase();
+    if (
+      (k === ' ' || k === 'spacebar') &&
+      this.scene &&
+      this.playCombat &&
+      !this.keys[' ']
+    ) {
+      event.preventDefault();
+      this.keys[' '] = true;
+      const body = getPlayAs(this.scene);
+      if (body) tryTraverse(this.scene, body, this.playCombat);
+    }
+    if (k in this.keys) this.keys[k] = true;
+    if (k === 'v' && this.scene && this.playCombat) {
+      const body = getPlayAs(this.scene);
+      if (body) toggleFirstPerson(this.playCombat, body);
+    }
+    if (k === 'tab' && this.scene && this.playCombat) {
+      event.preventDefault();
+      const body = getPlayAs(this.scene);
+      if (body) cycleTarget(this.scene, body, this.playCombat);
+    }
+    if (k === 'escape') this.destroyPointerLockControls();
+  }
+
+  showPlayReticle(on: boolean) {
+    if (!this.container) return;
+    if (!this.playReticle) {
+      const el = document.createElement('div');
+      el.style.cssText =
+        'position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border:1.5px solid #e8c56b;border-radius:50%;pointer-events:none;z-index:40;box-shadow:0 0 0 1px #0008';
+      this.container.style.position = 'relative';
+      this.container.appendChild(el);
+      this.playReticle = el;
+    }
+    this.playReticle.style.display = on ? 'block' : 'none';
+    let hint = this.container.querySelector(
+      '.play-esc-hint'
+    ) as HTMLDivElement | null;
+    if (on) {
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.className = 'play-esc-hint';
+        hint.textContent =
+          'Esc exit · V view · RMB aim · wheel zoom · Tab lock';
+        hint.style.cssText =
+          'position:absolute;right:12px;bottom:10px;color:#d8c9a0;font:12px/1.2 sans-serif;opacity:.55;pointer-events:none;z-index:40';
+        this.container.appendChild(hint);
+      }
+      hint.style.display = 'block';
+    } else if (hint) hint.style.display = 'none';
+  }
+
+  playAsSelected(uuid?: string | null): { ok: boolean; name: string } {
+    if (!this.scene) return { ok: false, name: '' };
+    const obj = uuid
+      ? this.scene.getObjectByProperty('uuid', uuid)
+      : this.scene.getObjectByProperty(
+          'uuid',
+          store.currentTransformMaterialUuid
+        );
+    if (!obj) return { ok: false, name: '' };
+    if (!isPlayBody(obj)) {
+      return { ok: false, name: '' };
+    }
+    setPlayAs(this.scene, obj);
+    this.setObjectHighlight(obj);
+    return { ok: true, name: obj.name || 'character' };
+  }
+
+  snapCameraToPlayAs(body: THREE.Object3D) {
+    if (!this.camera) return;
+    const pos = new THREE.Vector3();
+    body.getWorldPosition(pos);
+    const si = Number(body.userData.siHeightM) || 1.8;
+    this.camera.position.set(pos.x, pos.y + si * 0.88, pos.z);
+    this.controls?.target.set(pos.x, pos.y + si * 0.55, pos.z);
+  }
+
+  tickPlayAs(dt: number) {
+    if (!this.scene || !this.camera || !this.playCombat?.playing) return;
+    tickPlayBake(dt, this.scene);
+    const body = getPlayAsCached(this.scene);
+    if (!body) return;
+    tickPlayCombat(
+      this.scene,
+      this.camera,
+      body,
+      this.playCombat,
+      this.keys,
+      dt
+    );
+  }
   /**
-   * 键盘按下事件监听
-   * @param event - 键盘事件
+   * destroy first-person controls
+   */
+  destroyPointerLockControls() {
+    if (this.playCombat && this.scene) {
+      if (this.playCombat.firstPerson) {
+        const body = getPlayAs(this.scene);
+        if (body) toggleFirstPerson(this.playCombat, body);
+      }
+      disposePlayCombat(this.scene, this.playCombat);
+      this.playCombat = null;
+    }
+    if (this.scene) exitPlayBake(this.scene, this.camera || undefined);
+    disposePlayComposer();
+    store.setPlayMode(false);
+    if (this.transformControlsModules.transformControlsHelper) {
+      this.transformControlsModules.transformControlsHelper.visible = true;
+    }
+    requestAnimationFrame(() => this.onWindowResizes());
+    this.showPlayReticle(false);
+    this.renderer?.domElement.removeEventListener(
+      'mousemove',
+      this.playMouseMove
+    );
+    this.renderer?.domElement.removeEventListener(
+      'mousedown',
+      this.playMouseDown
+    );
+    this.renderer?.domElement.removeEventListener('mouseup', this.playMouseUp);
+    this.renderer?.domElement.removeEventListener('wheel', this.playWheel);
+    this.renderer?.domElement.removeEventListener(
+      'contextmenu',
+      this.playContext
+    );
+    document.removeEventListener('pointerlockchange', this.playLockChange);
+    if (document.pointerLockElement) document.exitPointerLock?.();
+    if (this.viewHelper) this.viewHelper.enabled = true;
+    if (this.controls) this.controls.enabled = true;
+    this.stopGuestFly();
+  }
+  /**
+   * keydown handler
+   * @param event - keyboard event
    */
   keyboardDownControls(event: KeyboardEvent) {
-    if (event.key in this.keys) {
-      this.keys[event.key] = true;
+    const k = event.key.toLowerCase();
+    if (k in this.keys) {
+      this.keys[k] = true;
     }
   }
   /**
-   * 键盘松开事件监听
-   * @param event - 键盘事件
+   * keyup handler
+   * @param event - keyboard event
    */
   keyboardUpControls(event: KeyboardEvent) {
-    if (event.key in this.keys) {
-      this.keys[event.key] = false;
+    const k = event.key.toLowerCase();
+    if (k in this.keys) {
+      this.keys[k] = false;
     }
   }
   /**
-   * 鼠标点击事件监听
-   * @param event - 鼠标事件
+   * click handler
+   * @param event - mouse event
    */
   pointerUnLockControls() {
     this.destroyPointerLockControls();
   }
 
   /**
-   * 计算合适的Move速度
+   * compute a fittingMovespeed
    * @returns number
    */
   calculateMoveSpeed(): number {
     if (!this.camera) return 1;
-    // 获取相机的Scale值
+    // cameraScalevalue
     const zoom = this.camera.zoom;
 
-    // 计算相机到目标点的距离
+    // distance from camera to target
     const distance = this.camera.position.distanceTo(
       this.controls?.target || new THREE.Vector3()
     );
 
-    // 基础速度
+    // base speed
     const baseSpeed = 0.1;
-    // 根据Scale值和距离计算速度
-    // 当Scale值越大（拉近）时，Move速度应该越小
-    // 当距离越远时，Move速度应该越大
+    // fromScaleand distance to compute speed
+    // when zoomed in, move speed should drop
+    // when farther, move speed should rise
     const speed = baseSpeed * (distance / zoom);
-    // 限制速度在合理范围内
+    // clamp speed to a sane range
     return Math.max(0.05, Math.min(speed, 2));
   }
 
   /**
-   * 更新第一人称控制器Move
+   * update first-person controlsMove
    */
   updatePointerLockControls() {
     if (!this.pointerLockControls) return;
-    // 计算当前合适的Move速度
+    // compute currentMovespeed
     this.moveSpeed = this.calculateMoveSpeed();
-    // 根据按键状态Move相机
+    // from pressed keysMovecamera
     if (this.keys.w) this.pointerLockControls.moveForward(this.moveSpeed);
     if (this.keys.s) this.pointerLockControls.moveForward(-this.moveSpeed);
     if (this.keys.a) this.pointerLockControls.moveRight(-this.moveSpeed);
@@ -467,32 +848,63 @@ class renderScene {
   }
 
   /**
-   * SceneAnimation循环
+   * SceneAnimationloop
    */
   sceneAnimation(): void {
     if (!this.controls || !this.renderer || !this.scene || !this.camera) return;
-    // 确保Animation循环持续进行
+    // ensureAnimationkeep the loop running
     this.renderAnimation = requestAnimationFrame(() => this.sceneAnimation());
-    if (this.loadingStatus || this.controls.enabled) {
-      // 更新 TWEEN
-      TWEEN.update();
-      // 更新控制器 如果当前是第一人称控制器则不更新
-      if (!this.pointerLockControls) {
+    if (
+      this.loadingStatus ||
+      this.controls.enabled ||
+      this.playCombat?.playing
+    ) {
+      if (!this.playCombat?.playing) TWEEN.update();
+      // update controls; skip while first-person is active
+      if (!this.pointerLockControls && !this.playCombat?.playing) {
         this.controls.update();
       }
-      // 更新包围盒
-      this.boxHelper?.update();
-      // 渲染Scene
-      this.renderer.render(this.scene, this.camera);
-      this.viewHelper?.render();
-      // 更新第一人称控制器
-      if (this.pointerLockControls) {
+      // update box helper
+      if (!store.playMode) this.boxHelper?.update();
+      const now = performance.now();
+      const dt = Math.min(0.05, (now - this.harvestLast) / 1000);
+      this.harvestLast = now;
+      if (store.playMode && renderPlayComposer(dt)) {
+        /* play composer owns the frame */
+      } else {
+        toRaw(this.renderer).render(toRaw(this.scene), toRaw(this.camera));
+        this.viewHelper?.render();
+      }
+      // update first-person controls
+      if (this.pointerLockControls && !getPlayAs(this.scene)) {
         this.updatePointerLockControls();
       }
+      tickNpcHarvest(this.scene, dt);
+      tickLookouts(this.scene, dt);
+      tickLootFall(this.scene, dt);
+      this.tickPlayAs(dt);
+      tickWorldAtmosphere(dt, this.camera);
+      tickGrassField(dt, this.scene);
+      if (this.scene && this.camera) tickWorldIslands(this.scene, this.camera);
     }
   }
+
+  mountWorldAtmosphere(): string {
+    if (!this.scene) return 'No scene';
+    return mountWorldAtmosphere(this.scene);
+  }
+
+  startFlyBy(): string {
+    if (!this.camera || !this.controls || !this.scene) return 'No camera';
+    return startFlyBy(
+      this.camera,
+      this.controls,
+      this.scene,
+      Boolean(this.playCombat?.playing)
+    );
+  }
   /**
-   * 添加事件监听器
+   * add listeners
    */
   addEvenListMouseListener(): void {
     this.onWindowResizesListener = this.onWindowResizes.bind(this);
@@ -500,21 +912,25 @@ class renderScene {
   }
 
   /**
-   * 监听窗口变化
+   * on window resize
    */
   onWindowResizes() {
     if (!this.container || !this.camera || !this.renderer) return false;
     const { offsetWidth, offsetHeight } = this.container;
     this.camera.aspect = offsetWidth / offsetHeight;
     this.camera.updateProjectionMatrix();
+    this.renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio || 1, PLAY_PERF.pixelRatioMax)
+    );
     this.renderer.setSize(offsetWidth, offsetHeight);
+    resizePlayComposer(offsetWidth, offsetHeight);
     this.viewHelper?.update();
   }
 
   /**
-   * 加载Models
-   * @param filePath - Models文件Path
-   * @param fileType - Models文件类型
+   * loadModels
+   * @param filePath - ModelsfilePath
+   * @param fileType - Modelsfile type
    * @returns Promise<void>
    */
   loadModel(
@@ -532,6 +948,18 @@ class renderScene {
       prefabId?: string;
       prefabKind?: PrefabKind;
       siHeightM?: number;
+      assetUuid?: string;
+      iconUuid?: string;
+      r2Key?: string;
+      iconUrl?: string;
+      contentLayer?: string;
+      harvestKind?: string;
+      harvestDrops?: string[];
+      animalRole?: 'prey' | 'predator';
+      air?: boolean;
+      islandKind?: 'static' | 'faction' | 'prefab';
+      meshName?: string;
+      playScript?: string;
     }
   ): Promise<void | boolean> {
     return new Promise((resolve, reject) => {
@@ -541,18 +969,86 @@ class renderScene {
       }
 
       this.loadingStatus = false;
-      // 获取合适的加载器
+      const kind: PlaceKind = kindFromGroup(opts?.group, filePath);
+      const url = filePath.startsWith('blob:')
+        ? filePath
+        : /^https?:\/\//i.test(filePath)
+          ? filePath
+          : assetUrl(opts?.r2Key || filePath);
+      if (!url || /^(prefab|hardroad):/i.test(url)) {
+        reject(new Error(`Not a CDN mesh: ${filePath}`));
+        return;
+      }
+
+      if (
+        isRasterImage(url, fileType) ||
+        (opts?.group === 'textures' && isRasterImage(url))
+      ) {
+        void loadCdnImage(url)
+          .then((img) => {
+            if (!this.scene) throw new Error('Scene not initialized');
+            const model = meshFromImage(img, opts?.siHeightM);
+            model.name = name || model.name;
+            const mousePosition = getMousePosition(clientX, clientY);
+            model.position.copy(mousePosition);
+            model.position.y += (opts?.siHeightM || img.metersH) * 0.5;
+            if (opts?.siHeightM) model.userData.siHeightM = opts.siHeightM;
+            model.userData.assetUuid = opts?.assetUuid;
+            model.userData.iconUuid = opts?.iconUuid;
+            model.userData.r2Key = opts?.r2Key || img.url;
+            model.userData.iconUrl = opts?.iconUrl;
+            model.userData.catalogKey = name;
+            model.userData.siPlace = {
+              kind: 'mesh',
+              beforeH: img.pxH,
+              afterH: opts?.siHeightM || img.metersH,
+              unitFix: 1,
+              diagnosis: 'ok',
+              method: 'world',
+              pxW: img.pxW,
+              pxH: img.pxH,
+            };
+            stampContentLayer(model, 'weather', {
+              siHeightM: opts?.siHeightM || img.metersH,
+            });
+            this.scene.add(model);
+            this.setObjectHighlight(model);
+            store.setTransformMaterialRandomId();
+            ElMessage.success(
+              `${name} · ${img.pxW}×${img.pxH} px · ${(opts?.siHeightM || img.metersH).toFixed(2)} m`
+            );
+            this.loadingStatus = true;
+            resolve(true);
+          })
+          .catch(reject);
+        return;
+      }
+
+      // pick the loader
       const loader = ['glb', 'gltf'].includes(fileType)
         ? this.getDracoLoader()
         : this.fileLoaderMap[fileType];
-      const kind: PlaceKind = kindFromGroup(opts?.group, filePath);
+      if (!loader) {
+        reject(new Error(`No loader for ${fileType}: ${filePath}`));
+        return;
+      }
 
       loader.load(
-        filePath,
+        url,
         (result: unknown) => {
           let model = createModelFromResult(result, fileType);
-          if (model && model.animations.length == 0) {
-            model.animations = (result as GLTF).animations;
+          if (model && opts?.meshName) {
+            model = isolateNamedMesh(model, opts.meshName);
+          }
+          const animHost = model as THREE.Object3D & {
+            animations?: THREE.AnimationClip[];
+          };
+          if (
+            animHost &&
+            Array.isArray(animHost.animations) &&
+            animHost.animations.length === 0
+          ) {
+            animHost.animations = (result as GLTF).animations;
           }
 
           const mousePosition = getMousePosition(clientX, clientY);
@@ -561,8 +1057,46 @@ class renderScene {
             model.name = name;
             if (kind === 'captain' || kind === 'unit') {
               bootstrapRaceKit(model, raceIdFromName(name, filePath));
+              if (kind === 'captain') {
+                model.userData.player = true;
+                if (!getPlayAs(this.scene)) setPlayAs(this.scene, model);
+              }
             }
+            if (kind === 'captain' || kind === 'unit' || kind === 'enemy') {
+              hideCarryVisuals(model);
+            }
+            if (opts?.siHeightM) model.userData.siHeightM = opts.siHeightM;
+            if (opts?.harvestDrops)
+              model.userData.harvestDrops = opts.harvestDrops;
+            if (opts?.animalRole) model.userData.animalRole = opts.animalRole;
+            if (opts?.air) model.userData.air = true;
+            if (
+              opts?.animalRole === 'predator' ||
+              opts?.contentLayer === 'monster'
+            ) {
+              model.userData.hp = Number(model.userData.hp) || 90;
+            } else if (opts?.contentLayer === 'animal') {
+              model.userData.hp = Number(model.userData.hp) || 35;
+            }
+            if (opts?.meshName) model.userData.meshName = opts.meshName;
+            if (opts?.playScript) model.userData.playScript = opts.playScript;
             setModelPositionSize(model, mousePosition, kind);
+            const placed = model.userData.siPlace as
+              { afterH?: number } | undefined;
+            if (opts?.group === 'sectors') {
+              ElMessage.success(
+                `${name} · DS2 sector bake (author ${opts.siHeightM || 420} m · 10 km in the 3×3)`
+              );
+            } else if (placed?.afterH) {
+              ElMessage.success(
+                `${name} · ${placed.afterH.toFixed(2)} m · ${(placed.afterH / 1.8).toFixed(2)}× human`
+              );
+            }
+            model.userData.assetUuid = opts?.assetUuid;
+            model.userData.iconUuid = opts?.iconUuid;
+            model.userData.r2Key = opts?.r2Key;
+            model.userData.iconUrl = opts?.iconUrl;
+            model.userData.catalogKey = name;
             if (opts?.prefabId && opts.prefabKind) {
               stampWarlordsPrefab(model, {
                 prefabId: opts.prefabId,
@@ -570,7 +1104,11 @@ class renderScene {
                 siHeightM: opts.siHeightM,
               });
             }
+            if (isAutoHarvestNpc(model)) stampAutoHarvest(model);
             if (opts?.isTerrain || kind === 'island') {
+              const islandKind =
+                opts?.islandKind ||
+                (opts?.group === 'scenes' ? 'faction' : 'static');
               tagTerrain(model, {
                 terrainId: opts?.terrainId || opts?.sectorId || name,
                 sectorId: opts?.sectorId,
@@ -581,10 +1119,46 @@ class renderScene {
                       ? 'map'
                       : 'island',
                 playUrl: opts?.playUrl,
+                islandKind: opts?.group === 'sectors' ? undefined : islandKind,
               });
+              if (
+                opts?.group !== 'sectors' &&
+                opts?.contentLayer !== 'seafloor'
+              ) {
+                weldIslandToSeafloor(model);
+              }
+              if (
+                opts?.terrainId === 'home-island' ||
+                /home.?island/i.test(name)
+              ) {
+                model.userData.homeIslandContract = '1.3.0';
+                model.userData.worldSizeM = 1024;
+                model.userData.characterHeightM = 2;
+                model.userData.foundation = 'driftwood_bay';
+                model.userData.infoSsot =
+                  'https://info.grudge-studio.com/api/v1/home-island-contract.json';
+              }
             }
+            stampContentLayer(
+              model,
+              (opts?.contentLayer as ContentLayerId | undefined) ||
+                inferContentLayer({
+                  name,
+                  group: opts?.group,
+                  prefabKind: opts?.prefabKind,
+                  harvestKind: opts?.harvestKind,
+                  isTerrain: Boolean(opts?.isTerrain || kind === 'island'),
+                  player: Boolean(model.userData.player),
+                }),
+              { siHeightM: opts?.siHeightM, harvestKind: opts?.harvestKind }
+            );
             this.scene.add(model);
+            if (opts?.harvestKind || opts?.contentLayer === 'harvestable') {
+              parentToNearestIsland(this.scene, model);
+            }
+            applyLayerRender(this.scene, loadLayerRender());
             this.setObjectHighlight(model);
+            store.setTransformMaterialRandomId();
             this.bindRaceKitHover();
           }
 
@@ -617,7 +1191,11 @@ class renderScene {
     if (!this.scene) throw new Error('Scene not initialized');
     this.loadingStatus = false;
     try {
-      const root = await generateDs2Terrain(preset, onProgress, quality);
+      const seedId = stamp?.sectorId || stamp?.terrainId;
+      const seed = seedId
+        ? seedForTarget(seedId, DS2_PRESETS[preset].seed)
+        : undefined;
+      const root = await generateDs2Terrain(preset, onProgress, quality, seed);
       const mouse = getMousePosition(clientX, clientY);
       root.name = name;
       this.scene.add(root);
@@ -628,26 +1206,132 @@ class renderScene {
       root.position.z += mouse.z - center.z;
       root.position.y += mouse.y - box.min.y;
       root.updateMatrixWorld(true);
+      root.userData.r2Key = stamp?.sectorId
+        ? `models/environment/sectors/${stamp.sectorId}/ds2-terrain.glb`
+        : `hardroad://ds2-terrain?preset=${preset}`;
+      root.userData.siHeightM = Number(root.userData.worldMeters) || 420;
       tagTerrain(root, {
         terrainId: stamp?.terrainId || stamp?.sectorId || `hd-${preset}`,
         sectorId: stamp?.sectorId,
         kind: stamp?.sectorId ? 'sector' : 'hd',
         playUrl: stamp?.playUrl,
       });
+      stampContentLayer(root, 'terrain', {
+        siHeightM: Number(root.userData.worldMeters) || 420,
+      });
+      applyTerrainLook(root, lookFromHdPreset(preset), {
+        terrainId: stamp?.terrainId || stamp?.sectorId || `hd-${preset}`,
+        sectorId: stamp?.sectorId,
+        kind: stamp?.sectorId ? 'sector' : 'hd',
+      });
+      applyLayerRender(this.scene, loadLayerRender());
       this.setObjectHighlight(root);
     } finally {
       this.loadingStatus = true;
     }
   }
 
+  async spawnLayerPrefab(
+    scheme: string,
+    clientX: number,
+    clientY: number,
+    onProgress?: (pct: number, msg: string) => void
+  ): Promise<THREE.Object3D | null> {
+    if (!this.scene || !isLayerPrefab(scheme)) return null;
+    if (scheme === 'prefab://seafloor-grid') {
+      const root = await spawnSeafloorGrid(this.scene, (p, m) =>
+        onProgress?.(p * 0.55, m)
+      );
+      await spawnWorldIslands(this.scene, (p, m) =>
+        onProgress?.(55 + p * 0.45, m)
+      );
+      mountWorldAtmosphere(this.scene);
+      dedupeSceneLights(this.scene);
+      applyLayerRender(this.scene, loadLayerRender());
+      this.setObjectHighlight(root);
+      return root;
+    }
+    const mapKind = scheme.replace('prefab://map-surface-', '');
+    if (
+      scheme.startsWith('prefab://map-surface-') &&
+      isMapSurfaceLayer(mapKind)
+    ) {
+      const root = await spawnMapSurface(
+        this.scene,
+        mapKind as MapSurfaceLayerId
+      );
+      applyLayerRender(this.scene, loadLayerRender());
+      this.setObjectHighlight(root);
+      return root;
+    }
+    const mouse = getMousePosition(clientX, clientY);
+    const obj = spawnLayerPrefab(this.scene, scheme, mouse);
+    if (obj) {
+      applyLayerRender(this.scene, loadLayerRender());
+      this.setObjectHighlight(obj);
+    }
+    return obj;
+  }
+
+  lookAtWorld(x: number, y: number, z: number) {
+    if (!this.camera || !this.controls) return;
+    this.controls.target.set(x, y, z);
+    this.camera.position.set(x + 48, y + 32, z + 48);
+    this.controls.update();
+  }
+
+  async openSeaPlay(look?: {
+    x: number;
+    y: number;
+    z: number;
+  }): Promise<string> {
+    if (!this.scene) return 'No scene';
+    if (!this.scene.getObjectByName(SEAFLOOR_ROOT)) {
+      await spawnSeafloorGrid(this.scene);
+      await spawnWorldIslands(this.scene);
+      mountWorldAtmosphere(this.scene);
+      dedupeSceneLights(this.scene);
+      applyLayerRender(this.scene, loadLayerRender());
+    }
+    const at = look || { x: 0, y: WORLD_STACK.waterY + 8, z: 0 };
+    this.lookAtWorld(at.x, at.y, at.z);
+    const player = getPlayAs(this.scene);
+    if (player) {
+      player.position.set(at.x, WORLD_STACK.waterY + 0.35, at.z);
+      player.updateMatrixWorld(true);
+      if (!this.playCombat?.playing) this.startPlayCombat(player);
+      if (this.playCombat) {
+        this.playCombat.sailing = true;
+        this.playCombat.heading = player.rotation.y;
+      }
+    }
+    return player
+      ? 'Open sea · DS2 seafloor · islands · wind sail (W/A/D, Shift with the wind)'
+      : 'Open sea · 9 DS2 cells under water. Stamp Play as a captain, then Play to sail.';
+  }
+
+  async spawnEnemyCamp(clientX: number, clientY: number): Promise<THREE.Group> {
+    if (!this.scene) throw new Error('Scene not initialized');
+    this.loadingStatus = false;
+    try {
+      const mouse = getMousePosition(clientX, clientY);
+      const camp = await spawnEnemyCampPrefab(this.scene, mouse);
+      applyLayerRender(this.scene, loadLayerRender());
+      this.setObjectHighlight(camp);
+      return camp;
+    } finally {
+      this.loadingStatus = true;
+    }
+  }
+
   /**
-   * 加载Geometry
-   * @param dragGeometry - 拖拽Models
+   * loadGeometry
+   * @param dragGeometry - dragModels
    */
   loadGeometry(dragGeometry: CurrentDragModelData) {
     if (!this.scene || !dragGeometry.modelData) return;
 
-    // 不需要作为Geometry的Properties
+    // keys that are not geometry constructor args
     const notGeometryKey = [
       'id',
       'name',
@@ -662,7 +1346,7 @@ class renderScene {
         dragGeometry.modelData as unknown as TubeGeometryType
       ).type;
 
-      // 处理其他Geometry
+      // handle otherGeometry
       const geometryData = Object.keys(dragGeometry.modelData as GeometryType)
         .filter((key) => !notGeometryKey.includes(key))
         .map((key) => (dragGeometry.modelData as GeometryType)[key]);
@@ -671,54 +1355,50 @@ class renderScene {
         ...(geometryData as unknown as number[])
       );
 
-      // 创建标准物理Material
+      // create physicalMaterial
       const material = new THREE.MeshStandardMaterial({
-        color: new THREE.Color('#fff'), // 使用一个柔和的蓝色
+        color: new THREE.Color('#fff'), // soft blue
         side: THREE.DoubleSide,
-        metalness: 0.3, // 降低金属感,让Material更自然
-        roughness: 0.7, // 增加Roughness,减少反光
-        emissive: new THREE.Color('#1B3A5A'), // 添加暗蓝色自发光
-        emissiveIntensity: 0.2, // 较低的emissive intensity
+        metalness: 0.3, // less metal, more natural
+        roughness: 0.7, // increaseRoughness,less glare
+        emissive: new THREE.Color('#1B3A5A'), // add dark-blue emissive
+        emissiveIntensity: 0.2, // lowemissive intensity
       });
 
-      // 创建网格
+      // create mesh
       const mesh = new THREE.Mesh(geometry, material);
-      // 设置Shadows
+      // setShadows
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      // 添加到Scene
+      // add toScene
 
       this.scene.add(mesh);
-      // 设置高亮对象
+      // highlight object
       this.setObjectHighlight(mesh);
 
       const mousePosition = getMousePosition(
         dragGeometry.clientX,
         dragGeometry.clientY
       );
-      mesh.position.copy(mousePosition);
-      //添加current model内容是否可以被变换控制器控制
       mesh.name = geometryType;
+      mesh.updateMatrixWorld(true);
+      const author = new THREE.Box3().setFromObject(mesh);
+      const authorH = author.isEmpty()
+        ? 1
+        : Math.max(author.getSize(new THREE.Vector3()).y, 0.2);
       mesh.userData = {
         ...mesh.userData,
         isTransformControls: true,
+        siHeightM: authorH,
       };
-      // // 更新Models的世界矩阵
-      mesh.updateMatrixWorld();
-      // 计算Models包围盒并调整大小
-      const box = new THREE.Box3().setFromObject(mesh);
-      const size = box.getSize(new THREE.Vector3());
-      const maxSize = Math.max(size.x, size.y, size.z);
-      const scale = 0.5 / (maxSize > 1 ? maxSize : 0.5);
-      // 应用Scale
-      mesh.scale.set(scale, scale, scale);
+      setModelPositionSize(mesh, mousePosition, 'mesh');
     } catch (error) {
-      console.error('创建Geometry失败:', error);
+      console.error('Failed to create geometry:', error);
     }
   }
   /**
-   * 加载Lights
-   * @param dragLight - 拖拽Lights
+   * loadLights
+   * @param dragLight - dragLights
    */
   loadLight(dragLight: CurrentDragModelData) {
     if (!this.scene || !dragLight.modelData) return;
@@ -730,8 +1410,8 @@ class renderScene {
     if (this.boxHelper) this.boxHelper.visible = false;
   }
   /**
-   * 加载indexDbScene数据
-   * @param indexDbSceneData - Scene数据
+   * loadindexDbScenedata
+   * @param indexDbSceneData - Scenedata
    * @returns Promise<void>
    */
   async loadIndexDbSceneData(
@@ -739,31 +1419,31 @@ class renderScene {
   ): Promise<boolean> {
     try {
       const { camera, scene, controls } = indexDbSceneData;
-      // 1. 清理旧Scene资源
+      // 1. dispose oldSceneresource
       if (this.scene) {
         disposeScene(this.scene);
         this.scene.clear();
       }
-      // 2. 创建加载器（可以考虑缓存loader实例）
+      // 2. create loader (cache later)
       const loader = new ObjectLoader();
 
-      // 3. 并行加载Scene和相机数据
+      // 3. load in parallelSceneand camera data
       const [parseScene, parseCamera] = await Promise.all([
         loader.parseAsync(scene),
         loader.parseAsync(camera),
       ]);
 
-      // 4. 更新Scene
+      // 4. updateScene
       this.scene = parseScene as THREE.Scene;
       if (this.boxHelper) {
         this.boxHelper.visible = false;
         this.scene?.add(this.boxHelper);
       }
 
-      // 清理旧Scene资源;
+      // dispose oldSceneresource;
       disposeScene(parseScene as THREE.Scene);
 
-      // 5. 更新相机（避免创建不必要的克隆）
+      // 5. update camera (avoid an extra clone)
       if (this.camera) {
         this.camera.clear();
         this.camera.copy(parseCamera as THREE.PerspectiveCamera);
@@ -772,42 +1452,46 @@ class renderScene {
       }
 
       this.camera.updateProjectionMatrix();
+      if (this.scene) {
+        for (const child of [...this.scene.children]) {
+          if ((child as THREE.Camera).isCamera) this.scene.remove(child);
+        }
+      }
+      this.ensureCameraInScene();
 
-      // 恢复控制器目标
+      // restore controls target
       if (this.controls) {
         this.controls.target.set(controls.x, controls.y, controls.z);
       }
-      // 6. 初始化Lights
+      // 6. initLights — one sun, helpers off
       this.lightModules.initLight();
-      // 6. 初始化地面
+      dedupeSceneLights(this.scene);
+      hydrateContentLayers(this.scene);
+      hydrateMapSurfaces(this.scene);
+      // 6. init ground
       this.initPlaneGround(indexDbSceneData);
-      // 7. 创建变换控制器
+      // 7. create transform controls
       this.transformControlsModules.createTransformControls();
-      // 8. 更新窗口大小
+      // 8. resize
       this.onWindowResizes();
-      // 9. 清理临时对象
+      // 9. drop temps
       parseCamera?.clear();
-      // 10. 初始化Animation
+      // 10. initAnimation
       this.animationModules.initializeAnimations();
       return Promise.resolve(true);
     } catch (error) {
-      console.error('加载indexDbScene数据失败:', error);
+      console.error('Failed to load IndexedDB scene:', error);
       return Promise.resolve(false);
     }
   }
-  /**
-   * 获取draco加载器
-   */
   getDracoLoader() {
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('draco/');
-    dracoLoader.preload();
-    return new GLTFLoader().setDRACOLoader(dracoLoader);
+    void bindProductionKtx2(this.renderer);
+    return getProductionGltfLoader();
   }
 
   /**
-   * 处理加载进度
-   * @param xhr - 加载进度事件
+   * on progress
+   * @param xhr - progress event
    */
   handleLoadProgress(xhr: ProgressEvent): void {
     if (xhr.lengthComputable && this.modelProgressCallback) {
@@ -816,12 +1500,12 @@ class renderScene {
   }
 
   /**
-   * 处理加载错误
-   * @param err - 错误信息
+   * on load error
+   * @param err - error
    * @returns boolean
    */
   handleLoadError(err: unknown) {
-    console.error('加载Models出错:', err);
+    console.error('Failed to load model:', err);
     if (err instanceof Error) {
       ElMessage.error('Invalid file');
     }
@@ -829,8 +1513,8 @@ class renderScene {
   }
 
   /**
-   * 设置Models加载进度回调函数
-   * @param callback - 回调函数
+   * setModelsload-progress callback
+   * @param callback - callback
    */
   onProgress(callback: (progressNum: number, totalSize: number) => void) {
     if (typeof callback === 'function') {
@@ -840,7 +1524,7 @@ class renderScene {
 
   /**
    * select object
-   * @param node - Material节点
+   * @param node - Materialnode
    */
   chooseMaterial(node: MaterialNode) {
     const material = this.scene?.getObjectByProperty('uuid', node.uuid);
@@ -848,21 +1532,26 @@ class renderScene {
     this.transformControlsModules?.transformControls?.attach(material);
     store.setCurrentTransformMaterialUuid(material.uuid);
     this.setObjectHighlight(material);
+    store.setTransformMaterialRandomId();
   }
   /**
    * delete object
-   * @param node - Material节点
+   * @param node - Materialnode
    * @returns Promise<boolean>
    */
   deleteSceneMaterial(node: MaterialNode) {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        // 根据uuid获取Scene中的对象
+        // look up the scene object by uuid
         const material = this.scene?.getObjectByProperty('uuid', node.uuid);
 
         if (!material) return;
+        if (material.userData?.lockedRoot) {
+          reject(new Error('Scene manager / HUD root stays'));
+          return;
+        }
 
-        // 如果是光源，则删除光源的辅助线
+        // if a light, remove its helper
         if (material instanceof THREE.Light) {
           const helper = this.scene?.getObjectByProperty(
             'uuid',
@@ -875,10 +1564,10 @@ class renderScene {
         }
 
         if (this.boxHelper) this.boxHelper.visible = false;
-        // 处理Material释放和对象移除
+        // dispose material and remove object
         const disposeMaterialAndRemove = () => {
           if (node.children) {
-            // 遍历并释放所有子网格的Material
+            // dispose every childMaterial
             material.traverse((child: THREE.Object3D) => {
               if (child instanceof THREE.Mesh && child.material) {
                 child.material.dispose();
@@ -891,16 +1580,17 @@ class renderScene {
         };
         disposeMaterialAndRemove();
         this.transformControlsModules.transformControls?.detach();
+        store.setTransformMaterialRandomId();
 
         resolve(true);
       } catch {
-        reject(new Error('delete object失败'));
+        reject(new Error('Failed to delete object'));
       }
     });
   }
   /**
    * copy object
-   * @param node - Material节点
+   * @param node - Materialnode
    */
   copySceneMaterial(
     uuid: string,
@@ -915,18 +1605,18 @@ class renderScene {
 
     if (!originalObject) return;
 
-    // 克隆对象
+    // clone object
     const clonedObject = clone(originalObject);
 
     if (clonedObject) {
-      // Depth克隆Material
+      // DepthcloneMaterial
       clonedObject.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           if (Array.isArray(child.material)) {
-            // 处理Material数组
+            // handle material array
             child.material = child.material.map((mat) => {
               const newMat = mat.clone() as THREE.Material & MaterialType;
-              // 确保纹理也被克隆
+              // clone textures too
               if (newMat.map) newMat.map = newMat.map.clone();
               if (newMat.normalMap) newMat.normalMap = newMat.normalMap.clone();
               if (newMat.roughnessMap)
@@ -940,10 +1630,10 @@ class renderScene {
               return newMat;
             });
           } else {
-            // 处理单个Material
+            // handle singleMaterial
             const newMat = child.material.clone() as THREE.Material &
               MaterialType;
-            // 确保纹理也被克隆
+            // clone textures too
             if (newMat.map) newMat.map = newMat.map.clone();
             if (newMat.normalMap) newMat.normalMap = newMat.normalMap.clone();
             if (newMat.roughnessMap)
@@ -959,29 +1649,30 @@ class renderScene {
         }
       });
 
-      // 设置位置和UUID
+      // set position andUUID
       const originalPosition = originalObject.position.clone();
       clonedObject.position.copy(originalPosition).add(offset);
       clonedObject.uuid = THREE.MathUtils.generateUUID();
 
-      // 添加到Scene
+      // add toScene
       this.scene?.add(clonedObject);
+      store.setTransformMaterialRandomId();
 
-      // 清理资源
+      // dispose resources
       if (originalObject instanceof THREE.Mesh) {
         disposeMaterial(originalObject);
       }
     }
   }
   /**
-   * 设置对象的高亮效果
-   * @param object - 要高亮的对象
-   * @param isGroup - 是否是组对象
+   * highlight the object
+   * @param object - object to highlight
+   * @param isGroup - whether it is a group
    */
   setObjectHighlight(object: THREE.Object3D) {
     store.setCurrentTransformMaterialUuid(object.uuid);
     this.transformControlsModules.transformControls?.attach(object);
-    // 创建新的 BoxHelper
+    // create new BoxHelper
     if (!this.boxHelper) {
       this.boxHelper = new THREE.BoxHelper(object, 0xffff00);
       this.boxHelper.setFromObject(object);
@@ -1018,7 +1709,8 @@ class renderScene {
       const hits = raycaster.intersectObject(root, true);
       const mesh = hits.find((h) => (h.object as THREE.Mesh).isMesh)?.object;
       const name = mesh?.name || null;
-      const kit = root.userData.raceKit as { hoverMesh?: string | null } | undefined;
+      const kit = root.userData.raceKit as
+        { hoverMesh?: string | null } | undefined;
       if (kit && kit.hoverMesh === name) return;
       setHoverMesh(root, name);
       store.setTransformMaterialRandomId();
@@ -1035,20 +1727,67 @@ class renderScene {
   /** Asset-to-ground: snap selection onto stamped terrain (or y=0). */
   snapSelectedToGround(): { ok: boolean; terrainId: string } {
     if (!this.scene) return { ok: false, terrainId: '' };
-    const uuid = store.currentTransformMaterialUuid;
-    const obj = uuid
-      ? this.scene.getObjectByProperty('uuid', uuid) || null
-      : null;
+    const obj = this.getSelectedObject();
     if (!obj) return { ok: false, terrainId: '' };
     const root = findRaceKitRoot(obj) || obj;
+    const before = root.position.clone();
     const result = snapObjectToTerrain(root, this.scene);
+    if (result.ok) {
+      const after = root.position.clone();
+      root.position.copy(before);
+      this.historyModules.execute(
+        new TransformCommand(
+          root,
+          after,
+          root.rotation.clone(),
+          root.scale.clone()
+        )
+      );
+    }
     this.setObjectHighlight(root);
     return result;
   }
+
+  /** Hierarchy Ctrl+Alt+LMB: put the selected asset in front of the current camera view. */
+  placeSelectedInFrontOfCamera(): { ok: boolean } {
+    if (!this.scene || !this.camera) return { ok: false };
+    const obj = this.getSelectedObject();
+    if (!obj || obj === this.camera) return { ok: false };
+    const root = findRaceKitRoot(obj) || obj;
+    root.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(root);
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z, 0.5);
+    const dist = Math.max(3, maxDim * 1.6);
+    const dir = new THREE.Vector3();
+    this.camera.getWorldDirection(dir);
+    const desiredCenter = this.camera.position
+      .clone()
+      .addScaledVector(dir, dist);
+    const currentCenter = box.isEmpty()
+      ? root.getWorldPosition(new THREE.Vector3())
+      : box.getCenter(new THREE.Vector3());
+    const worldPos = root
+      .getWorldPosition(new THREE.Vector3())
+      .add(desiredCenter.sub(currentCenter));
+    const local = root.parent
+      ? root.parent.worldToLocal(worldPos.clone())
+      : worldPos;
+    this.historyModules.execute(
+      new TransformCommand(
+        root,
+        local,
+        root.rotation.clone(),
+        root.scale.clone()
+      )
+    );
+    this.setObjectHighlight(root);
+    return { ok: true };
+  }
   /**
    * update geometry
-   * @param labelKey - 参数标签
-   * @param value - 参数值
+   * @param labelKey - param label
+   * @param value - param value
    * @param uuid - Materialuuid
    */
   updateGeometryParameter(
@@ -1077,34 +1816,39 @@ class renderScene {
       material.geometry.dispose();
       material.geometry = newGeometry;
     } catch (error) {
-      console.error('update geometry失败:', error);
+      console.error('Failed to update geometry:', error);
       ElMessage.error('Failed to update geometry');
     }
     disposeMaterial(material);
   }
   /**
-   * update material类型
+   * update materialtype
    * @param type - material types
    * @returns THREE.Material | null
    */
-  updateMaterialType(type: string) {
-    const uuid = store.currentTransformMaterialUuid;
+  updateMaterialType(type: string, meshUuid?: string) {
+    const uuid = meshUuid || store.currentTransformMaterialUuid;
     if (!uuid) return;
-    const object = this.scene?.getObjectByProperty('uuid', uuid) as THREE.Mesh;
+    const object = this.scene?.getObjectByProperty('uuid', uuid);
     if (!object) return;
-    const oldMaterial = object.material as THREE.Material;
+    const mesh = firstEditableMesh(object);
+    if (!mesh) return;
+    const oldMaterial = materialOf(mesh);
+    if (!oldMaterial) return;
     const material = createMaterial(type, {
       ...(oldMaterial as unknown as MaterialConfig),
     });
-    object.material = material;
+    mesh.material = material;
     disposeMaterial(oldMaterial);
-    return object;
+    return mesh;
   }
   /**
-   * 销毁Models
+   * destroyModels
    */
   renderDestroy() {
-    // CancelAnimation循环
+    this.measureUnbind?.();
+    this.measureUnbind = null;
+    // CancelAnimationloop
     if (this.renderAnimation) {
       cancelAnimationFrame(this.renderAnimation);
       this.renderAnimation = null;
@@ -1112,29 +1856,29 @@ class renderScene {
 
     disposeScene(this.scene);
     TWEEN.removeAll();
-    // TWEEN.removeAll()清理Scene
+    // TWEEN.removeAll()cleanScene
     this.scene?.clear();
-    // 释放控制器
+    // dispose controls
     if (this.controls) {
       this.controls.dispose();
       this.controls = null;
     }
-    // 移除事件监听器
+    // remove listeners
     if (this.onWindowResizesListener) {
       window.removeEventListener('resize', this.onWindowResizesListener);
       this.onWindowResizesListener = null;
     }
 
-    // 释放变换控制器
+    // dispose transform controls
     this.transformControlsModules?.destroy();
 
-    // 释放 ViewHelper
+    // dispose ViewHelper
     if (this.viewHelper) {
       this.viewHelper.dispose();
       this.viewHelper = null;
     }
 
-    // 清空其他引用
+    // null remaining refs
     this.camera = null;
     this.scene = null;
     this.container = null;

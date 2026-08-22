@@ -2,7 +2,7 @@ import { DRAG_MODEL_TYPE } from '@/enums/enum';
 
 export { defaultModelList } from './warlordsCatalog';
 
-// 默认geometry list
+// default geometry list
 export const defaultGeometryList = [
   {
     name: 'Box',
@@ -36,10 +36,10 @@ export const defaultGeometryList = [
   {
     name: 'Cone',
     type: 'ConeGeometry',
-    radius: 5, // Radius
-    height: 10, //cone height
+    radius: 0.5, // Radius
+    height: 1.8, //cone height
     radialSegments: 8, // cone side segments
-    heightSegments: 1, //circle sector sweep
+    heightSegments: 1, // height segments
     openEnded: false, //whether the cone base is open
     thetaStart: 0,
     thetaLength: 6.283185307179586, //circle sector sweep
@@ -48,9 +48,9 @@ export const defaultGeometryList = [
   {
     name: 'Cylinder',
     type: 'CylinderGeometry',
-    radiusTop: 4,
-    radiusBottom: 4,
-    height: 8,
+    radiusTop: 0.5,
+    radiusBottom: 0.5,
+    height: 1.8,
     radialSegments: 8,
     heightSegments: 1,
     openEnded: false,
@@ -103,7 +103,7 @@ export const defaultGeometryList = [
   {
     name: 'Sphere',
     type: 'SphereGeometry',
-    radius: 15,
+    radius: 0.5,
     widthSegments: 32,
     heightSegments: 16,
     phiStart: 0,
@@ -122,8 +122,8 @@ export const defaultGeometryList = [
   {
     name: 'Torus',
     type: 'TorusGeometry',
-    radius: 10,
-    tube: 3,
+    radius: 0.5,
+    tube: 0.15,
     radialSegments: 16,
     tubularSegments: 100,
     arc: 6.283185307179586,
@@ -132,8 +132,8 @@ export const defaultGeometryList = [
   {
     name: 'Torus knot',
     type: 'TorusKnotGeometry',
-    radius: 10,
-    tube: 3,
+    radius: 0.5,
+    tube: 0.15,
     tubularSegments: 161,
     radialSegments: 8,
     P: 2,
@@ -176,7 +176,7 @@ export const defaultLightList = [
   },
 ];
 
-// Geometrycolor列表
+// geometry color list
 export const geometryColorList = [
   '#FF4500',
   '#90EE90',

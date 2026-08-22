@@ -4,13 +4,19 @@
   justify-content: space-between;
   height: 32px;
   padding: 0 16px;
-  color: #ffffff;
-  background-color: #2a2342;
+  color: #e8d5a3;
+  background-color: #101218;
+  border-bottom: 1px solid rgb(201 162 39 / 28%);
 
   .render-header-left {
     display: flex;
     align-items: center;
     gap: 10px;
+
+    .header-hub-link {
+      display: flex;
+      line-height: 0;
+    }
 
     .header-logo {
       width: 20px;
@@ -21,25 +27,23 @@
     .left-title {
       font-size: 13px;
       font-weight: 600;
-      color: #c0caf5;
+      color: #d4af37;
       display: flex;
       align-items: center;
       letter-spacing: 0.5px;
-      background: linear-gradient(to right, #ffffff, #c0caf5);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
       .author {
         font-size: 12px;
-        font-weight: normal;
+        font-weight: 400;
         margin-left: 8px;
-    
+        color: #8b93b7;
       }
     }
   }
 
   .render-header-right {
     display: flex;
-    gap: 10px;
+    gap: 6px;
+    align-items: center;
   }
 
   .header-right-item {

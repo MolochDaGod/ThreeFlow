@@ -1,5 +1,5 @@
 /**
- * 数据库工具类
+ * IndexedDB helper
  */
 export default class IndexDBUtil {
   private dbName: string;
@@ -13,9 +13,9 @@ export default class IndexDBUtil {
   }
 
   /**
-   * 初始化数据库
-   * @param stores - 对象仓库
-   * @returns 是否初始化成功
+   * open database
+   * @param stores - object store
+   * @returns whether init succeeded
    */
   async initDB(stores: { name: string; keyPath: string }[]): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -36,7 +36,7 @@ export default class IndexDBUtil {
         // Create object store
         stores.forEach((store) => {
           if (!db.objectStoreNames.contains(store.name)) {
-             console.log('Create object store', store.name, store.keyPath);
+            console.log('Create object store', store.name, store.keyPath);
             db.createObjectStore(store.name, { keyPath: store.keyPath });
           }
         });
@@ -45,10 +45,10 @@ export default class IndexDBUtil {
   }
 
   /**
-   * 添加数据
-   * @param storeName - 对象仓库名称
-   * @param data - 数据
-   * @returns 添加的数据
+   * add row
+   * @param storeName - store name
+   * @param data - data
+   * @returns inserted row
    */
   async add<T>(storeName: string, data: T): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -68,10 +68,10 @@ export default class IndexDBUtil {
   }
 
   /**
-   * 更新数据
-   * @param storeName - 对象仓库名称
-   * @param data - 数据
-   * @returns 更新的数据
+   * update row
+   * @param storeName - store name
+   * @param data - data
+   * @returns updated row
    */
   async update<T>(storeName: string, data: T): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -90,10 +90,10 @@ export default class IndexDBUtil {
   }
 
   /**
-   * 删除数据
-   * @param storeName - 对象仓库名称
-   * @param key - 数据键
-   * @returns 是否删除成功
+   * delete row
+   * @param storeName - store name
+   * @param key - key
+   * @returns whether delete succeeded
    */
   async delete(storeName: string, key: string | number): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -112,10 +112,10 @@ export default class IndexDBUtil {
   }
 
   /**
-   * 查询单条数据
-   * @param storeName - 对象仓库名称
-   * @param key - 数据键
-   * @returns 查询的数据
+   * get one row
+   * @param storeName - store name
+   * @param key - key
+   * @returns queried row
    */
   async get<T>(storeName: string, key: string | number): Promise<T | null> {
     return new Promise((resolve, reject) => {
@@ -134,9 +134,9 @@ export default class IndexDBUtil {
   }
 
   /**
-   * 获取所有数据
-   * @param storeName - 对象仓库名称
-   * @returns 所有数据
+   * list all rows
+   * @param storeName - store name
+   * @returns all rows
    */
   async getAll<T>(storeName: string): Promise<T[]> {
     return new Promise((resolve, reject) => {
@@ -150,14 +150,14 @@ export default class IndexDBUtil {
       const request = store.getAll();
 
       request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(new Error('获取所有数据失败'));
+      request.onerror = () => reject(new Error('Failed to list all rows'));
     });
   }
 
   /**
-   * 清空对象仓库
-   * @param storeName - 对象仓库名称
-   * @returns 是否清空成功
+   * clear object store
+   * @param storeName - store name
+   * @returns whether clear succeeded
    */
   async clear(storeName: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
@@ -171,7 +171,7 @@ export default class IndexDBUtil {
       const request = store.clear();
 
       request.onsuccess = () => resolve(true);
-      request.onerror = () => reject(new Error('清空数据失败'));
+      request.onerror = () => reject(new Error('Failed to clear store'));
     });
   }
 }

@@ -11,9 +11,29 @@
       left: 0;
       z-index: 100;
     }
-    #scene-render {
+    .scene-stage {
       position: relative;
       width: calc(100% - 340px);
+      height: 100%;
+    }
+    #scene-render {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+  }
+  &.is-play {
+    .render-header,
+    .render-left-box,
+    .right-panel-container,
+    .world-map {
+      display: none !important;
+    }
+    .render-content {
+      height: 100vh;
+    }
+    .scene-stage {
+      width: 100%;
       height: 100%;
     }
   }

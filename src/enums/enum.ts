@@ -89,8 +89,9 @@ export enum MATERIAL_DATA_ENUM {
 
   // emissive
   emissive = 'Emissive',
-  // emissiveIntensity = 'emissive intensity',
-  // aoMapIntensity = 'AO intensity',
+  emissiveIntensity = 'Emissive intensity',
+  aoMapIntensity = 'AO intensity',
+  envMapIntensity = 'Env intensity',
 
   // reflection
   metalness = 'Metalness',
@@ -174,6 +175,7 @@ export enum DRAG_MODEL_TYPE {
   Vfx = 'vfx',
   Geometry = 'geometry',
   Light = 'light',
+  Ui2d = 'ui2d',
 }
 
 /**
@@ -201,6 +203,9 @@ export enum FOG_TYPE {
 export enum MITT_ON_KEY {
   PAGE_LOADING = 'pageLoading',
   SCENE_LOADING = 'sceneLoading',
+  OPEN_AI_TAB = 'openAiTab',
+  HUD_CHANGED = 'hudChanged',
+  OPEN_WORLD_MAP = 'openWorldMap',
 }
 
 /**
@@ -270,6 +275,12 @@ export enum MODEL_TYPE {
   OBJ = 'obj',
   STL = 'stl',
   USDZ = 'usdz',
+  PNG = 'png',
+  JPG = 'jpg',
+  JPEG = 'jpeg',
+  WEBP = 'webp',
+  GIF = 'gif',
+  HDR = 'hdr',
 }
 
 /**
@@ -288,7 +299,7 @@ export enum CANVAS_METHOD {
 }
 
 /**
- * 文本material types
+ * textmaterial types
  */
 export enum TEXT_MATERIAL_TYPE {
   Sprite = 'Sprite',

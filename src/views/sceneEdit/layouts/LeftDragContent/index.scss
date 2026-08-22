@@ -1,7 +1,7 @@
 .left-drag-content {
   position: relative;
   display: flex;
-  width: 180px;
+  width: 268px;
   height: calc(100vh - 32px);
   color: #d4c4a0;
   background-color: #12151cd6;
@@ -14,13 +14,18 @@
       .tab-item {
         padding: 2px;
         background-color: #2a2f45;
-        width: 60px;
-        height: 60px;
+        width: 52px;
+        height: 44px;
+        font-size: 10px;
         align-items: center;
         justify-content: center;
         display: flex;
         flex-direction: column;
-        gap: 7px;
+        gap: 4px;
+        span:last-child {
+          line-height: 1.1;
+          text-align: center;
+        }
         border-bottom: 1px solid #000;
         cursor: pointer;
       }
@@ -35,6 +40,34 @@
       }
     }
     .drag-tab-content {
+      flex: 1;
+      min-width: 0;
+      .lib-search {
+        padding: 8px 8px 0;
+        .lib-search-input {
+          width: 100%;
+          height: 28px;
+          padding: 0 8px;
+          color: #e8e0cc;
+          font-size: 12px;
+          background: #1a1e28;
+          border: 1px solid rgb(212 196 160 / 22%);
+          border-radius: 6px;
+          outline: none;
+          &::placeholder {
+            color: #6e6658;
+          }
+          &:focus {
+            border-color: #d4c4a0;
+          }
+        }
+      }
+      .ui-hint {
+        padding: 6px 8px 0;
+        font-size: 10px;
+        line-height: 1.3;
+        color: #8a8070;
+      }
       .asset-filter {
         padding: 6px 8px 0;
         .asset-filter-select {
@@ -48,6 +81,35 @@
           border-radius: 4px;
         }
       }
+      .folder-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 6px 8px 0;
+        .folder-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 2px 6px;
+          color: #d4c4a0;
+          font-size: 10px;
+          background: #2a2f45;
+          border: 1px solid rgb(212 196 160 / 18%);
+          border-radius: 10px;
+          cursor: pointer;
+          em {
+            font-style: normal;
+            color: #8a8070;
+          }
+          &.is-active {
+            color: #12151c;
+            background: #d4c4a0;
+            em {
+              color: #3a3428;
+            }
+          }
+        }
+      }
       .drag-list {
         display: flex;
         flex-wrap: wrap;
@@ -55,11 +117,12 @@
         justify-content: center;
         padding: 10px;
         &.warlords-list .drag-item {
-          height: 72px;
+          width: 92px;
+          height: 96px;
           .item-name {
             position: absolute;
             right: 0;
-            bottom: 0;
+            bottom: 14px;
             left: 0;
             padding: 1px 3px;
             overflow: hidden;
@@ -70,6 +133,25 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             background: rgb(18 20 32 / 78%);
+          }
+          .item-meta {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            padding: 0 3px 2px;
+            overflow: hidden;
+            font-size: 8px;
+            line-height: 1.2;
+            color: #9aa3c2;
+            text-align: center;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background: rgb(18 20 32 / 88%);
+          }
+          &.is-pending {
+            opacity: 0.55;
+            cursor: default;
           }
         }
         .drag-item {
@@ -142,7 +224,6 @@
     border-bottom: 1px solid rgb(0 0 0 / 10%);
   }
 
-
   .outside-file-content {
     .outside-file-box {
       position: relative;
@@ -151,11 +232,11 @@
       overflow: hidden;
       cursor: pointer;
       background-color: #2a2f45;
-      border: 1px dashed rgb(122 162 247 / 15%); // 边框更细腻
+      border: 1px dashed rgb(122 162 247 / 15%); // thinner border
       border-radius: 8px;
       transition: all 0.3s ease;
 
-      // 添加内部光晕效果
+      // inner glow
       &::after {
         position: absolute;
         inset: 0;
@@ -167,24 +248,13 @@
       &:active {
         transform: translateY(0) scale(0.98);
       }
-      .file-icon {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 5px;
-        .iconfont {
-          font-size: 42px;
-          color: #7aa2f7;
-          opacity: 0.8;
-          transition: all 0.2s ease;
-        }
-      }
       .upload-tip {
-        font-size: 12px;
+        font-size: 11px;
         line-height: 1.5;
         color: #a9b1d6;
         text-align: center;
-        word-wrap: break-word; // 支持英文换行
-        white-space: pre-wrap; // 保持换行符
+        word-wrap: break-word; // allow English wrap
+        white-space: pre-wrap; // keep newlines
         opacity: 0.8;
       }
       &:hover {
@@ -200,7 +270,7 @@
           opacity: 1;
         }
         &::after {
-          box-shadow: inset 0 0 20px rgb(122 162 247 / 8%); // 悬停时增强内部光晕
+          box-shadow: inset 0 0 20px rgb(122 162 247 / 8%); // stronger inner glow on hover
         }
       }
     }
@@ -247,7 +317,7 @@
       transform: translateY(-3px) scale(1.02);
       box-shadow: 0 8px 25px rgba(124, 77, 255, 0.6);
       background: linear-gradient(135deg, #8c61ff 0%, #5a99ff 100%);
-      
+
       &::after {
         left: 100%;
       }
@@ -269,7 +339,7 @@
       transition: all 0.6s ease;
     }
 
-    // 突兀明显的边框闪烁效果
+    // loud border flash
     &::before {
       content: '';
       position: absolute;
@@ -285,9 +355,9 @@
   }
 
   &.is-collapsed {
-    transform: translateX(-180px);
+    transform: translateX(-268px);
     transition: all 0.3s ease;
-    
+
     .commercial-version {
       opacity: 0;
       pointer-events: none;
@@ -315,18 +385,29 @@
         rgb(124 77 255 / 90%),
         rgb(68 138 255 / 90%)
       );
-      transform: translateY(-50%) translateX(2px); // 修改这行以保持垂直居中
+      transform: translateY(-50%) translateX(2px); // keep vertically centered
     }
   }
 }
 
 @keyframes icon-bounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
 }
 
 @keyframes border-glow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

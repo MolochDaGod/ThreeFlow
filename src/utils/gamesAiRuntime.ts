@@ -12,6 +12,30 @@ import {
 
 const HELPER = '__gamesAiHelper';
 
+let previewAlive = false;
+let previewTimer = 0;
+
+export function stopGamesAiPreview(scene?: THREE.Scene) {
+  previewAlive = false;
+  if (previewTimer) {
+    window.clearTimeout(previewTimer);
+    previewTimer = 0;
+  }
+  if (!scene) return;
+  const doomed: THREE.Object3D[] = [];
+  scene.traverse((o) => {
+    if (o.name === HELPER) doomed.push(o);
+  });
+  for (const o of doomed) {
+    o.removeFromParent();
+    const m = o as THREE.Mesh;
+    m.geometry?.dispose?.();
+    const mat = m.material;
+    if (Array.isArray(mat)) mat.forEach((x) => x.dispose());
+    else mat?.dispose?.();
+  }
+}
+
 export async function previewGamesAi(
   scene: THREE.Scene,
   obj: THREE.Object3D,
@@ -20,6 +44,8 @@ export async function previewGamesAi(
 ): Promise<string> {
   const state = normalizeGamesAi(brain);
   if (!state) return '';
+
+  stopGamesAiPreview(scene);
 
   const yuka = await import('yuka');
   const origin = new THREE.Vector3();
@@ -31,7 +57,9 @@ export async function previewGamesAi(
   const vehicle = new yuka.Vehicle();
   vehicle.position.set(origin.x, origin.y, origin.z);
   vehicle.maxSpeed =
-    state === 'pursue' ? GAMES_AI_DISTANCES.runSpeed : GAMES_AI_DISTANCES.walkSpeed;
+    state === 'pursue'
+      ? GAMES_AI_DISTANCES.runSpeed
+      : GAMES_AI_DISTANCES.walkSpeed;
 
   const seekTarget = new yuka.Vector3(aim.x, aim.y, aim.z);
   if (state === 'wander') {
@@ -39,7 +67,9 @@ export async function previewGamesAi(
   } else if (state === 'idle') {
     /* yaw only */
   } else if (state === 'patrol') {
-    vehicle.steering.add(new yuka.WanderBehavior(2, GAMES_AI_DISTANCES.patrolDistance, 1));
+    vehicle.steering.add(
+      new yuka.WanderBehavior(2, GAMES_AI_DISTANCES.patrolDistance, 1)
+    );
   } else {
     vehicle.steering.add(new yuka.SeekBehavior(seekTarget));
   }
@@ -74,12 +104,12 @@ export async function previewGamesAi(
   ring.position.set(origin.x, origin.y + 0.06, origin.z);
   scene.add(ring);
 
-  let alive = true;
+  previewAlive = true;
   let last = performance.now();
   let walked = 0;
   const startYaw = obj.rotation.y;
   const tick = () => {
-    if (!alive) return;
+    if (!previewAlive) return;
     const now = performance.now();
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
@@ -89,7 +119,11 @@ export async function previewGamesAi(
     } else {
       vehicle.update(dt);
       marker.position.set(vehicle.position.x, origin.y, vehicle.position.z);
-      const look = new THREE.Vector3(vehicle.position.x, obj.position.y, vehicle.position.z);
+      const look = new THREE.Vector3(
+        vehicle.position.x,
+        obj.position.y,
+        vehicle.position.z
+      );
       obj.lookAt(look);
       walked += GAMES_AI_DISTANCES.walkSpeed * dt;
       if (state === 'follow') {
@@ -102,7 +136,10 @@ export async function previewGamesAi(
       }
       if (state === 'patrol' && walked >= GAMES_AI_DISTANCES.patrolDistance) {
         walked = 0;
-        const steering = vehicle.steering as { clear?: () => void; add: (b: unknown) => void };
+        const steering = vehicle.steering as {
+          clear?: () => void;
+          add: (b: unknown) => void;
+        };
         steering.clear?.();
         steering.add(new yuka.WanderBehavior(2, 6, 2));
       }
@@ -111,14 +148,8 @@ export async function previewGamesAi(
   };
   requestAnimationFrame(tick);
 
-  window.setTimeout(() => {
-    alive = false;
-    scene.remove(marker);
-    scene.remove(ring);
-    marker.geometry.dispose();
-    ring.geometry.dispose();
-    (marker.material as THREE.Material).dispose();
-    (ring.material as THREE.Material).dispose();
+  previewTimer = window.setTimeout(() => {
+    stopGamesAiPreview(scene);
   }, 7000);
 
   return `${state} · sight ${GAMES_AI_DISTANCES.sightDistance}m · ${GAMES_AI_SOURCE}${state}/`;

@@ -2,18 +2,18 @@
   position: relative;
   box-sizing: border-box;
   width: 340px;
-  color: #a9b1d6;
-  background-color: #252837;
+  color: #c5cceb;
+  background-color: #16181f;
   transition: transform 0.3s ease;
   :deep(.el-tabs) {
     background-color: transparent;
     border: none !important;
 
-    // tabs 头部样式
+    // tabs tab header
     .el-tabs__header {
       padding: 0;
       margin: 0;
-      background-color: #29344c;
+      background-color: #1a1d27;
       border: none;
       .el-tabs__nav-wrap {
         &::after {
@@ -38,13 +38,13 @@
         }
       }
       .el-tabs__item.is-active {
-        font-weight: 500;
-        color: #c7cacf;
-        background-color: rgb(69 137 255);
+        font-weight: 600;
+        color: #14161c;
+        background-color: #d4af37;
       }
     }
 
-    // tabs 内容区域样式
+    // tabs tab body
     .el-tabs__content {
       padding: 0;
       overflow: hidden;

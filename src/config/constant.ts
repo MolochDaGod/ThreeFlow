@@ -10,5 +10,8 @@ export const FOG_FAR_VALUE = 200;
 // fog density
 export const FOG_DENSITY_VALUE = 0.001;
 
-// 雾color值
-export const FOG_COLOR_VALUE = '#EFD1B5';
+/** Editor viewport — dark studio, not peach fog. */
+export const STUDIO_BG_COLOR = '#14161c';
+
+// fogcolorvalue (matches studio when fog is on)
+export const FOG_COLOR_VALUE = STUDIO_BG_COLOR;

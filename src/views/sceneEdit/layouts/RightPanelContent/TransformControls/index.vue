@@ -14,20 +14,25 @@
       </el-tooltip>
     </div>
     <div class="transform-controls-item" v-if="currentView">
-      <el-tooltip content="View: first person" placement="left">
+      <el-tooltip content="Guest fly (no Play-as) — Esc exits" placement="left">
         <span
           class="iconfont icon-shubiaozhizhen-diyirenchengmanyou-yidong"
         ></span>
       </el-tooltip>
     </div>
     <div class="transform-controls-item" @click="switchCurrentView" v-else>
-      <el-tooltip content="View: third person" placement="left">
+      <el-tooltip content="Play TPS (needs Play-as body)" placement="left">
         <span class="iconfont icon-a-disanrencheng1x"></span>
       </el-tooltip>
     </div>
     <div class="transform-controls-item" @click="groundSelected">
-      <el-tooltip content="Asset to ground (G)" placement="left">
+      <el-tooltip content="Place on terrain (G / Ctrl+Shift)" placement="left">
         <span class="iconfont icon-moxing"></span>
+      </el-tooltip>
+    </div>
+    <div class="transform-controls-item" @click="frameSelected">
+      <el-tooltip content="Frame selected (F)" placement="left">
+        <span class="iconfont icon-xiangji"></span>
       </el-tooltip>
     </div>
   </div>
@@ -84,7 +89,11 @@ onUnmounted(() => {
 });
 
 const keyDownEventListener = (event: KeyboardEvent) => {
-  if (currentView.value) return;
+  if (currentView.value || store.playMode) return;
+  const typing = (event.target as HTMLElement | null)?.closest(
+    'input, textarea, [contenteditable="true"]'
+  );
+  if (typing) return;
   const type = transformKeyMap[event.key as keyof typeof transformKeyMap];
   if (type) {
     transformControlsType.value = type;
@@ -106,23 +115,41 @@ const keyDownEventListener = (event: KeyboardEvent) => {
     //Ctrl+Shift+Z Redo
     event.preventDefault();
     store.sceneApi?.historyModules.redo();
+  } else if (
+    (event.ctrlKey || event.metaKey) &&
+    event.shiftKey &&
+    !event.altKey &&
+    (event.key === 'Shift' || event.key === 'Control' || event.key === 'Meta')
+  ) {
+    event.preventDefault();
+    groundSelected();
   } else if (event.key.toLowerCase() === 'g') {
     event.preventDefault();
     groundSelected();
-  } else if (event.key.toLowerCase() === 'f') {
-    //F Focus
+  } else if (event.key.toLowerCase() === 'f' && !event.ctrlKey && !event.altKey) {
     event.preventDefault();
-    const mesh = store.sceneApi?.scene?.getObjectByProperty(
-      'uuid',
-      store.currentTransformMaterialUuid
-    );
-    if (mesh) {
-      store.sceneApi?.transformControlsModules.focusOnObject(mesh);
-    }
+    frameSelected();
+  } else if (
+    (event.ctrlKey || event.metaKey) &&
+    event.key.toLowerCase() === 'd'
+  ) {
+    event.preventDefault();
+    const uuid = store.currentTransformMaterialUuid;
+    if (uuid) store.sceneApi?.copySceneMaterial(uuid);
+  } else if (event.key === 'Delete' || event.key === 'Backspace') {
+    const uuid = store.currentTransformMaterialUuid;
+    if (!uuid) return;
+    event.preventDefault();
+    void store.sceneApi?.deleteSceneMaterial({ uuid });
   }
 };
+const frameSelected = () => {
+  store.sceneApi?.transformControlsModules?.frameSelection?.();
+};
 const groundSelected = () => {
-  const api = store.sceneApi as { snapSelectedToGround?: () => { ok: boolean; terrainId: string } } | null;
+  const api = store.sceneApi as {
+    snapSelectedToGround?: () => { ok: boolean; terrainId: string };
+  } | null;
   const result = api?.snapSelectedToGround?.();
   if (result?.ok) ElMessage.success(`Grounded on ${result.terrainId}`);
   else ElMessage.warning('Select an asset first (drop a sector for terrain)');
@@ -135,7 +162,16 @@ const handleTransformControlsType = (type: TRANSFORM_CONTROLS_TYPE) => {
 };
 
 const switchCurrentView = () => {
-  store.sceneApi?.createPointerLockControls();
+  const api = store.sceneApi as {
+    playAsSelected?: (id?: string | null) => { ok: boolean; name: string };
+    createPointerLockControls?: () => void;
+  } | null;
+  const r = api?.playAsSelected?.(store.currentTransformMaterialUuid);
+  if (!r?.ok) {
+    ElMessage.warning('Stamp Play as on a character first');
+    return;
+  }
+  api?.createPointerLockControls?.();
 };
 </script>
 <style lang="scss" scoped src="./index.scss"></style>

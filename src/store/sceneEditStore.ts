@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia';
-import { ref, type Ref } from 'vue';
+import { markRaw, ref, type Ref } from 'vue';
 import type renderModel from '@/utils/renderScene';
 import { generateUniqueId } from '@/utils/utils';
 
 type ModelStoreType = {
   sceneApi: Ref<renderModel | null>;
+  playMode: Ref<boolean>;
+  setPlayMode: (on: boolean) => void;
   currentTransformMaterialUuid: Ref<string | null>;
   setSceneApi: (api: renderModel | null) => void;
   setCurrentTransformMaterialUuid: (uuid: string | null) => void;
@@ -13,25 +15,28 @@ type ModelStoreType = {
 };
 
 export const useSceneStore = defineStore('modelStore', (): ModelStoreType => {
-  
   const sceneApi = ref<renderModel | null>(null) as Ref<renderModel | null>;
 
+  const playMode = ref(false);
+  const setPlayMode = (on: boolean) => {
+    playMode.value = on;
+  };
   const currentTransformMaterialUuid = ref<string | null>(null);
   /**
-   *  transformMaterialRandomId 变换Material随机值
-   * ps:用于触发 Vue 的响应式更新
+   * transformMaterialRandomId transformMaterialnonce
+   * ps:used to trigger Vue Vue reactivity bump
    */
   const transformMaterialRandomId = ref<string>('');
-   /**
-    * 设置SceneAPI
-    * @param api - SceneAPI
-    */
+  /**
+   * setSceneAPI
+   * @param api - SceneAPI
+   */
   const setSceneApi = (api: renderModel | null) => {
-    sceneApi.value = api;
+    sceneApi.value = api ? markRaw(api) : null;
   };
 
   /**
-   * 设置当前变换MaterialUUID
+   * set current transformMaterialUUID
    * @param uuid - MaterialUUID
    */
   const setCurrentTransformMaterialUuid = <T extends string | null>(
@@ -41,14 +46,17 @@ export const useSceneStore = defineStore('modelStore', (): ModelStoreType => {
   };
 
   /**
-   * 设置更新变换Material随机值
-   * ps:用于触发 Vue 的响应式更新
+   * bump transformMaterialnonce
+   * ps:used to trigger Vue Vue reactivity bump
    */
-  const setTransformMaterialRandomId = () =>transformMaterialRandomId.value = generateUniqueId();
+  const setTransformMaterialRandomId = () =>
+    (transformMaterialRandomId.value = generateUniqueId());
 
   return {
     sceneApi,
     setSceneApi,
+    playMode,
+    setPlayMode,
     currentTransformMaterialUuid,
     setCurrentTransformMaterialUuid,
     transformMaterialRandomId,

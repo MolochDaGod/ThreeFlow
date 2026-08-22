@@ -23,8 +23,8 @@ import { placeAssetSi, type PlaceKind } from '@/utils/siPlace';
 const store = useSceneStore();
 
 /**
- * @description 获取Scene配置数据
- * @returns Scene配置
+ * @description getSceneconfig
+ * @returns Sceneconfig
  */
 export const getSceneConfig = () => {
   const { scene, renderer } = store.sceneApi || {};
@@ -42,7 +42,7 @@ export const getSceneConfig = () => {
     background = BACKGROUND_TYPE.NoBackground;
   }
 
-  // 获取地面Material
+  // get groundMaterial
   const planeGeometry = scene?.getObjectByName('customPlane') as THREE.Mesh;
   const planeGeometryKey = planeGeometry?.userData.planeGeometry as string;
 
@@ -85,9 +85,9 @@ export const getSceneConfig = () => {
 };
 
 /**
- * 更新地面
- * @description 更新地面
- * @param planeGeometry - 地面Geometry
+ * update ground
+ * @description update ground
+ * @param planeGeometry - groundGeometry
  */
 export const updatePlaneGeometry = async (plane: PlaneGeometry) => {
   const { scene } = store.sceneApi || {};
@@ -132,11 +132,9 @@ export const updatePlaneGeometry = async (plane: PlaneGeometry) => {
 /**
  * update scene fog
  * @description update scene fog
- * @param fogInfo - 雾信息
+ * @param fogInfo - fog info
  */
-export const updateSceneFog = (
-  fogInfo: Record<string, number | string>
-) => {
+export const updateSceneFog = (fogInfo: Record<string, number | string>) => {
   const { fog, fogColor, fogNear, fogFar, fogDensity } = fogInfo;
   if (fog === FOG_TYPE.None) {
     store.sceneApi!.scene!.fog = null;
@@ -152,14 +150,39 @@ export const updateSceneFog = (
       fogDensity as number
     );
   }
+  if (store.sceneApi?.scene) {
+    store.sceneApi.scene.userData.fogEnabled = fog !== FOG_TYPE.None;
+  }
 };
 
+export function toggleSceneFog(on?: boolean): boolean {
+  const scene = store.sceneApi?.scene;
+  if (!scene) return false;
+  const want = on ?? !scene.fog;
+  if (!want) {
+    if (scene.fog) scene.userData.savedFog = scene.fog;
+    scene.fog = null;
+    scene.userData.fogEnabled = false;
+    store.setTransformMaterialRandomId();
+    return false;
+  }
+  const kept = scene.userData.savedFog as THREE.Fog | THREE.FogExp2 | undefined;
+  scene.fog = kept || new THREE.FogExp2(FOG_COLOR_VALUE, FOG_DENSITY_VALUE);
+  scene.userData.fogEnabled = true;
+  store.setTransformMaterialRandomId();
+  return true;
+}
+
+export function sceneFogOn(): boolean {
+  return Boolean(store.sceneApi?.scene?.fog);
+}
+
 /**
- * 获取鼠标在3DScene中的位置
- * @description 获取鼠标在3DScene中的位置
- * @param clientX - 鼠标X坐标
- * @param clientY - 鼠标Y坐标
- * @returns THREE.Vector3 | null - 返回3D坐标位置，如果未找到则返回null
+ * mouse position in3DSceneposition
+ * @description mouse position in3DSceneposition
+ * @param clientX - mouseXcoords
+ * @param clientY - mouseYcoords
+ * @returns THREE.Vector3 | null - return3Dworld position, or null if nonenull
  */
 export const getMousePosition = (
   clientX: number,
@@ -168,29 +191,29 @@ export const getMousePosition = (
   if (!store.sceneApi?.camera || !store.sceneApi?.container)
     return new THREE.Vector3();
 
-  // 当 clientX 和 clientY 都为 0 时，计算相机前方的合适位置
+  // when clientX and clientY are both 0, use a point in front of the camera
   if (clientX === 0 && clientY === 0) {
     const camera = store.sceneApi.camera;
-    // 获取相机的方向向量
+    // camera forward
     const direction = new THREE.Vector3();
     camera.getWorldDirection(direction);
 
-    // 计算相机到目标点的距离（基于相机的视锥体）
+    // distance from camera to target (frustum)
     const distance =
       Math.abs(camera.position.y) * Math.tan((camera.fov * Math.PI) / 360);
-    const targetDistance = Math.max(distance, 5); // 确保最小距离
+    const targetDistance = Math.max(distance, 5); // enforce min distance
 
-    // 计算目标位置：相机位置 + 方向 * 距离
+    // target = camera position + direction * distance
     const position = camera.position
       .clone()
       .add(direction.multiplyScalar(targetDistance));
 
-    // 确保y坐标在合理范围内
+    // ensureyaxis stays in range
     position.y = Math.max(0.5, position.y);
     return position;
   }
 
-  // 原有的鼠标位置计算逻辑
+  // original mouse-to-world path
   const { clientWidth, clientHeight, offsetLeft, offsetTop } =
     store.sceneApi?.container || {};
 
@@ -201,13 +224,13 @@ export const getMousePosition = (
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, store.sceneApi?.camera);
 
-  // 计算射线与 XY Plane的交点
-  const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0)); // 修改为水Plane
+  // intersect the ray with XY Planeintersection
+  const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0)); // use a waterPlane
   const target = new THREE.Vector3();
   const intersected = raycaster.ray.intersectPlane(plane, target);
 
   if (!intersected) {
-    // 如果没有交点，返回相机前方的位置
+    // if no hit, use a point in front of the camera
     const camera = store.sceneApi.camera;
     const direction = new THREE.Vector3();
     camera.getWorldDirection(direction);
@@ -218,31 +241,31 @@ export const getMousePosition = (
       .add(direction.multiplyScalar(Math.max(distance, 5)));
   }
 
-  // 限制最大距离，考虑相机位置
+  // clamp max distance vs camera
   const camera = store.sceneApi.camera;
   const maxDistance = Math.max(
     camera.position.length() * 2,
-    50 // 最小限制距离
+    50 // min clamp distance
   );
 
   const distanceToCamera = target.distanceTo(camera.position);
   if (distanceToCamera > maxDistance) {
-    // 如果距离太远，将位置拉近
+    // if too far, pull the point closer
     const direction = target.clone().sub(camera.position).normalize();
     target.copy(camera.position).add(direction.multiplyScalar(maxDistance));
   }
 
-  // 确保y坐标在合理范围内
+  // ensureyaxis stays in range
   target.y = Math.max(0.5, target.y);
 
   return target;
 };
 
 /**
- * 根据文件类型创建Models
- * @description 根据文件类型创建Models
- * @param result - 加载结果
- * @param fileType - 文件类型
+ * create from file typeModels
+ * @description create from file typeModels
+ * @param result - load result
+ * @param fileType - file type
  * @returns THREE.Object3D | null
  */
 export const createModelFromResult = (
@@ -269,19 +292,45 @@ export const createModelFromResult = (
 };
 
 /**
- * 获取文件名
- * @description 获取文件名
- * @param ext - 文件扩展名
- * @returns 文件名
+ * file name
+ * @description file name
+ * @param ext - file extension
+ * @returns file name
  */
 export const getFilename = (ext: string): string =>
   `${new Date().toLocaleString()}.${ext}`.replace(/[:]/g, '-');
 
+/** Export any hierarchy node (mesh/group) as GLB — not only TransformControls roots. */
+export const exportObjectToGlbBlob = (
+  object: THREE.Object3D,
+  filenameBase = 'mesh'
+): Promise<{ blob: Blob; filename: string }> =>
+  new Promise((resolve, reject) => {
+    const wrap = new THREE.Group();
+    wrap.name = object.name || filenameBase;
+    const cloned = object.clone(true);
+    wrap.add(cloned);
+    new GLTFExporter().parse(
+      wrap,
+      (result) => {
+        if (!(result instanceof ArrayBuffer)) {
+          reject(new Error('GLTFExporter returned JSON'));
+          return;
+        }
+        const blob = new Blob([result], { type: 'application/octet-stream' });
+        const filename = `${filenameBase.replace(/\.[^.]+$/, '')}.glb`;
+        resolve({ blob, filename });
+      },
+      (err) => reject(err),
+      { binary: true, embedImages: true, trs: true, includeCustomExtensions: true }
+    );
+  });
+
 /**
- * 设置Models位置和大小
- * @description 设置Models位置和大小
+ * setModelsposition and size
+ * @description setModelsposition and size
  * @param model - Models
- * @param mousePosition - 鼠标位置
+ * @param mousePosition - mouse position
  */
 export const setModelPositionSize = (
   model: THREE.Object3D,
@@ -311,7 +360,7 @@ export const setModelPositionSize = (
  * @description export model
  * @param type - export types
  * @param scene - Scene
- * @param options - 导出选项
+ * @param options - export options
  */
 export const exportSceneModel = async (
   type: ExportType,
@@ -344,13 +393,13 @@ export const exportSceneModel = async (
     } else {
       modelList.forEach(processModel);
     }
-    // 如果导出usdzModels，则将所有双面Material改为单面Material
+    // if exporting USDZ, force double-sided materials to front-side only
     if (type === MODEL_TYPE.USDZ) {
       modelGroup.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           const material = child.material as THREE.Material;
           if (material.side === THREE.DoubleSide) {
-            material.side = THREE.FrontSide; // 改为单面Material
+            material.side = THREE.FrontSide; // front-side onlyMaterial
           }
         }
       });

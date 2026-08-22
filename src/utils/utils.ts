@@ -11,20 +11,20 @@ import { LIGHT_ICON_TYPE } from '@/enums/enum';
 import { ElNotification } from 'element-plus';
 
 /**
- * 获取文件扩展名
- * @param fileName 文件名
- * @returns 文件扩展名(小写)
+ * file extension
+ * @param fileName file name
+ * @returns file extension(lowercase)
  */
 export function getFileType(fileName: string): MODEL_TYPE {
   return fileName.split('.').pop()?.toLowerCase() as MODEL_TYPE;
 }
 
 /**
- * 计算光源位置坐标
- * @param horizontal 水平方向角度(Arc)
- * @param vertical 垂直方向角度(Arc)
- * @param distance 光源距离
- * @returns 光源坐标
+ * light position from angles
+ * @param horizontal horizontal angle(Arc)
+ * @param vertical vertical angle(Arc)
+ * @param distance light distance
+ * @returns light position
  */
 export function lightPosition(
   horizontal: number,
@@ -39,18 +39,18 @@ export function lightPosition(
 }
 
 /**
- * 获取资源Path
- * @param url 资源Path
- * @returns 资源Path
+ * resolve assetPath
+ * @param url resourcePath
+ * @returns resourcePath
  */
 export const getAssetUrl = (url: string) => {
   return new URL(`/src/assets/${url}`, import.meta.url).href;
 };
 
 /**
- * 生成唯一ID
- * @param prefix 可选前缀
- * @returns 唯一ID字符串
+ * uniqueID
+ * @param prefix optional prefix
+ * @returns uniqueIDstring
  */
 export function generateUniqueId(prefix: string = ''): string {
   const timestamp = Date.now();
@@ -59,7 +59,7 @@ export function generateUniqueId(prefix: string = ''): string {
 }
 
 /**
- * 获取SceneMaterial列表
+ * getSceneMateriallist
  * @param mesh Scene
  * @returns
  */
@@ -78,126 +78,161 @@ interface SceneMaterialItem {
   name: string;
   iconClass: string;
   type: string;
+  kind?: string;
 }
 
 interface SceneModelItem extends SceneMaterialItem {
-  children?: SceneMaterialItem[];
+  children?: SceneModelItem[];
 }
 
 /**
- * 检查Models是否为Geometry
+ * checkModelswhetherGeometry
  * @param model Models
- * @returns 是否为Geometry
+ * @returns whetherGeometry
  */
 const isGeometry = (model: THREE.Object3D): boolean =>
-  model instanceof THREE.Mesh &&
-  model.geometry instanceof THREE.BufferGeometry;
+  model instanceof THREE.Mesh && model.geometry instanceof THREE.BufferGeometry;
 
 /**
- * 检查Models是否为特效
+ * checkModelswhether it is an effect
  * @param model Models
- * @returns 是否为特效
+ * @returns whether it is an effect
  */
 const isEffect = (model: THREE.Object3D): boolean =>
   model instanceof THREE.Points;
 
 /**
- * 检查类型是否为光源类型
- * @param type 类型
- * @returns 是否为光源类型
+ * whether this type is a light
+ * @param type type
+ * @returns whether it is a light type
  */
-const isLightIconType = (
-  type: string
-): type is keyof typeof LIGHT_ICON_TYPE => type in LIGHT_ICON_TYPE;
+const isLightIconType = (type: string): type is keyof typeof LIGHT_ICON_TYPE =>
+  type in LIGHT_ICON_TYPE;
 
 /**
- * 获取光源图标类名
- * @param type 类型
- * @returns 光源图标类名
+ * light icon class
+ * @param type type
+ * @returns light icon class
  */
 const getLightIconClass = (type: string) =>
   (isLightIconType(type) ? LIGHT_ICON_TYPE[type] : undefined) || 'icon-light';
 
 /**
- * 获取SceneMaterial列表
+ * getSceneMateriallist
  * @param scene Scene
- * @returns SceneMaterial列表
+ * @returns SceneMateriallist
  */
+export function skipInTree(o: THREE.Object3D): boolean {
+  if (!o) return true;
+  if (o.userData?.editorGizmo || o.userData?.isHelper || o.userData?.lightHelper)
+    return true;
+  if (/^__(char|tf|fleet|cdn)/i.test(o.name)) return true;
+  const kind = o.type || '';
+  if (/TransformControls|ViewportGizmo|CSS2D|CSS3D/i.test(kind)) return true;
+  if (/transformcontrols|viewportgizmo/i.test(o.name || '')) return true;
+  if (
+    o instanceof THREE.SkeletonHelper ||
+    o instanceof THREE.BoxHelper ||
+    o instanceof THREE.AxesHelper ||
+    o instanceof THREE.GridHelper ||
+    o instanceof THREE.CameraHelper
+  )
+    return true;
+  return false;
+}
+
+/** Walk a viewport hit up to the dropped asset root (gizmo + hierarchy uuid). */
+export function pickableRoot(obj: THREE.Object3D | null | undefined): THREE.Object3D | null {
+  if (!obj) return null;
+  let o: THREE.Object3D | null = obj;
+  let last = obj;
+  while (o) {
+    if (skipInTree(o)) {
+      o = o.parent;
+      continue;
+    }
+    last = o;
+    if (o.userData?.isTransformControls) return o;
+    if (!o.parent || o.parent.type === 'Scene') return o;
+    o = o.parent;
+  }
+  return last;
+}
+
+export function clipsOnObject(obj: THREE.Object3D | null | undefined): THREE.AnimationClip[] {
+  let o: THREE.Object3D | null | undefined = obj;
+  while (o) {
+    const anims = (o as THREE.Object3D & { animations?: THREE.AnimationClip[] }).animations;
+    if (Array.isArray(anims) && anims.length) return anims;
+    o = o.parent;
+  }
+  return [];
+}
+
+function treeIcon(model: THREE.Object3D): string {
+  const role = String(model.userData?.grudgeRole || model.userData?.kind || '');
+  if (role === 'hud-root' || role === 'hud-frame' || role === 'hud-slot')
+    return 'icon-changjing2';
+  if (role === 'game-manager') return 'icon-zhuti';
+  if (role === 'network-manager') return 'icon-zhuti1';
+  if (model instanceof THREE.SkinnedMesh) return 'icon-donghua';
+  if (model instanceof THREE.Bone || model.type === 'Bone') return 'icon-a-tree_icon_py1x';
+  if (model instanceof THREE.Group) return 'icon-brankiclayout';
+  return 'icon-moxing';
+}
+
 export const getSceneMaterialList = (scene: THREE.Scene): SceneModelItem[] => {
-  // 获取指定Models下所有的 Mesh Material
-  const getAllMeshMaterials = (model: THREE.Object3D): SceneMaterialItem[] => {
-    const materials: SceneMaterialItem[] = [];
-
-    model.traverse((child: THREE.Object3D) => {
-      if (!(child instanceof THREE.Mesh)) return;
-
-      if (child.material instanceof THREE.Material) {
-        materials.push({
-          uuid: child.uuid,
-          name: child.name || '未命名Material',
-          iconClass: 'icon-model',
-          type: child.type,
-        });
-      } else if (Array.isArray(child.material)) {
-        materials.push(
-          ...child.material.filter(Boolean).map((mat: THREE.Material) => ({
-            uuid: mat.uuid,
-            name: mat.name || '未命名Material',
-            iconClass: 'icon-model',
-            type: mat.type,
-          }))
-        );
-      }
-    });
-
-    return Array.from(
-      new Map(materials.map((mat) => [mat.uuid, mat])).values()
-    );
-  };
-
-  // 根据类型创建Models数据
   const createModelData = (model: THREE.Object3D): SceneModelItem => {
+    const kids = model.children
+      .filter((c) => !skipInTree(c))
+      .map(createModelData);
+    const role = model.userData?.grudgeRole || model.userData?.kind;
     const baseData: SceneModelItem = {
       uuid: model.uuid,
       type: model.type,
-      iconClass: 'icon-moxing',
-      name: model.name || '未命名Models',
+      iconClass: treeIcon(model),
+      name: model.name || model.type || 'node',
+      kind: role,
     };
+    if (kids.length) baseData.children = kids;
 
-    // 根据model types自定义数据
-    if (isGeometry(model)) {
-      return baseData;
-    } else if (isLight(model)) {
+    if (
+      model instanceof THREE.PerspectiveCamera ||
+      model instanceof THREE.OrthographicCamera
+    ) {
       return {
         ...baseData,
-        name: model.name || '未命名光源',
+        name: model.name || 'Camera',
+        iconClass: 'icon-24gf-camera2',
+      };
+    }
+    if (isLight(model)) {
+      return {
+        ...baseData,
+        name: model.name || 'Light',
         iconClass: getLightIconClass(model.type),
       };
-    } else if (isEffect(model)) {
+    }
+    if (isEffect(model)) {
       return {
         ...baseData,
-        name: model.name || '未命名特效',
+        name: model.name || 'Points',
         iconClass: 'icon-lizifeisheng',
       };
     }
-
-    // 对于带有Material的Models
-    return {
-      ...baseData,
-      children: getAllMeshMaterials(model),
-    };
+    if (isGeometry(model)) return baseData;
+    return baseData;
   };
 
-  // 过滤和映射
   return scene.children
-    .filter((item: THREE.Object3D) => item.userData.isTransformControls)
+    .filter((item) => !skipInTree(item))
     .map(createModelData);
 };
 
 /**
- * 获取网格类型
- * @param mesh - 网格
- * @returns 网格类型
+ * mesh geometry type
+ * @param mesh - mesh
+ * @returns geometry type
  */
 export const getMeshType = (mesh: THREE.Mesh) => {
   if (mesh instanceof THREE.Mesh) {
@@ -207,16 +242,16 @@ export const getMeshType = (mesh: THREE.Mesh) => {
 };
 
 type ScrollOptions = {
-  behavior?: 'auto' | 'smooth'; // 滚动行为
-  offset?: number; // 额外偏移量（例如顶部间距）
+  behavior?: 'auto' | 'smooth'; // scroll behavior
+  offset?: number; // extra offset (e.g. top padding)
 };
 
 /**
- * 滚动到 el-tree 的当前选中节点
- * @param treeRef el-tree 实例的 Ref
- * @param scrollbarRef el-scrollbar 实例的 Ref
- * @param options 滚动配置
- * @param currentNodeKey 当前选中节点的 key
+ * scroll to el-tree current selected node
+ * @param treeRef el-tree Ref
+ * @param scrollbarRef el-scrollbar Ref
+ * @param options scroll options
+ * @param currentNodeKey selected node key
  */
 export const scrollToTreeNode = async (
   treeRef: typeof ElTree | null,
@@ -228,22 +263,22 @@ export const scrollToTreeNode = async (
     return;
   }
 
-  // 获取当前选中节点的 key
+  // current selected node key
   if (!currentNodeKey) {
-    console.warn('当前未选中任何节点');
+    console.warn('No node selected');
     return;
   }
 
-  // 获取节点信息
+  // node info
   const node = treeRef.getNode(currentNodeKey) as { data: { uuid: string } };
   if (!node?.data) {
     return;
   }
 
-  // 等待 DOM 更新
+  // wait for DOM update
   await nextTick();
 
-  // 获取滚动容器
+  // scroll container
   const scrollWrap = (
     scrollbarRef.$el as HTMLElement
   ).querySelector<HTMLElement>('.el-scrollbar__wrap');
@@ -251,7 +286,7 @@ export const scrollToTreeNode = async (
     return;
   }
 
-  // 获取节点 DOM 元素（通过 data-key Properties）
+  // get node DOM element via data-key
   const nodeElement = document.querySelector<HTMLElement>(
     `[data-key="${node.data.uuid}"]`
   );
@@ -260,7 +295,7 @@ export const scrollToTreeNode = async (
     return;
   }
 
-  // 计算精准偏移量
+  // exact scroll offset
   const scrollRect = scrollWrap.getBoundingClientRect();
   const nodeRect = nodeElement.getBoundingClientRect();
   const offsetTop =
@@ -269,16 +304,16 @@ export const scrollToTreeNode = async (
     scrollWrap.scrollTop +
     (options.offset || 0);
 
-  // 执行滚动
+  // scroll
   scrollWrap.scrollTo({
     top: offsetTop,
   });
 };
 
 /**
- * 创建Material
+ * createMaterial
  * @param type material types
- * @param config Material配置
+ * @param config Materialconfig
  * @returns Material
  */
 export function createMaterial(
@@ -295,7 +330,7 @@ export function createMaterial(
   };
 
   switch (type) {
-    // 网格Material
+    // meshMaterial
     case 'MeshPhysicalMaterial':
       return new THREE.MeshPhysicalMaterial({
         ...commonParams,
@@ -305,7 +340,7 @@ export function createMaterial(
         clearcoatRoughness: config.clearcoatRoughness ?? 0,
         normalMap: config.normalMap || null,
       });
-    // 标准Material
+    // standardMaterial
     case 'MeshStandardMaterial':
       return new THREE.MeshStandardMaterial({
         ...commonParams,
@@ -334,7 +369,7 @@ export function createMaterial(
         normalMap: config.normalMap || null,
       });
 
-    // 法线Material
+    // normalMaterial
     case 'MeshNormalMaterial':
       return new THREE.MeshNormalMaterial({
         ...commonParams,
@@ -346,7 +381,7 @@ export function createMaterial(
     case 'MeshDepthMaterial':
       return new THREE.MeshDepthMaterial(commonParams);
 
-    // 漫反射Material
+    // lambertMaterial
     case 'MeshMatcapMaterial':
       return new THREE.MeshMatcapMaterial({
         ...commonParams,
@@ -354,13 +389,13 @@ export function createMaterial(
         normalMap: config.normalMap || null,
       });
 
-    // 线条Material
+    // lineMaterial
     case 'LineBasicMaterial':
       return new THREE.LineBasicMaterial({
         ...commonParams,
         linewidth: config.linewidth ?? 1,
       });
-    // 虚线Material
+    // dashedMaterial
     case 'LineDashedMaterial': {
       const material = new THREE.LineDashedMaterial({
         ...commonParams,
@@ -373,7 +408,7 @@ export function createMaterial(
       return material;
     }
 
-    // 点Material
+    // pointMaterial
     case 'PointsMaterial':
       return new THREE.PointsMaterial({
         ...commonParams,
@@ -390,88 +425,100 @@ export function createMaterial(
 }
 
 /**
- * 验证当前value 是否是MapProperties
- * @param key Properties名
- * @returns 是否是MapProperties
+ * check whethervalue whetherMapProperties
+ * @param key Propertiesname
+ * @returns whetherMapProperties
  */
 export const verifyValueMap = (key: string) => {
   return [
-    'map', // 基础colorMap
+    'map', // basecolorMap
     'alphaMap', // Alpha map
     'bumpMap', // Bump map
     'normalMap', // Normal map
-    'displacementMap', // 位移Map
+    'displacementMap', // displacementMap
     'roughnessMap', // Roughness map
     'metalnessMap', // Metalness map
     'envMap', // EnvironmentMap
     'lightMap', // Light map
-    'aoMap', // Environment光遮蔽Map
+    'aoMap', // EnvironmentocclusionMap
     'emissiveMap', // Emissive map
-    'specularMap', // 高光Map
-    'gradientMap', // 渐变Map
+    'specularMap', // specularMap
+    'gradientMap', // gradientMap
     'matcap', // MatCap Map
-    'clearcoatMap', // 清漆层Map
-    'clearcoatNormalMap', // 清漆层Normal map
-    'clearcoatRoughnessMap', // 清漆层Roughness map
-    'sheenColorMap', // 光泽colorMap
-    'sheenRoughnessMap', // 光泽Roughness map
-    'transmissionMap', // 透射Map
-    'thicknessMap', // 厚度Map
+    'clearcoatMap', // clearcoatMap
+    'clearcoatNormalMap', // clearcoatNormal map
+    'clearcoatRoughnessMap', // clearcoatRoughness map
+    'sheenColorMap', // sheencolorMap
+    'sheenRoughnessMap', // sheenRoughness map
+    'transmissionMap', // transmissionMap
+    'thicknessMap', // thicknessMap
     'iridescenceMap', // Iridescence map
   ].includes(key);
 };
 
 /**
- * 验证当前value 是否是 colorProperties
- * @param key Properties名
- * @returns 是否是colorProperties
+ * check whethervalue whether colorProperties
+ * @param key Propertiesname
+ * @returns whethercolorProperties
  */
 export const verifyValueColor = (key: string) => {
   return ['color', 'emissive', 'sheenColor'].includes(key);
 };
 /**
- * 获取Scene中所有Models
+ * getSceneallModels
  * @param scene Scene
- * @returns Scene中所有Models
+ * @returns SceneallModels
  */
 export const getSceneModelList = (scene: THREE.Scene) => {
   return scene.children.filter((item) => item.userData.isTransformControls);
 };
 
 /**
- * 获取Models自带Map
+ * getModelsembeddedMap
  * @param {THREE.Texture} texture - Map
- * @returns {Object} Map数据
+ * @returns {Object} Mapdata
  */
+function isCanvasImage(img: unknown): img is CanvasImageSource {
+  if (!img || typeof img !== 'object') return false;
+  return (
+    img instanceof HTMLImageElement ||
+    img instanceof HTMLCanvasElement ||
+    img instanceof ImageBitmap ||
+    img instanceof OffscreenCanvas ||
+    img instanceof HTMLVideoElement ||
+    (typeof SVGImageElement !== 'undefined' && img instanceof SVGImageElement)
+  );
+}
+
 export const generateMaterialMaps = (
   texture: THREE.Texture | THREE.DataTexture
 ) => {
   if (!texture?.image) return null;
 
-  // 处理HDRMap（DataTexture）
+  // handle HDR map (DataTexture)
   if (texture instanceof THREE.DataTexture) {
     const renderer = new THREE.WebGLRenderer();
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-    // 创建一个Plane来渲染HDRMap
+    // create aPlaneto renderHDRMap
     const geometry = new THREE.PlaneGeometry(2, 2);
     const material = new THREE.MeshBasicMaterial({ map: texture });
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    // 设置渲染尺寸
+    // set render size
     renderer.setSize(256, 256);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1;
 
-    // 渲染Scene
+    // renderScene
     renderer.render(scene, camera);
 
-    // 获取预览image
+    // previewimage
     const textureMap = renderer.domElement.toDataURL('image/png', 1);
 
-    // 清理资源
+    // dispose resources
     renderer.dispose();
     geometry.dispose();
     material.dispose();
@@ -479,21 +526,22 @@ export const generateMaterialMaps = (
     return textureMap;
   }
 
-  // 处理普通Map
+  const src = texture.image as { width?: number; height?: number };
+  if (!isCanvasImage(src) || !src.width || !src.height) return null;
+
+  // handle regularMap
   const canvas = document.createElement('canvas');
-  const { width, height } = texture.image as ImageBitmap;
-  canvas.width = width / 2;
-  canvas.height = height / 2;
+  canvas.width = Math.max(1, Math.floor(src.width / 2));
+  canvas.height = Math.max(1, Math.floor(src.height / 2));
 
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
   if (!context) return null;
-  context.drawImage(
-    texture.image as ImageBitmap,
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
+  try {
+    context.drawImage(src, 0, 0, canvas.width, canvas.height);
+  } catch {
+    canvas.remove();
+    return null;
+  }
   const textureMap = canvas.toDataURL('image/png', 1);
   canvas.remove();
 
@@ -502,19 +550,75 @@ export const generateMaterialMaps = (
 /**
  * update materialMap
  * @param fileUrl MapURL
- * @param fileType Map类型
+ * @param fileType Maptype
  * @returns Map
  */
-export const updateMaterialMap = async (fileUrl: string, fileType: string) => {
+const COLOR_MAP_KEYS = new Set([
+  'map',
+  'emissiveMap',
+  'sheenColorMap',
+  'specularMap',
+  'envMap',
+  'matcap',
+  'backgroundMap',
+]);
+
+/** sRGB for color maps, linear for data maps (normal / roughness / metal / AO). */
+export function prepareEditorTexture(
+  texture: THREE.Texture,
+  mapKey = 'map'
+): THREE.Texture {
+  texture.needsUpdate = true;
+  texture.colorSpace = COLOR_MAP_KEYS.has(mapKey)
+    ? THREE.SRGBColorSpace
+    : THREE.NoColorSpace;
+  texture.anisotropy = Math.max(texture.anisotropy, 8);
+  if (texture.wrapS === THREE.ClampToEdgeWrapping) {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+  }
+  return texture;
+}
+
+export function collectEditableMeshes(root: THREE.Object3D | null): THREE.Mesh[] {
+  if (!root) return [];
+  const out: THREE.Mesh[] = [];
+  root.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (m.isMesh && m.material) out.push(m);
+  });
+  return out;
+}
+
+export function firstEditableMesh(
+  root: THREE.Object3D | null
+): THREE.Mesh | null {
+  if (!root) return null;
+  const m = root as THREE.Mesh;
+  if (m.isMesh && m.material) return m;
+  return collectEditableMeshes(root)[0] || null;
+}
+
+export function materialOf(mesh: THREE.Mesh | null): THREE.Material | null {
+  if (!mesh) return null;
+  const mat = mesh.material;
+  return Array.isArray(mat) ? mat[0] : mat;
+}
+
+export const updateMaterialMap = async (
+  fileUrl: string,
+  fileType: string,
+  mapKey = 'map'
+) => {
   const loader =
     fileType === 'hdr' ? new HDRLoader() : new THREE.TextureLoader();
   const textures = await loader.loadAsync(fileUrl);
-  return textures;
+  return prepareEditorTexture(textures, mapKey);
 };
 
 /**
- * 释放Material资源
- * @param material - 要释放的Material对象
+ * disposeMaterialresource
+ * @param material - to disposeMaterialobject
  */
 export const disposeMaterial = (
   material: THREE.Mesh | THREE.Material | THREE.Material[]
@@ -522,14 +626,14 @@ export const disposeMaterial = (
   if (!material) return;
 
   const disposeSingleMaterial = (mat: THREE.Material) => {
-    // 释放纹理
+    // dispose textures
     Object.values(mat).forEach((value) => {
       if (value instanceof THREE.Texture) {
         value.dispose();
       }
     });
 
-    // 释放 uniforms
+    // dispose uniforms
     const materialWithUniforms = mat as MaterialWithUniforms;
     if (materialWithUniforms.uniforms) {
       Object.values(materialWithUniforms.uniforms).forEach((uniform) => {
@@ -538,40 +642,40 @@ export const disposeMaterial = (
         }
       });
     }
-    // 释放Material本身
+    // disposeMaterialitself
     mat.dispose();
   };
 
   if (material instanceof THREE.Mesh && material.material) {
-    // 处理网格对象的Material
+    // handle meshMaterial
     if (Array.isArray(material.material)) {
       material.material.forEach(disposeSingleMaterial);
     } else {
       disposeSingleMaterial(material.material);
     }
   } else if (material instanceof THREE.Material) {
-    // 直接处理Material对象
+    // handle material object
     disposeSingleMaterial(material);
   } else if (Array.isArray(material)) {
-    // 处理Material数组
+    // handle material array
     material.forEach(disposeSingleMaterial);
   }
 };
 
 /**
- * 释放Scene资源
- * @param scene - 要释放的Scene
+ * disposeSceneresource
+ * @param scene - to disposeScene
  */
 export const disposeScene = (scene: THREE.Scene | null | undefined) => {
   if (!scene) return;
 
   scene.traverse((object: THREE.Object3D) => {
-    // 释放Geometry
+    // disposeGeometry
     if (object instanceof THREE.Mesh) {
       if (object.geometry) {
         object.geometry.dispose();
       }
-      // 释放Material
+      // disposeMaterial
       if (object.material) {
         if (Array.isArray(object.material)) {
           object.material.forEach((material) => {
@@ -586,7 +690,7 @@ export const disposeScene = (scene: THREE.Scene | null | undefined) => {
 };
 
 /**
- *  释放Map资源
+ * disposeMapresource
  * @param material -
  */
 export const disposeTextures = (material: THREE.Material) => {
@@ -598,33 +702,33 @@ export const disposeTextures = (material: THREE.Material) => {
 };
 
 /**
- * 检查页面使用时间并显示Notice
- * @param ip 当前IP地址
- * @param maxDays 最大允许使用天数
+ * Check page usage time and show a notice
+ * @param ip currentIPurl
+ * @param maxDays max allowed days
  */
 export const checkPageUsageTime = (maxDays: number = 5) => {
-  // 获取当前时间戳
+  // now
   const currentTime = Date.now();
 
-  // 从localStorage获取该IP的首次访问时间
+  // first-visit time from localStorage
   const firstAccessKey = `first_access_key`;
   const firstAccessTime = localStorage.getItem(firstAccessKey);
 
   if (!firstAccessTime) {
-    // 如果是首次访问，记录当前时间
+    // first visit — store the timestamp
     localStorage.setItem(firstAccessKey, currentTime.toString());
     return;
   }
 
-  // 计算已使用天数
+  // days used
   const daysUsed = Math.floor(
     (currentTime - parseInt(firstAccessTime)) / (1000 * 60 * 60 * 24)
   );
-  // 如果超过最大使用天数，显示Notice
+  // if past the max usage days, show notice
   if (daysUsed >= maxDays) {
     ElNotification.warning({
-      title: '使用期限Notice',
-      message: `您的使用期限已超过${maxDays}天，请联系管理员获取授权。vx:answer_2027`,
+      title: 'Trial notice',
+      message: `Trial period exceeded ${maxDays} days. Contact an admin for a license. vx:answer_2027`,
       duration: 0,
     });
     return true;
@@ -633,15 +737,15 @@ export const checkPageUsageTime = (maxDays: number = 5) => {
 };
 
 /**
- * 将十六进制color字符串转换为HSL对象
- * @param hex 十六进制color字符串 (#RRGGBB)
- * @returns HSL对象
+ * Convert a hex color string to HSL
+ * @param hex hex color string (#RRGGBB)
+ * @returns HSLobject
  */
 export function hexToHSL(hex: string): { h: number; s: number; l: number } {
-  // 移除#号
+  // strip leading #
   hex = hex.replace(/^#/, '');
 
-  // 解析十六进制值
+  // parse hex
   const r = parseInt(hex.substring(0, 2), 16) / 255;
   const g = parseInt(hex.substring(2, 4), 16) / 255;
   const b = parseInt(hex.substring(4, 6), 16) / 255;

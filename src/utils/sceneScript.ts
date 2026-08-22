@@ -11,6 +11,27 @@ export interface SceneScriptCtx {
   selected: THREE.Object3D | null;
 }
 
+export function runAttachedPlayScripts(ctx: SceneScriptCtx): {
+  ran: number;
+  errors: string[];
+} {
+  const errors: string[] = [];
+  let ran = 0;
+  ctx.scene.traverse((o) => {
+    const src = o.userData?.playScript;
+    if (typeof src !== 'string' || !src.trim()) return;
+    try {
+      runSceneScript(src, { ...ctx, selected: o });
+      ran += 1;
+    } catch (err) {
+      errors.push(
+        `${o.name}: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+  });
+  return { ran, errors };
+}
+
 export function runSceneScript(source: string, ctx: SceneScriptCtx): unknown {
   const body = source.trim();
   if (!body) return 'empty';

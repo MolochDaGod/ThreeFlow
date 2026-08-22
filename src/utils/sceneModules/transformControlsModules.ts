@@ -5,37 +5,46 @@ import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { toRaw } from 'vue';
 import { useSceneStore } from '@/store/sceneEditStore';
 import { TransformCommand } from '../historyModules/transformCommand';
-import router from '@/router'; // 导入你的路由实例
+import router from '@/router'; // router instance
 import { PREVIEW_URL } from '@/config/constant';
 import type { SelectLightType } from '@/types/renderModelTypes';
+import { ElMessage } from 'element-plus';
+import { handleCampClick } from '@/utils/enemyCampPrefab';
+import { snapObjectToTerrain } from '@/utils/terrainGround';
+import { findRaceKitRoot } from '@/utils/raceKit';
+import { pickableRoot, skipInTree } from '@/utils/utils';
 
 const store = useSceneStore();
 
 /**
- * @description 变换控制器模块
+ * @description transform-controls module
  */
 class TransformControlsModules {
-  // 变换控制器
+  // transform controls
   transformControls: TransformControls | null = null;
-  // 变换控制器辅助对象
+  // transform-controls helper
   transformControlsHelper: THREE.Object3D | null = null;
-  // 拖拽状态改变事件
+  // dragging-changed
   draggingChangedHandler: ((event: { value: unknown }) => void) | null = null;
-  // 变换改变事件
+  // transform change
   transformChangeHandler: () => void;
-  // 鼠标单击事件
+  // click
   onMouseClickListener: ((event: MouseEvent) => void) | null = null;
-  // 鼠标双击事件
+  // double-click
   onMouseDblClickListener: ((event: MouseEvent) => void) | null = null;
-  // 射线投射器
+  // raycaster
   raycaster = new THREE.Raycaster();
-  // 鼠标位置
+  // mouse position
   mouse = new THREE.Vector2();
   currentSelectedObject: THREE.Object3D | null = null;
-  // 鼠标按下位置
+  // mouse-down position
   mouseDownPosition = new THREE.Vector2();
-  // 是否鼠标按下
+  // mouse is down
   isMouseDown = false;
+  /** Ctrl+Shift held — snap gizmo translate onto terrain. */
+  ctrlShiftGround = false;
+  onModKey: ((event: KeyboardEvent) => void) | null = null;
+  private focusTween: TWEEN.Tween<{ t: number }> | null = null;
   constructor() {
     this.transformControls = null;
     this.transformControlsHelper = null;
@@ -49,7 +58,7 @@ class TransformControlsModules {
     this.mouse = new THREE.Vector2();
   }
   /**
-   * @description 初始化变幻控制器
+   * @description init transform controls
    */
   init() {
     const { camera, renderer, scene, container } = store.sceneApi || {};
@@ -79,24 +88,31 @@ class TransformControlsModules {
     this.onMouseDblClickListener = this.onMouseDblClick();
     container?.addEventListener('dblclick', this.onMouseDblClickListener);
 
-    // 添加鼠标按下和松开事件监听
+    // listen for mouse down / up
     container?.addEventListener('mousedown', this.onMouseDown.bind(this));
     container?.addEventListener('mouseup', this.onMouseUp.bind(this));
+
+    this.onModKey = (event: KeyboardEvent) => {
+      this.ctrlShiftGround =
+        (event.ctrlKey || event.metaKey) && event.shiftKey && !event.altKey;
+    };
+    window.addEventListener('keydown', this.onModKey);
+    window.addEventListener('keyup', this.onModKey);
   }
   /**
-   * @description 创建变换控制器
+   * @description create transform controls
    */
   createTransformControls() {
     this.destroy();
-    // 获取当前路由Path
+    // current routePath
     const currentPath = router.currentRoute.value.path;
     if (currentPath != PREVIEW_URL) {
       this.init();
     }
   }
   /**
-   * @description 鼠标按下事件
-   * @param event - 鼠标事件
+   * @description mousedown
+   * @param event - mouse event
    */
   onMouseDown(event: MouseEvent) {
     if (!store.sceneApi?.container) return;
@@ -109,30 +125,30 @@ class TransformControlsModules {
   }
 
   /**
-   * @description 鼠标松开事件
+   * @description mouseup
    */
   onMouseUp() {
     this.isMouseDown = false;
   }
 
   /**
-   * @description 鼠标单击事件
-   * @returns 鼠标单击事件
+   * @description click
+   * @returns click
    */
   onMouseClick() {
     return (event: MouseEvent) => {
       const { camera, container, scene, boxHelper } = store.sceneApi || {};
       if (!camera || !container) return;
 
-      // 检查是否发生了拖拽
+      // was this a drag
       const rect = container.getBoundingClientRect();
       const currentPosition = new THREE.Vector2(
         event.clientX - rect.left,
         event.clientY - rect.top
       );
 
-      // 如果鼠标Move距离超过阈值，认为是拖拽操作，不处理点击
-      const DRAG_THRESHOLD = 5; // 像素
+      // if mouseMovedistance exceeds threshold — treat as drag, ignore click
+      const DRAG_THRESHOLD = 5; // px
       if (this.mouseDownPosition.distanceTo(currentPosition) > DRAG_THRESHOLD) {
         return;
       }
@@ -144,19 +160,22 @@ class TransformControlsModules {
 
       const clickableObjects = Array.from(scene?.children || [])
         .map((obj) => toRaw(obj))
-        .filter(
-          (obj) => obj.userData?.isTransformControls || obj.userData.lightHelper
-        );
+        .filter((obj) => !skipInTree(obj) || obj.userData?.lightHelper);
       const intersects = this.raycaster
         .intersectObjects(clickableObjects, true)
-        .slice(0, 1);
+        .slice(0, 8);
 
       if (intersects.length === 0) {
         this.clearCurrentSelection();
         if (boxHelper) boxHelper.visible = false;
         return;
       }
-      const selectedObject = this.getValidSelectedObject(intersects);
+      const selectedObject = pickableRoot(this.getValidSelectedObject(intersects));
+      if (selectedObject && scene) {
+        const r = handleCampClick(scene, selectedObject);
+        if (r.kind === 'loot' && r.message) ElMessage.success(r.message);
+        else if (r.kind === 'aggro' && r.message) ElMessage.warning(r.message);
+      }
       if (!selectedObject || selectedObject === this.currentSelectedObject)
         return;
 
@@ -168,8 +187,8 @@ class TransformControlsModules {
   }
 
   /**
-   * @description 拖拽状态改变事件
-   * @returns 拖拽状态改变事件
+   * @description dragging-changed
+   * @returns dragging-changed
    */
   onDraggingChanged() {
     return (event: { value: unknown }) => {
@@ -181,10 +200,10 @@ class TransformControlsModules {
         object.rotation.clone(),
         object.scale.clone()
       );
-      // 将当前操作添加到历史记录中去
+      // push this op onto history
       store.sceneApi?.historyModules.execute(command);
 
-      if (store.sceneApi?.controls) {
+      if (store.sceneApi?.controls && !store.playMode) {
         store.sceneApi.controls.enabled = !event.value;
       }
       if (store.sceneApi?.renderer) {
@@ -198,17 +217,31 @@ class TransformControlsModules {
     };
   }
   /**
-   * @description 变换改变事件
-   * @returns 变换改变事件
+   * @description transform change
+   * @returns transform change
    */
   onTransformChange() {
     return () => {
       store.sceneApi?.lightModules.updateHelper();
+      const tc = this.transformControls;
+      const object = tc?.object;
+      const scene = store.sceneApi?.scene;
+      if (
+        !tc ||
+        !object ||
+        !scene ||
+        !this.ctrlShiftGround ||
+        tc.getMode() !== 'translate'
+      ) {
+        return;
+      }
+      const root = findRaceKitRoot(object) || object;
+      snapObjectToTerrain(root, scene);
     };
   }
   /**
-   * @description 鼠标双击事件
-   * @returns 鼠标双击事件
+   * @description double-click
+   * @returns double-click
    */
   onMouseDblClick() {
     return (event: MouseEvent) => {
@@ -226,7 +259,7 @@ class TransformControlsModules {
 
       const clickableObjects = Array.from(scene.children || [])
         .map((obj) => toRaw(obj))
-        .filter((obj) => obj.userData?.isTransformControls === true);
+        .filter((obj) => !skipInTree(obj));
 
       const intersects = this.raycaster.intersectObjects(
         clickableObjects,
@@ -234,13 +267,13 @@ class TransformControlsModules {
       );
 
       if (intersects.length > 0) {
-        const selectedObject = intersects[0].object;
-        this.focusOnObject(selectedObject);
+        const selectedObject = pickableRoot(intersects[0].object);
+        if (selectedObject) this.focusOnObject(selectedObject);
       }
     };
   }
   /**
-   * @description 清除当前选中对象
+   * @description clear selection
    */
   clearCurrentSelection() {
     if (this.transformControls?.object) {
@@ -252,26 +285,26 @@ class TransformControlsModules {
     }
   }
   /**
-   * @description 获取有效的选中对象
-   * @param intersects - 交集
-   * @returns 有效的选中对象
+   * @description valid picked object
+   * @param intersects - hits
+   * @returns valid selection
    */
   getValidSelectedObject(
     intersects: THREE.Intersection[]
   ): THREE.Object3D | null {
     const validIntersects = intersects.filter((intersect) => {
       const obj = intersect.object;
-      // 检查对象是否可见
+      // is the object visible
       if (!obj.visible || !obj.parent?.visible) return false;
 
-      // 检查是否是网格对象、粒子系统、精灵对象
+      // mesh, points, or sprite
       if (
         obj instanceof THREE.Mesh ||
         obj instanceof THREE.Points ||
         obj instanceof THREE.Sprite
       )
         return true;
-      // 检查是否是Lights辅助对象
+      // check whether it isLightshelper
       if (
         obj.parent instanceof THREE.DirectionalLightHelper ||
         obj.parent instanceof THREE.PointLightHelper ||
@@ -287,7 +320,7 @@ class TransformControlsModules {
     if (validIntersects.length === 0) return null;
 
     const selectedObject = validIntersects[0].object;
-    // 如果选中的是Lights辅助对象，返回其关联的Lights对象
+    // if the pick is aLightshelper — return its linkedLightsobject
     if (
       selectedObject.parent instanceof THREE.DirectionalLightHelper ||
       selectedObject.parent instanceof THREE.PointLightHelper ||
@@ -299,110 +332,104 @@ class TransformControlsModules {
     return selectedObject;
   }
   /**
-   * @description Focus对象
-   * @param object - 对象
+   * Frame the current selection (F). Falls back to all dropped assets.
+   */
+  frameSelection() {
+    const selected =
+      this.currentSelectedObject ||
+      this.transformControls?.object ||
+      store.sceneApi?.getSelectedObject?.() ||
+      null;
+    if (selected) {
+      this.focusOnObject(selected);
+      return;
+    }
+    const scene = store.sceneApi?.scene;
+    const assets = (scene?.children || []).filter(
+      (c) => c.userData?.isTransformControls
+    );
+    if (!assets.length) {
+      ElMessage.warning('Select a mesh (click it, then F)');
+      return;
+    }
+    const box = new THREE.Box3();
+    for (const a of assets) {
+      a.updateWorldMatrix(true, true);
+      box.expandByObject(a);
+    }
+    this.focusBox(box);
+  }
+
+  /**
+   * Frame object in the current camera view — keep look direction, fit FOV.
    */
   focusOnObject(object: THREE.Object3D) {
+    if (store.playMode) return;
+    object.updateWorldMatrix(true, true);
+    const box = new THREE.Box3();
+    box.setFromObject(object, true);
+    if (box.isEmpty()) {
+      const p = new THREE.Vector3();
+      object.getWorldPosition(p);
+      box.setFromCenterAndSize(p, new THREE.Vector3(1, 1, 1));
+    }
+    this.focusBox(box);
+  }
+
+  /** Distance so the AABB fits the perspective frustum (aspect-aware). */
+  private fitDistance(
+    camera: THREE.PerspectiveCamera,
+    size: THREE.Vector3,
+    padding = 1.4
+  ): number {
+    const fov = (camera.fov * Math.PI) / 180;
+    const halfY = Math.max(fov * 0.5, 1e-4);
+    const halfX = Math.atan(Math.tan(halfY) * Math.max(camera.aspect, 1e-4));
+    const distY = size.y * 0.5 / Math.tan(halfY);
+    const distX = size.x * 0.5 / Math.tan(halfX);
+    const distZ = size.z * 0.5;
+    return Math.max(distX, distY, distZ, 0.25) * padding;
+  }
+
+  private focusBox(box: THREE.Box3) {
     const { camera, controls } = store.sceneApi || {};
     if (!camera || !controls) return;
-
-    const box = new THREE.Box3();
-
-    // 是否存在有效的Geometry
-    let hasValidGeometry = false;
-
-    object.traverse((child: THREE.Object3D) => {
-      // 处理网格和粒子系统
-      if (child instanceof THREE.Mesh) {
-        child.geometry.computeBoundingBox();
-        box.expandByObject(child);
-        hasValidGeometry = true;
-      } else if (child instanceof THREE.Points) {
-        // 粒子系统需要考虑位置Properties
-        if (child.geometry.attributes.position) {
-          child.geometry.computeBoundingBox();
-          box.expandByObject(child);
-          hasValidGeometry = true;
-        }
-      }
-    });
-
-    // 如果没有找到有效的Geometry，使用对象的位置作为后备
-    if (!hasValidGeometry || box.isEmpty()) {
-      box.expandByPoint(object.position);
-      // 在点周围添加一个小缓冲区
-      box.min.subScalar(0.5);
-      box.max.addScalar(0.5);
-    }
+    if (store.playMode) return;
+    if (!(camera instanceof THREE.PerspectiveCamera)) return;
 
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
+    const distance = this.fitDistance(camera, size);
 
-    // 根据对象类型调整最小尺寸
-    const MIN_SIZE = object instanceof THREE.Points ? 0.2 : 0.5;
-    const maxDim = Math.max(
-      Math.max(size.x, MIN_SIZE),
-      Math.max(size.y, MIN_SIZE),
-      Math.max(size.z, MIN_SIZE)
-    );
+    const dir = new THREE.Vector3()
+      .subVectors(camera.position, controls.target);
+    if (dir.lengthSq() < 1e-8) dir.set(0.55, 0.4, 1);
+    dir.normalize();
 
-    // 根据对象类型调整FOV
-    const isParticleSystem =
-      object instanceof THREE.Points ||
-      object.userData?.type === 'Effect' ||
-      object.children.some((child) => child instanceof THREE.Points);
+    const toPos = center.clone().addScaledVector(dir, distance);
+    const fromPos = camera.position.clone();
+    const fromTarget = controls.target.clone();
 
-    camera.fov = isParticleSystem ? 50 : 60;
-    camera.near = 0.1;
-    camera.updateProjectionMatrix();
-
-    // 根据对象类型和大小计算距离
-    const distanceFactor = isParticleSystem ? 1.5 : 2;
-    const distance = maxDim * distanceFactor;
-
-    // 根据对象类型使用不同的观察角度
-    const theta = isParticleSystem ? Math.PI / 3 : Math.PI / 4;
-    const phi = isParticleSystem ? Math.PI / 4 : Math.PI / 6;
-
-    const newPosition = new THREE.Vector3(
-      center.x + distance * Math.sin(theta) * Math.cos(phi),
-      center.y + distance * Math.sin(phi),
-      center.z + distance * Math.cos(theta) * Math.cos(phi)
-    );
-
-    // 更平滑的Animation，更好的用户体验
-    new TWEEN.Tween(camera.position)
-      .to(
-        {
-          x: newPosition.x,
-          y: newPosition.y,
-          z: newPosition.z,
-        },
-        600
-      )
-      .easing(TWEEN.Easing.Cubic.Out)
-      .start();
-
-    new TWEEN.Tween(controls.target)
-      .to(
-        {
-          x: center.x,
-          y: center.y,
-          z: center.z,
-        },
-        600
-      )
-      .easing(TWEEN.Easing.Cubic.Out)
+    this.focusTween?.stop();
+    this.focusTween = new TWEEN.Tween({ t: 0 })
+      .to({ t: 1 }, 280)
+      .easing(TWEEN.Easing.Quadratic.Out)
+      .onUpdate(({ t }) => {
+        camera.position.lerpVectors(fromPos, toPos, t);
+        controls.target.lerpVectors(fromTarget, center, t);
+        controls.update();
+      })
       .onComplete(() => {
-        // 更新控制器并渲染一次完成
-        controls?.update();
-        camera.updateProjectionMatrix();
+        camera.position.copy(toPos);
+        controls.target.copy(center);
+        controls.update();
+        this.focusTween = null;
       })
       .start();
   }
 
   /**
-   * 销毁
+   * destroy
    */
   destroy() {
     this.clearCurrentSelection();
@@ -426,9 +453,14 @@ class TransformControlsModules {
       container?.removeEventListener('dblclick', this.onMouseDblClickListener);
     }
 
-    // 移除鼠标按下和松开事件监听
+    // remove mouse down / up listeners
     container?.removeEventListener('mousedown', this.onMouseDown.bind(this));
     container?.removeEventListener('mouseup', this.onMouseUp.bind(this));
+    if (this.onModKey) {
+      window.removeEventListener('keydown', this.onModKey);
+      window.removeEventListener('keyup', this.onModKey);
+      this.onModKey = null;
+    }
 
     if (this.transformControlsHelper?.parent) {
       this.transformControlsHelper.parent.remove(this.transformControlsHelper);
@@ -440,7 +472,7 @@ class TransformControlsModules {
     this.transformControls = null;
     this.transformControlsHelper = null;
     this.draggingChangedHandler = null;
-    this.transformChangeHandler = () => { };
+    this.transformChangeHandler = () => {};
     this.onMouseClickListener = null;
     this.onMouseDblClickListener = null;
     this.clearCurrentSelection();

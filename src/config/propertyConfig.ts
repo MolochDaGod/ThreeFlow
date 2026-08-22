@@ -48,22 +48,22 @@ export const GEOMETRY_PARAMETER_LIMITS = {
   radiusTop: { min: 0.1, max: 50 },
   radiusBottom: { min: 0.1, max: 50 },
 } as const;
-//color选择器配置
+// color picker presets
 export const PREDEFINE_COLORS = [
-  '#ff4500',
-  '#ff8c00',
-  '#ffd700',
+  '#d4af37',
+  '#c9a227',
+  '#e8d5a3',
+  '#ffffff',
+  '#c5cceb',
+  '#8b93b7',
+  '#14161c',
+  '#2a2342',
+  '#ff6b6b',
+  '#4ecdc4',
+  '#448aff',
   '#90ee90',
-  '#00ced1',
-  '#1e90ff',
   '#c71585',
-  'rgba(255, 69, 0, 0.68)',
-  'rgb(255, 120, 0)',
-  'hsv(51, 100, 98)',
-  'hsva(120, 40, 94, 0.5)',
-  'hsl(181, 100%, 37%)',
-  'hsla(209, 100%, 56%, 0.73)',
-  '#c7158577',
+  '#ff8c00',
 ];
 
 // material types
@@ -82,11 +82,11 @@ export const materialTypeList = [
   },
   {
     type: 'MeshLambertMaterial',
-    name: 'LambertMaterial',
+    name: 'Lambert',
   },
   {
     type: 'MeshPhongMaterial',
-    name: 'PhongMaterial',
+    name: 'Phong',
   },
   {
     type: 'MeshToonMaterial',
@@ -98,11 +98,11 @@ export const materialTypeList = [
   },
   {
     type: 'MeshDepthMaterial',
-    name: 'DepthMaterial',
+    name: 'Depth',
   },
   {
     type: 'MeshMatcapMaterial',
-    name: 'MatcapMaterial',
+    name: 'Matcap',
   },
   {
     type: 'LineBasicMaterial',
@@ -118,14 +118,14 @@ export const materialTypeList = [
   },
 ];
 
-// RendererTone mapping
+// renderer tone mapping
 export const toneMappingOptions = [
   {
     label: 'Custom',
     value: THREE.CustomToneMapping,
   },
   {
-    label: 'NoneTone mapping(NoToneMapping)',
+    label: 'None',
     value: THREE.NoToneMapping,
   },
   {
@@ -133,39 +133,39 @@ export const toneMappingOptions = [
     value: THREE.LinearToneMapping,
   },
   {
-    label: 'ReinhardTone mapping(ReinhardToneMapping)',
+    label: 'Reinhard',
     value: THREE.ReinhardToneMapping,
   },
   {
-    label: 'CineonTone mapping(CineonToneMapping)',
+    label: 'Cineon',
     value: THREE.CineonToneMapping,
   },
   {
-    label: 'ACESTone mapping(ACESFilmicToneMapping)',
+    label: 'ACES Filmic',
     value: THREE.ACESFilmicToneMapping,
   },
   {
-    label: 'AgXTone mapping(AgXToneMapping)',
+    label: 'AgX',
     value: THREE.AgXToneMapping,
   },
   {
-    label: 'NeutralTone mapping(NeutralToneMapping)',
+    label: 'Neutral',
     value: THREE.NeutralToneMapping,
   },
 ];
-// SceneShadows
+// scene shadows
 export const shadowTypeOptions = [
   {
-    label: 'NoneShadows(NoShadow)',
+    label: 'Basic',
     value: THREE.BasicShadowMap,
   },
   {
-    // r182+：PCFShadowMap includes soft shadows; PCFSoftShadowMap is deprecated
+    // r182+: PCFShadowMap includes soft shadows; PCFSoftShadowMap is deprecated
     label: 'PCF soft',
     value: THREE.PCFShadowMap,
   },
   {
-    label: 'VSMShadows(VSMShadowMap)',
+    label: 'VSM',
     value: THREE.VSMShadowMap,
   },
 ];
@@ -180,10 +180,10 @@ export const normalizeShadowType = (
   }
   return type ?? THREE.BasicShadowMap;
 };
-// SceneBackground
+// scene background
 export const backgroundOptions = [
   {
-    label: 'NoneBackground',
+    label: 'None',
     value: BACKGROUND_TYPE.NoBackground,
   },
   {
@@ -208,7 +208,6 @@ export const environmentOptions = [
   },
 ];
 
-
 export const fogOptions = [
   {
     label: 'None',
@@ -223,5 +222,3 @@ export const fogOptions = [
     value: FOG_TYPE.FogExp2,
   },
 ];
-
-

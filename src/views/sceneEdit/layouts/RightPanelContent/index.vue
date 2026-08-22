@@ -19,7 +19,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, onUnmounted, getCurrentInstance, ref } from 'vue';
+import { MITT_ON_KEY } from '@/enums/enum';
 import TransformControls from './TransformControls/index.vue';
 import SceneContent from './SceneContent/index.vue';
 import ProjectConfig from './ProjectConfig/index.vue';
@@ -51,7 +52,7 @@ const tabList = [
     component: AiWorkerPanel,
   },
   {
-    name: 'Project',
+    name: 'Setup',
     key: 'projectConfig',
     component: ProjectConfig,
   },
@@ -66,5 +67,11 @@ const props = defineProps<{
 }>();
 
 const activeTabs = ref('scene');
+const { $eventBus } = getCurrentInstance()?.proxy || {};
+const openAi = () => {
+  activeTabs.value = 'ai';
+};
+onMounted(() => $eventBus?.on(MITT_ON_KEY.OPEN_AI_TAB, openAi));
+onUnmounted(() => $eventBus?.off(MITT_ON_KEY.OPEN_AI_TAB, openAi));
 </script>
 <style lang="scss" scoped src="./index.scss"></style>

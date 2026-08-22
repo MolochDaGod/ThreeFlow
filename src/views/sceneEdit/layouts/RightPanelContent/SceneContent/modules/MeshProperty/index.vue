@@ -14,6 +14,12 @@
           {{ meshProperty[item.key] }}
         </div>
       </div>
+      <div class="property-item" v-for="row in identityRows" :key="row.label">
+        <div class="property-item-label">{{ row.label }}</div>
+        <div class="property-item-value" :title="row.value">
+          {{ row.value }}
+        </div>
+      </div>
       <!-- transform properties -->
       <div
         class="property-item"
@@ -43,6 +49,50 @@
         </div>
       </div>
       <div class="property-item">
+        <div class="property-item-label">Layer</div>
+        <div class="property-item-value">
+          <el-select
+            size="small"
+            :model-value="contentLayerId"
+            style="width: 140px"
+            @change="assignContentLayer"
+          >
+            <el-option
+              v-for="l in CONTENT_LAYERS"
+              :key="l.id"
+              :label="`${l.label} · ${l.phys}`"
+              :value="l.id"
+            />
+          </el-select>
+          <el-button
+            v-if="contentLayerId === 'player'"
+            size="small"
+            type="primary"
+            style="margin-left: 6px"
+            @click="playAsThis"
+          >
+            Play as
+          </el-button>
+        </div>
+      </div>
+      <div class="property-item" v-if="isMapSurface">
+        <div class="property-item-label">Map Y</div>
+        <div class="property-item-value">
+          <el-input-number
+            size="small"
+            :model-value="mapSurfaceY"
+            :precision="2"
+            :step="1"
+            :controls="false"
+            style="width: 80px"
+            @change="setMapSurfaceY"
+          />
+          <span style="margin-left: 6px; font-size: 11px; opacity: 0.7">
+            2000 m brick · stack more in Systems
+          </span>
+        </div>
+      </div>
+      <div class="property-item">
         <div class="property-item-label">Terrain</div>
         <div class="property-item-value">
           <el-button size="small" type="primary" @click="groundToTerrain">
@@ -65,6 +115,12 @@
       </div>
       <!-- camera properties -->
       <template v-if="meshProperty.type === 'PerspectiveCamera'">
+        <div class="property-item">
+          <div class="property-item-label">Fog</div>
+          <div class="property-item-value">
+            <el-switch :model-value="fogOn" @change="onFogToggle" />
+          </div>
+        </div>
         <div class="property-item">
           <div class="property-item-label">FOV</div>
           <div class="property-item-value">
@@ -222,16 +278,30 @@ import type {
   TransformType,
 } from '@/types/rightPanelTypes';
 import { disposeMaterial } from '@/utils/utils';
+import { sceneFogOn, toggleSceneFog } from '@/utils/sceneModules';
 import { PREDEFINE_COLORS } from '@/config/propertyConfig';
 import { SCENE_OBJECT_NAME } from '@/enums/enum';
 import { ElMessage } from 'element-plus';
+import {
+  CONTENT_LAYERS,
+  isMapSurfaceLayer,
+  type ContentLayerId,
+} from '@/config/fleetSystems';
+import {
+  applyLayerRender,
+  getPlayAs,
+  loadLayerRender,
+  setPlayAs,
+  stampContentLayer,
+} from '@/utils/contentLayers';
+import { isMapSurfaceObject, stampMapSurface } from '@/utils/mapSurface';
 
 const store = useSceneStore();
 
 const groundToTerrain = () => {
-  const api = store.sceneApi as
-    | { snapSelectedToGround?: () => { ok: boolean; terrainId: string } }
-    | null;
+  const api = store.sceneApi as {
+    snapSelectedToGround?: () => { ok: boolean; terrainId: string };
+  } | null;
   const result = api?.snapSelectedToGround?.();
   if (result?.ok) ElMessage.success(`Grounded on ${result.terrainId}`);
   else ElMessage.warning('Drop a sector first, then select the asset');
@@ -243,6 +313,88 @@ const { meshProperty } = defineProps({
     default: () => ({}),
   },
 });
+
+const identityRows = computed(() => {
+  const obj = store.sceneApi?.scene?.getObjectByProperty(
+    'uuid',
+    store.currentTransformMaterialUuid
+  );
+  const ud = (obj?.userData || {}) as Record<string, unknown>;
+  const rows: { label: string; value: string }[] = [];
+  if (ud.prefabId) rows.push({ label: 'Prefab', value: String(ud.prefabId) });
+  if (ud.assetUuid)
+    rows.push({ label: 'Asset UUID', value: String(ud.assetUuid) });
+  if (ud.iconUuid)
+    rows.push({ label: 'Icon UUID', value: String(ud.iconUuid) });
+  if (ud.r2Key) rows.push({ label: 'R2', value: String(ud.r2Key) });
+  if (ud.siHeightM) rows.push({ label: 'SI m', value: String(ud.siHeightM) });
+  if (ud.contentLayer)
+    rows.push({ label: 'Layer', value: String(ud.contentLayer) });
+  if (ud.physLayer) rows.push({ label: 'Phys', value: String(ud.physLayer) });
+  if (ud.surface) rows.push({ label: 'Surface', value: String(ud.surface) });
+  if (ud.sectorId) rows.push({ label: 'Sector', value: String(ud.sectorId) });
+  if (obj?.parent) {
+    const scene = store.sceneApi?.scene;
+    const parentName =
+      obj.parent === scene
+        ? 'Scene'
+        : obj.parent.name || obj.parent.type || 'node';
+    rows.unshift({ label: 'Parent', value: parentName });
+  }
+  return rows;
+});
+
+const selectedMesh = () =>
+  store.sceneApi?.scene?.getObjectByProperty(
+    'uuid',
+    store.currentTransformMaterialUuid
+  ) || null;
+
+const contentLayerId = computed(() => {
+  return (
+    (selectedMesh()?.userData?.contentLayer as ContentLayerId) || 'terrain'
+  );
+});
+
+const isMapSurface = computed(() => isMapSurfaceObject(selectedMesh()));
+
+const mapSurfaceY = computed(() => selectedMesh()?.position.y ?? 0);
+
+const setMapSurfaceY = (y: number | undefined) => {
+  const obj = selectedMesh();
+  if (!obj || y == null || !Number.isFinite(y)) return;
+  obj.position.y = y;
+};
+
+const assignContentLayer = (id: ContentLayerId) => {
+  const obj = store.sceneApi?.scene?.getObjectByProperty(
+    'uuid',
+    store.currentTransformMaterialUuid
+  );
+  if (!obj || !store.sceneApi?.scene) return;
+  if (isMapSurfaceObject(obj) && isMapSurfaceLayer(id)) {
+    stampMapSurface(obj, id);
+  } else {
+    stampContentLayer(obj, id);
+  }
+  if (id === 'player' && !getPlayAs(store.sceneApi.scene)) {
+    setPlayAs(store.sceneApi.scene, obj);
+  }
+  applyLayerRender(store.sceneApi.scene, loadLayerRender());
+  ElMessage.success(`${obj.name} → ${id}`);
+};
+
+const playAsThis = () => {
+  const api = store.sceneApi as {
+    playAsSelected?: (id?: string | null) => { ok: boolean; name: string };
+  } | null;
+  const r = api?.playAsSelected?.(store.currentTransformMaterialUuid);
+  if (r?.ok) ElMessage.success(`Play as ${r.name}`);
+  else
+    ElMessage.warning(
+      'Play as a Toon RTS captain (loadRaceKit). Foundry creates the play body.'
+    );
+};
 
 // selected object
 const currentTransformMaterialUuid = computed(
@@ -382,12 +534,21 @@ const updateLightProperty = (propertyKey: string, value: string | boolean) => {
   }
 };
 
-// 更新light helper
+// updatelight helper
 const updateLightHelper = (value: boolean) => {
   const { light } = currentLight.value;
   if (light) {
     light.userData.helperVisible = value;
   }
+};
+
+const fogOn = computed(() => {
+  void store.transformMaterialRandomId;
+  return sceneFogOn();
+});
+
+const onFogToggle = (on: boolean) => {
+  toggleSceneFog(on);
 };
 
 // update camera properties

@@ -12,8 +12,8 @@ declare global {
   }
 }
 /**
- * @description 指令加载
- * @param Vue - 应用实例
+ * @description directive load
+ * @param Vue - app instance
  */
 const directiveLoading = (Vue: App) => {
   Vue.directive('zLoading', {
@@ -39,7 +39,8 @@ const directiveLoading = (Vue: App) => {
       loadingEl.style.display = binding.value ? 'block' : 'none';
     },
     unmounted(el: HTMLElement) {
-      if (el._loading_instance) {(
+      if (el._loading_instance) {
+        (
           el._loading_instance as ComponentPublicInstance & {
             $destroy?: () => void;
           }

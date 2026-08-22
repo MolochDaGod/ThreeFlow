@@ -30,4 +30,3 @@ export const useIndexDbStore = defineStore('indexDbStore', () => {
     initIndexDb,
   };
 });
-

@@ -6,6 +6,7 @@
         <h1>Grudge Studio · ThreeFlow</h1>
         <p>Migrations landing · asset organizer · one prefab / character SSOT</p>
       </div>
+      <a class="hub-go ghost" href="/view">ThreePipe viewer</a>
       <router-link class="hub-go" to="/editor">Open scene editor</router-link>
     </header>
 
@@ -115,12 +116,13 @@
               <span v-if="row.mesh?.r2Key"> · {{ row.mesh.r2Key }}</span>
             </td>
             <td>
-              <router-link
-                v-if="row.mesh?.cdnUrl"
-                :to="editorAssetUrl(row.mesh.cdnUrl)"
-              >
-                Open in editor
-              </router-link>
+              <template v-if="row.mesh?.cdnUrl">
+                <a :href="viewAssetUrl(row.mesh.cdnUrl)">View</a>
+                ·
+                <router-link :to="editorAssetUrl(row.mesh.cdnUrl)">
+                  Editor
+                </router-link>
+              </template>
               <span v-else class="dim">no GLB</span>
             </td>
           </tr>
@@ -140,6 +142,7 @@ import {
   editorAssetUrl,
   fetchPrefabIndex,
   prefabLabel,
+  viewAssetUrl,
   type HubPrefabRow,
 } from '@/config/migrationHub';
 
@@ -181,7 +184,15 @@ const shown = computed(() => {
 onMounted(async () => {
   const params = new URLSearchParams(window.location.search);
   const asset = params.get('asset') || params.get('mesh');
+  const wantView =
+    params.get('intent') === 'view' ||
+    params.get('view') === '1' ||
+    params.get('view') === 'true';
   if (asset && /^https?:\/\//i.test(asset)) {
+    if (wantView) {
+      window.location.replace(`/view?${params.toString()}`);
+      return;
+    }
     await router.replace({ path: '/editor', query: Object.fromEntries(params) });
     return;
   }
@@ -233,6 +244,11 @@ const PREFABS_HOST = 'client.grudge-studio.com/api/v1/warlords-entity-prefabs.js
   background: #c9a227;
   text-decoration: none;
   font-weight: 600;
+}
+.hub-go.ghost {
+  margin-left: 0;
+  color: #f0d48a;
+  background: transparent;
 }
 .hub-banner {
   margin-bottom: 28px;
